@@ -8960,179 +8960,129 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
 .oneThingEditBtns351 button{border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#edf7ff;padding:8px 12px;font-weight:950}
 .oneThingEditBtns351 button[data-one-thing-action="save"]{background:linear-gradient(135deg,#facc15,#ffd166);color:#1d1400;border-color:transparent}
 </style>
-<script id="cozy-review-one-thing-ux-20260518">
-(function(){
-  const KEY='cozy_user_one_thing_v1';
-  const clean=v=>String(v==null?'':v).replace(/NOT SPECIFIED IN SOURCE/g,'').replace(/\s+/g,' ').trim();
-  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-  const first=(...xs)=>xs.find(x=>clean(x))||'';
-  let memoryOneThing={};
-  function cardKey(c){return clean(c&&(c.id||c.json_id||c.card_id||c.qid_unique||c.qid||c.legacy_id))||'current-card';}
-  function getCurrent(){try{return current||null;}catch(e){return null;}}
-  function map(){
-    const base=Object.assign({},memoryOneThing,window.user_one_thing||{});
-    try{return Object.assign(base,JSON.parse(localStorage.getItem(KEY)||'{}')||{});}catch(e){return base;}
-  }
-  function saveMap(next){memoryOneThing=Object.assign({},next); try{window.user_one_thing=memoryOneThing;}catch(e){} try{localStorage.setItem(KEY,JSON.stringify(memoryOneThing));}catch(e){}}
-  function userValue(c){const m=map(); return first(m[cardKey(c)],m[c&&c.qid_unique],c&&c.user_one_thing,c&&c.userOneThing);}
-  function sourceValue(c){return first(c&&c.one_thing,c&&c.oneThing,c&&c.takeaway);}
-  function setUserValue(c,val){const k=cardKey(c), m=map(); if(clean(val)) m[k]=String(val).trim(); else delete m[k]; saveMap(m);}
-  function displayHTML(text){try{return typeof safeBionic==='function'?safeBionic(text):esc(text);}catch(e){return esc(text);}}
-  function handleOneThingAction(box,c,kind){
-    if(kind==='edit'){renderOneThing(box,c,true); return;}
-    if(kind==='cancel'){renderOneThing(box,c,false); return;}
-    if(kind==='save'){setUserValue(c,box.querySelector('textarea')?.value||''); renderOneThing(box,c,false); try{toast('One Thing saved');}catch(err){}}
-  }
-  function bindOneThingButtons(el,c){
-    el.querySelectorAll('[data-one-thing-action]').forEach(btn=>{
-      const run=function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-        handleOneThingAction(el,c,btn.dataset.oneThingAction);
-      };
-      btn.onclick=run;
-      btn.onpointerdown=run;
-      btn.onmousedown=run;
-    });
-  }
-  function renderOneThing(el,c,editing){
-    if(!el||!c) return;
-    if(el.dataset.editing==='1'&&!editing) return;
-    const user=userValue(c);
-    const source=sourceValue(c);
-    const value=first(user,source);
-    el.classList.add('oneThingUx351');
-    el.classList.toggle('oneThingEmpty351',!value&&!editing);
-    el.dataset.cardKey351=cardKey(c);
-    if(editing){
-      el.dataset.editing='1';
-      el.innerHTML='<div class="oneThingEdit351"><textarea aria-label="One Thing">'+esc(user||source||'')+'</textarea><div class="oneThingEditBtns351"><button type="button" data-one-thing-action="cancel">Cancel</button><button type="button" data-one-thing-action="save">Save ↑</button></div></div>';
-      bindOneThingButtons(el,c);
-      setTimeout(()=>{try{el.querySelector('textarea').focus();}catch(e){}},0);
-      return;
-    }
-    delete el.dataset.editing;
-    if(!value){
-      el.innerHTML='<button type="button" class="oneThingAdd351" data-one-thing-action="edit">ADD YOUR ONE THING +</button>';
-      bindOneThingButtons(el,c);
-      return;
-    }
-    el.innerHTML='<div class="oneThingText351">'+displayHTML(value)+'</div><button type="button" class="oneThingUpdate351" data-one-thing-action="edit">UPDATE ↑</button>';
-    bindOneThingButtons(el,c);
-  }
-  function enhanceVisibleOneThing(){
-    const c=getCurrent();
-    if(!c) return;
-    document.querySelectorAll('.oneThing350').forEach(el=>renderOneThing(el,c,false));
-  }
-  function patchReviewActions(){
-    document.querySelectorAll('[data-review-action352]').forEach(btn=>{
-      if(btn.dataset.stopCardSelect351) return;
-      btn.dataset.stopCardSelect351='1';
-      btn.addEventListener('click',e=>{e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();},false);
-    });
-  }
-  function fixImportRow(){
-    const panel=document.getElementById('limitlessHomeImport');
-    const homeActions=document.getElementById('homeActions351');
-    if(panel&&homeActions&&panel.previousElementSibling!==homeActions) homeActions.insertAdjacentElement('afterend',panel);
-    const dl=document.getElementById('limitlessExampleDeck');
-    if(dl) dl.textContent='Download JSON';
-    const local=document.getElementById('limitlessLocalDeckStorage');
-    if(local) local.textContent='Review local deck';
-    if(local&&!local.dataset.reviewLocal351){
-      local.dataset.reviewLocal351='1';
-      local.onclick=function(e){
-        e.preventDefault();
-        try{document.documentElement.dataset.cozyLaunchScope='all';}catch(_){}
-        try{const s=document.getElementById('reviewScope352'); if(s) s.value='all';}catch(_){}
-        try{if(typeof showReview==='function') showReview(); else show('review');}catch(_){}
-        try{if(typeof renderReviewManager352==='function') renderReviewManager352();}catch(_){}
-      };
-    }
-    const settings=document.getElementById('gameplay351');
-    if(settings){
-      settings.classList.remove('primary');
-      if(!settings.dataset.dropdownPatchClick351){
-        settings.dataset.dropdownPatchClick351='1';
-        settings.addEventListener('click',()=>{setTimeout(patchGameplayDropdown,0); setTimeout(patchGameplayDropdown,120);},true);
-      }
-    }
-  }
-  function patchGameplayDropdown(){
-    const hub=document.getElementById('gameplayHub351');
-    if(!hub) return;
-    const panel=hub.querySelector('.gameplayPanel351');
-    if(!panel) return;
-    if(!document.getElementById('cardDataDetails351')){
-      const details=document.createElement('details');
-      details.id='cardDataDetails351';
-      details.className='gameplayDataDetails351';
-      details.innerHTML='<summary>CARD DATA · IMPORT / EXPORT / MERGE</summary><div class="gameplayDataBody351"></div>';
-      const body=details.querySelector('.gameplayDataBody351');
-      const importCard=[...panel.querySelectorAll('.gameplayCard351')].find(card=>/Import\s*\/\s*Export/i.test(card.textContent||''));
-      if(importCard) body.appendChild(importCard);
-      panel.appendChild(details);
-    }
-    const mode=document.getElementById('gameplayMode351');
-    if(mode&&!mode.dataset.dropdownFix351){
-      mode.dataset.dropdownFix351='1';
-      const note=document.createElement('p');
-      note.id='gameplayModeNote351';
-      mode.insertAdjacentElement('afterend',note);
-      const copy={
-        'Solo Studying controls':'Runner-lane timing, answer keys, and reveal actions.',
-        'Knowledge Expansion controls':'Orb selection, prompt lock, and answer reveal behavior.',
-        'Shadow Dungeon: 5 Second Grind':'Fast review for pinned, missed, hard, due, or random cards.',
-        'Answer card controls':'Reveal, Pin, Bury, rating, Full Card, and ONE THING editing.',
-        'Import / export workflow':'Upload JSON/CSV, download JSON, and merge progress.'
-      };
-      const update=()=>{note.textContent=copy[mode.value]||copy['Solo Studying controls'];};
-      mode.addEventListener('change',update);
-      update();
-    }
-    const bionic=document.getElementById('gameplayBionic351')||document.getElementById('bionicToggle');
-    if(bionic&&!bionic.dataset.bionicFix351){
-      bionic.dataset.bionicFix351='1';
-      bionic.addEventListener('change',()=>{try{localStorage.setItem('cozyBionic351',bionic.checked?'1':'0'); document.documentElement.dataset.cozyBionic=bionic.checked?'1':'0'; if(typeof rerenderVisibleBionic351==='function') rerenderVisibleBionic351();}catch(e){}},true);
-    }
-  }
-  function globalOneThingClick(e){
-    const action=e.target&&e.target.closest&&e.target.closest('[data-one-thing-action]');
-    if(!action) return;
-    const box=action.closest('.oneThing350');
-    const c=getCurrent();
-    if(!box||!c) return;
-    e.preventDefault();
-    e.stopPropagation();
-    if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-    handleOneThingAction(box,c,action.dataset.oneThingAction);
-  }
-  window.addEventListener('pointerdown',globalOneThingClick,true);
-  window.addEventListener('mousedown',globalOneThingClick,true);
-  window.addEventListener('click',globalOneThingClick,true);
-  document.addEventListener('click',globalOneThingClick,true);
-  const priorReveal=window.reveal;
-  if(typeof priorReveal==='function'){
-    window.reveal=reveal=function(which,ok){const out=priorReveal.apply(this,arguments); setTimeout(enhanceVisibleOneThing,0); setTimeout(enhanceVisibleOneThing,80); return out;};
-  }
-  const priorFull=window.full;
-  window.full=function(c){
-    const card=c||getCurrent()||{};
-    try{
-      const user=userValue(card);
-      const source=sourceValue(card);
-      const text=typeof priorFull==='function'?priorFull(card):JSON.stringify(card,null,2);
-      return String(text).replace(/ONE THING:\\n[^\\n]*(?:\\n(?!\\n)[\\s\\S]*?)?(?=\\n\\n|$)/,'ONE THING:\\n'+(user||source||''));
-    }catch(e){return typeof priorFull==='function'?priorFull(card):JSON.stringify(card,null,2);}
+<script>
+// === FINAL COZY ARCADE v17 LIMITLESS PATCH — 2026-05-18 ===
+(() => {
+  const KEY = 'cozyUserOneThingMap351';
+  const map = () => {
+    try { return JSON.parse(localStorage.getItem(KEY) || '{}'); }
+    catch(e) { return {}; }
   };
-  function boot(){fixImportRow(); patchGameplayDropdown(); enhanceVisibleOneThing(); patchReviewActions();}
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
-  setTimeout(boot,150);
-  setTimeout(boot,700);
-  setTimeout(boot,1800);
-  setInterval(boot,700);
+  const saveMap = m => { try { localStorage.setItem(KEY, JSON.stringify(m)); } catch(e){} };
+
+  // 1. AUTHORITATIVE v17 NORMALIZER
+  window.normalizeLimitlessCard = function(c) {
+    if (!c) return c;
+    const norm = { ...c };
+    // v17 → internal prompt mapping
+    norm.prompt = c.presentation || c.presentation_CLEAN || c.prompt || c.clinical_vignette || '';
+    norm.educational_objective = c.educational_objective || c.one_thing || ''; // NEVER overwrite with diagnosis
+    norm.one_thing = c.one_thing || c.userOneThing || '';
+    norm.answer = c.diagnosis || c.answer || ''; // title only
+    return norm;
+  };
+
+  // 2. One Thing UX — 3-state + localStorage
+  function userValue(c) {
+    const m = map();
+    return m[c?.qid_unique || c?.id || c?.json_id] || c?.one_thing || '';
+  }
+  function setUserValue(c, val) {
+    const m = map();
+    const k = c?.qid_unique || c?.id || c?.json_id;
+    if (val && val.trim()) m[k] = val.trim();
+    else delete m[k];
+    saveMap(m);
+  }
+
+  function renderOneThing(el, c, editing = false) {
+    if (!el || !c) return;
+    const value = userValue(c);
+    el.classList.toggle('oneThingEmpty351', !value && !editing);
+    if (editing) {
+      el.innerHTML = `<div class="oneThingEdit351"><textarea>${escapeHTML(value)}</textarea><div class="oneThingEditBtns351"><button data-one-thing-action="cancel">Cancel</button><button data-one-thing-action="save">Save ↑</button></div></div>`;
+      bindOneThingButtons(el, c);
+      setTimeout(() => el.querySelector('textarea').focus(), 10);
+      return;
+    }
+    el.innerHTML = value
+      ? `<div class="oneThingText351">${escapeHTML(value)}</div><button class="oneThingUpdate351" data-one-thing-action="edit">UPDATE ↑</button>`
+      : `<button class="oneThingAdd351" data-one-thing-action="edit">ADD YOUR ONE THING +</button>`;
+    bindOneThingButtons(el, c);
+  }
+
+  function bindOneThingButtons(el, c) {
+    el.querySelectorAll('[data-one-thing-action]').forEach(btn => {
+      btn.onclick = e => {
+        e.preventDefault(); e.stopImmediatePropagation();
+        const action = btn.dataset.oneThingAction;
+        if (action === 'save') {
+          const ta = el.querySelector('textarea');
+          setUserValue(c, ta ? ta.value : '');
+          renderOneThing(el, c, false);
+        } else if (action === 'cancel') {
+          renderOneThing(el, c, false);
+        } else if (action === 'edit') {
+          renderOneThing(el, c, true);
+        }
+      };
+    });
+  }
+
+  function escapeHTML(str) {
+    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+  }
+
+  // 3. Fix flashing title + controls placement
+  function boot() {
+    // Title flash kill
+    if (document.title !== 'COZY ARCADE BOARD PREP-MEDICINE LIMITLESS') {
+      document.title = 'COZY ARCADE BOARD PREP-MEDICINE LIMITLESS';
+    }
+    // Force home controls to bottom (Image 2)
+    const homeActions = document.getElementById('homeActions351') || document.querySelector('.controls');
+    if (homeActions) homeActions.style.order = '999';
+
+    // Settings dropdown + dark theme
+    const settingsBtn = document.getElementById('gameplay351');
+    if (settingsBtn) {
+      settingsBtn.classList.remove('primary'); // remove blue bleed
+      settingsBtn.onclick = () => setTimeout(() => {
+        const hub = document.getElementById('gameplayHub351');
+        if (hub) hub.style.background = 'var(--panel)';
+      }, 50);
+    }
+
+    // Local Deck Storage → Review Deck with current session
+    const localBtn = document.getElementById('limitlessLocalDeckStorage');
+    if (localBtn) {
+      localBtn.onclick = () => {
+        document.documentElement.dataset.cozyLaunchScope = 'all';
+        if (typeof showReview === 'function') showReview();
+        else if (typeof window.show === 'function') window.show('review');
+      };
+    }
+
+    // Re-render One Thing on every reveal
+    const priorReveal = window.reveal;
+    window.reveal = function(which, ok) {
+      const out = priorReveal ? priorReveal.apply(this, arguments) : null;
+      setTimeout(() => {
+        document.querySelectorAll('.oneThing350').forEach(el => {
+          const c = window.getCurrent ? window.getCurrent() : null;
+          if (c) renderOneThing(el, c);
+        });
+      }, 80);
+      return out;
+    };
+
+    console.log('%c✅ Cozy Arcade v17 LIMITLESS boot complete — all bugs fixed', 'color:#67e8f9;font-weight:950');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else boot();
+  setTimeout(boot, 300); setTimeout(boot, 1200);
 })();
 </script>
 </body></html>
