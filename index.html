@@ -13686,4 +13686,37 @@ else boot160();
 setTimeout(boot160,900);
 })();
 </script>
+<!-- v175161 — mobile proportion fix: card sizes, reveal, orbs, domain pad -->
+<style id="v175161-mobile-css">
+@media(max-width:760px){
+  /* Solo: cap card so choices are always visible */
+  .solo .promptBox{max-height:22vh!important;min-height:84px!important;overflow-y:auto!important;}
+  /* choices track follows capped card — consistent 10px clearance across all phone heights */
+  .soloTrack{inset:calc(22vh + 58px) 0 0!important;}
+
+  /* Reveal: never full-screen */
+  .reveal{max-height:64vh!important;overflow-y:auto!important;}
+  .trigger{max-height:26vh!important;overflow-y:auto!important;}
+
+  /* Domain: hide title (saves ~50px), raise promptBox into freed space, cap height */
+  .domainTitle{display:none!important;}
+  .domain .promptBox{top:54px!important;max-height:20vh!important;min-height:76px!important;overflow-y:auto!important;}
+  /* orb arena follows capped card — consistent 8px clearance */
+  .orbArena{inset:calc(20vh + 62px) 0 0!important;}
+
+  /* Domain pad: hide ↑↓, keep ← Select → */
+  .domainTouchPad [data-d="up"],.domainTouchPad [data-d="down"]{display:none!important;}
+
+  /* Orbs: compact, nimble */
+  .orb{min-width:80px!important;max-width:130px!important;min-height:44px!important;font-size:10px!important;padding:7px 9px!important;}
+}
+@media(max-width:480px){
+  .solo .promptBox{max-height:19vh!important;}
+  .soloTrack{inset:calc(19vh + 52px) 0 0!important;}
+  .reveal{max-height:58vh!important;}
+  .domain .promptBox{max-height:17vh!important;}
+  .orbArena{inset:calc(17vh + 58px) 0 0!important;}
+  .orb{min-width:66px!important;max-width:110px!important;min-height:38px!important;}
+}
+</style>
 </body></html>
