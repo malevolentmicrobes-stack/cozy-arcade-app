@@ -13686,6 +13686,53 @@ else boot160();
 setTimeout(boot160,900);
 })();
 </script>
+<!-- vA01 — Phase A: semantic CSS variable foundation. Zero visual change.
+     Adds warm/cold token split so Phase D palette swap touches one block only.
+     Nothing references these vars yet — that is intentional. -->
+<style id="vA01-css-variable-foundation">
+:root {
+  /* ── RGB decompositions — enables rgba(var(--cyan-rgb), alpha) pattern ── */
+  --cyan-rgb: 103,232,249;
+  --red-rgb: 251,88,118;
+  --green-rgb: 110,231,183;
+  --gold-rgb: 255,209,102;
+  --purple-rgb: 124,58,237;
+  --blue-rgb: 56,189,248;
+
+  /* ── Semantic aliases (cold arcade defaults — Phase D overrides for home) ── */
+  --accent: #67e8f9;
+  --accent-rgb: 103,232,249;
+  --page-bg: #020611;
+  --page-surface: rgba(255,255,255,.04);
+  --page-border: rgba(103,232,249,.18);
+  --page-glow: rgba(103,232,249,.22);
+
+  /* ── Warm palette token set (used by Phase D on #home / .screen) ── */
+  --warm-bg: #0e0a06;
+  --warm-surface: rgba(245,201,122,.05);
+  --warm-border: rgba(245,201,122,.22);
+  --warm-accent: #f5c97a;
+  --warm-accent-rgb: 245,201,122;
+  --warm-glow: rgba(245,201,122,.16);
+  --warm-muted: #8a7660;
+}
+
+/* ── Cold pin: gameplay always stays arcade regardless of Phase D home changes ── */
+.game {
+  --accent: #67e8f9;
+  --accent-rgb: 103,232,249;
+  --page-bg: #020611;
+  --page-surface: rgba(255,255,255,.04);
+  --page-border: rgba(103,232,249,.18);
+  --page-glow: rgba(103,232,249,.22);
+}
+
+/* ── cursorGlow: desktop-only element — compositor layer waste on touch devices ── */
+@media (hover: none) {
+  .cursorGlow { display: none !important; }
+}
+</style>
+
 <!-- v175161 — mobile proportion fix: card sizes, reveal, orbs, domain pad -->
 <style id="v175161-mobile-css">
 @media(max-width:760px){
