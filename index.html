@@ -13686,6 +13686,161 @@ else boot160();
 setTimeout(boot160,900);
 })();
 </script>
+<!-- vC4 — Prompt AI: collapsible <details> dropdown in settings drawer -->
+<style id="vC4-prompt-ai-css">
+/* Reset panel container — visual chrome moves to <details> */
+#promptAiPanel351{background:transparent!important;border:none!important;padding:0!important;margin-top:12px!important;}
+.promptAiDetails351{background:rgba(103,232,249,.06);border:1px solid rgba(103,232,249,.22);border-radius:14px;overflow:hidden;}
+.promptAiSummary351{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:11px 16px;cursor:pointer;list-style:none;
+  color:#67e8f9;font-family:Orbitron,monospace;font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;font-weight:950;
+  user-select:none;
+}
+.promptAiSummary351::-webkit-details-marker{display:none;}
+.promptAiArrow351{display:inline-block;transition:transform .18s;font-style:normal;}
+.promptAiDetails351[open] .promptAiArrow351{transform:rotate(180deg);}
+.promptAiDetails351 textarea{
+  width:100%!important;min-height:170px!important;max-height:42vh!important;
+  border:none!important;border-top:1px solid rgba(103,232,249,.15)!important;
+  border-radius:0 0 14px 14px!important;resize:vertical!important;
+  background:rgba(2,9,21,.72)!important;color:#e9f8ff!important;
+  font-size:11px!important;line-height:1.42!important;padding:12px!important;
+}
+@media(max-width:760px){
+  .promptAiDetails351 textarea{min-height:130px!important;font-size:10.5px!important;}
+}
+</style>
+<script id="vC4-prompt-ai-js">
+;(function(){
+'use strict';
+if(window.__vC4PromptAi) return;
+window.__vC4PromptAi=true;
+
+function restructure(panel){
+  if(panel.dataset.vC4) return;
+  panel.dataset.vC4='1';
+  var h3=panel.querySelector('h3');
+  var ta=panel.querySelector('textarea');
+  if(!ta) return;
+
+  var details=document.createElement('details');
+  details.className='promptAiDetails351';
+
+  var summary=document.createElement('summary');
+  summary.className='promptAiSummary351';
+  summary.innerHTML='PROMPT AI <i class="promptAiArrow351">▾</i>';
+
+  ta.parentNode.removeChild(ta);
+  if(h3) h3.parentNode.removeChild(h3);
+  details.appendChild(summary);
+  details.appendChild(ta);
+  panel.appendChild(details);
+}
+
+function scan(){
+  var p=document.getElementById('promptAiPanel351');
+  if(p) restructure(p);
+}
+
+/* watch for dynamic injection */
+new MutationObserver(function(muts){
+  muts.forEach(function(m){
+    m.addedNodes.forEach(function(n){
+      if(n.nodeType!==1) return;
+      if(n.id==='promptAiPanel351') restructure(n);
+      var inner=n.querySelector && n.querySelector('#promptAiPanel351');
+      if(inner) restructure(inner);
+    });
+  });
+}).observe(document.body,{childList:true,subtree:true});
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',scan);
+else scan();
+setTimeout(scan,800);
+})();
+</script>
+
+<!-- vB01 — Phase B: single authoritative mobile layout block.
+     Uses high-specificity selectors to beat all 9 prior @media(max-width:760px) conflicts.
+     #orbArena id override fixes orbs-behind-card bug from line-1465 inset:0 rule.
+     soloTrack/orbArena use calc() for consistent clearance on all phone heights. -->
+<style id="vB01-mobile-authority-css">
+@media(max-width:760px){
+  /* ── Solo prompt card: capped height, scrollable ── */
+  #solo .promptBox{
+    top:48px!important;
+    max-height:22vh!important;
+    min-height:84px!important;
+    overflow-y:auto!important;
+    width:90vw!important;
+    padding:12px 16px 14px!important;
+  }
+  /* ── Solo track: always 10px below card bottom across all phone heights ── */
+  #solo .soloTrack{inset:calc(22vh + 58px) 0 0!important;}
+
+  /* ── Domain: title hidden, card raised and capped ── */
+  #domain .domainTitle{display:none!important;}
+  #domain .promptBox{
+    top:54px!important;
+    max-height:20vh!important;
+    min-height:76px!important;
+    overflow-y:auto!important;
+    width:90vw!important;
+    padding:12px 16px 14px!important;
+  }
+  /* ── orbArena: id selector beats line-1465 inset:0!important — fixes orbs-behind-card ── */
+  #orbArena{
+    inset:calc(20vh + 62px) 0 0!important;
+    overflow:visible!important;
+  }
+
+  /* ── Reveal + trigger: never full-screen ── */
+  .reveal{max-height:64vh!important;overflow-y:auto!important;}
+  #solo .reveal, #domain .reveal{width:92vw!important;}
+  .trigger{max-height:26vh!important;overflow-y:auto!important;}
+
+  /* ── Choices: 2-column, tight ── */
+  .choiceRow{
+    grid-template-columns:repeat(2,1fr)!important;
+    gap:9px!important;
+    top:0!important;bottom:auto!important;
+    left:2vw!important;right:2vw!important;
+  }
+  .choice{min-height:52px!important;font-size:12px!important;padding:10px 10px 10px 38px!important;}
+  .choice .letter{left:9px!important;top:10px!important;width:22px!important;height:22px!important;font-size:10px!important;}
+
+  /* ── Orbs: compact, nimble ── */
+  #orbArena .orb{
+    min-width:80px!important;max-width:130px!important;
+    min-height:44px!important;
+    font-size:10px!important;padding:7px 9px!important;
+  }
+
+  /* ── Domain pad: ↑↓ already hidden by v175161; reinforce here ── */
+  .domainTouchPad [data-d="up"],.domainTouchPad [data-d="down"]{display:none!important;}
+
+  /* ── KPI grid: 2-column on all small screens ── */
+  .kpis{grid-template-columns:repeat(2,1fr)!important;}
+
+  /* ── Settings drawer: full-width on very small phones ── */
+  #cozySettingsDrawer351{width:min(420px,100vw)!important;}
+
+  /* ── HUD: tighter pills ── */
+  .hudPill{padding:6px 10px!important;font-size:12px!important;}
+}
+
+@media(max-width:480px){
+  #solo .promptBox{max-height:19vh!important;}
+  #solo .soloTrack{inset:calc(19vh + 52px) 0 0!important;}
+  #domain .promptBox{max-height:17vh!important;}
+  #orbArena{inset:calc(17vh + 58px) 0 0!important;}
+  .reveal{max-height:58vh!important;}
+  #orbArena .orb{min-width:66px!important;max-width:110px!important;min-height:38px!important;}
+}
+</style>
+
 <!-- vA01 — Phase A: semantic CSS variable foundation. Zero visual change.
      Adds warm/cold token split so Phase D palette swap touches one block only.
      Nothing references these vars yet — that is intentional. -->
