@@ -42,6 +42,7 @@
 | Reveal: 🔁 Later flag button | ✅ Added (vFix19 — queue cards; "Study Flagged (N)" drill button at end modal) |
 | Home: Daily Goal progress bar | ✅ Added (vFix20 — 10/20/30/50 goal picker; blue→green fill; persists) |
 | Reveal: ✏️ Quick Note on Board Pearl | ✅ Added (vFix21 — inline textarea; saves to user_one_thing; user note overrides deck pearl) |
+| Home hero: ABIM countdown chip | ✅ Added (vFix22 — amber pill "N days · ABIM"; red ≤30d; green post-boards) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |

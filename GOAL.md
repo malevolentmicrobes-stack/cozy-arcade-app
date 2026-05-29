@@ -106,6 +106,7 @@
 - ✅ `vFix19`: 🔁 Later flag in reveal + Study Flagged end modal — "🔁 Later/Queued" button (30ms) accumulates cards into __cozyFlagQueue529; end modal injects "Study Flagged (N)" drill button; queue persists through drill sessions, resets on fresh game start (commit b80f21f)
 - ✅ `vFix20`: Daily Goal tracker on home — compact bar between mastery stats and weak chips; goal picker [10|20|30|50] (default 20, cozy_dailygoal_v20); fills blue → green when reached; outermost updateKpis wrapper (commit a382b5b)
 - ✅ `vFix21`: ✏️ Quick Note inline editor on Board Pearl — fires at 110ms after pearl; ✏️ button opens inline textarea; saves to progress.user_one_thing + window.current.one_thing + saveState(); user note takes priority over deck pearl text; creates pearl for user-note-only cards (commit 772761f)
+- ✅ `vFix22`: ABIM countdown chip in hero — amber pill "N days · ABIM Aug 2026" below heroSub; amber >30d, red/fire ≤30d, gold on boards day, green post-boards; updates every 60s; target Aug 4 2026 (commit a74cefc)
 
 ### Atlas Tag Feature (2026-05-28) — all ✅
 - ✅ `003957c`: Tag filter + sortable columns + tag/sys constellation toggle (PHASE2 only)
