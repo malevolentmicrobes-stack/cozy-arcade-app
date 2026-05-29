@@ -17277,6 +17277,92 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix27: Swipe-to-rate in reveal panel + haptic feedback -->
+<style id="vFix27-css">
+/* Default: hint hidden; shown only on touch devices */
+.v27-swipe-hint { display: none; user-select: none; pointer-events: none; }
+@media (hover: none) {
+  .v27-swipe-hint {
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(148,163,184,0.50);
+    letter-spacing: 0.05em;
+    margin-top: 10px;
+  }
+}
+/* Flash ring on swipe — fades out via CSS transition */
+.v27-flash-ok  { outline: 2px solid rgba(34,197,94,0.60)  !important; }
+.v27-flash-bad { outline: 2px solid rgba(251,88,118,0.60) !important; }
+</style>
+<script id="vFix27-swipe-js">(function(){
+  'use strict';
+  if(window.__vFix27Swipe) return;
+  window.__vFix27Swipe = true;
+
+  function vibrate(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+
+  function flashReveal(el, ok){
+    var cls = ok ? 'v27-flash-ok' : 'v27-flash-bad';
+    el.classList.add(cls);
+    setTimeout(function(){ el.classList.remove(cls); }, 260);
+  }
+
+  function setupSwipe(revealId){
+    var el = document.getElementById(revealId);
+    if(!el || el.dataset.v27) return;
+    el.dataset.v27 = '1';
+
+    /* Inject swipe hint below ratings (touch devices only via CSS) */
+    if(!el.querySelector('.v27-swipe-hint')){
+      var hint = document.createElement('div');
+      hint.className = 'v27-swipe-hint';
+      hint.textContent = '← Hard · Good →';
+      el.appendChild(hint);
+    }
+
+    var sx = 0, sy = 0, st = 0;
+
+    el.addEventListener('touchstart', function(e){
+      var t = e.touches[0];
+      sx = t.clientX; sy = t.clientY; st = Date.now();
+    }, { passive: true });
+
+    el.addEventListener('touchend', function(e){
+      if(el.classList.contains('hidden')) return;
+      var t = e.changedTouches[0];
+      var dx = t.clientX - sx;
+      var dy = t.clientY - sy;
+      var dt = Date.now() - st;
+
+      /* Reject: too slow, too short, or dominantly vertical (scroll) */
+      if(dt > 500 || Math.abs(dx) < 52 || Math.abs(dy) > Math.abs(dx) * 0.75) return;
+
+      var rating = dx > 110 ? 'easy' : dx > 52 ? 'good' : dx < -110 ? 'again' : 'hard';
+
+      var btn = el.querySelector('[data-rate="' + rating + '"]');
+      if(!btn || btn.classList.contains('hidden') || btn.disabled) return;
+
+      e.preventDefault();
+      flashReveal(el, dx > 0);
+      vibrate(dx > 0 ? 18 : [14, 8, 14]);
+      btn.click();
+    }, { passive: false });
+  }
+
+  function init27(){
+    setupSwipe('soloReveal');
+    setupSwipe('domainReveal');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init27);
+  } else {
+    init27();
+  }
+})();
+</script>
+
 <!-- vFix26: Mobile optimization + daily goal celebration -->
 <style id="vFix26-css">
 /* Disable bgMove grid animation on mobile — saves compositor layer & battery */
