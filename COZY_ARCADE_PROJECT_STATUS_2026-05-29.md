@@ -60,6 +60,7 @@
 | Reveal: Audio feedback on rating (opt-in) | ✅ Added (vFix37 — Web Audio tones; 🔔/🔕 toggle; default OFF; correct=ascending chime, incorrect=low tone) |
 | Home: Study Board Pearls drill | ✅ Added (vFix38 — teal 💎 button; deck one_thing + user notes; pearl auto-shown in reveal via vFix11) |
 | Safety: Progress backup reminder | ✅ Added (vFix39 — amber toast after session; one-tap export; once/day guard; auto-dismisses 10s) |
+| Home: 30-day study calendar | ✅ Added (vFix40 — expandable grid below heatmap; week-aligned; same color scale; lazy renders when opened) |
 | Home: 🎯 Daily Goal celebration | ✅ Added (vFix26 — confetti sparks + toast on first goal completion each day) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |

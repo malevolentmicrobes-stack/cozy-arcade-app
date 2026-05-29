@@ -56,6 +56,7 @@
 | vFix37 | **Audio feedback (opt-in)** — Web Audio API tones, no external files; correct=440→660Hz two-tone, incorrect=300Hz; 🔔/🔕 toggle below session picker; default OFF; cozy_audio_v37 localStorage; wraps window.rate | ✅ | 6a9e4df |
 | vFix38 | **Study Board Pearls** — teal "💎 Study Board Pearls (N)" button; includes c.one_thing (deck) + user_one_thing (vFix21 notes); vFix11 auto-shows pearl on each reveal; inserted after #cozyPinnedBtn529 | ✅ | 96ddb06 |
 | vFix39 | **Progress backup reminder** — amber toast once/day on return to home after ≥5 cards studied; one-tap Export calls exportProgress351; auto-dismisses 10s; cozy_backup_v39 guard | ✅ | a0edead |
+| vFix40 | **30-day study calendar** — expandable 7-col week-aligned grid below 7-day heatmap; same gray/amber/cyan/green scale; DOW headers; today cyan outline; lazy render; cozy_cal30_v40 state | ✅ | 1b154bc |
 
 ## Remaining Items
 
