@@ -14218,4 +14218,63 @@ setTimeout(scan,800);
   background:#020611!important;
 }
 </style>
+
+<!-- vFix1: ceChip centered in HUD gap (no text overlap) + import overlay → home after upload -->
+<style id="vFix1-chip-position-css">
+/* Move chip to HUD row center — sits in the empty space between left and right pill groups */
+.ceChip{
+  top:10px!important;
+  right:auto!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  font-size:13px!important;
+}
+</style>
+<!-- P7: PWA — manifest injection + service worker registration -->
+<script id="vP7-pwa-register-js">
+(function(){
+  /* Inject <link rel="manifest"> into <head> */
+  if(!document.querySelector('link[rel="manifest"]')){
+    var lnk=document.createElement('link');
+    lnk.rel='manifest'; lnk.href='./manifest.json';
+    document.head.appendChild(lnk);
+  }
+  /* iOS installable */
+  ['apple-mobile-web-app-capable','apple-mobile-web-app-status-bar-style'].forEach(function(name,i){
+    if(!document.querySelector('meta[name="'+name+'"]')){
+      var m=document.createElement('meta');
+      m.name=name; m.content=i===0?'yes':'black-translucent';
+      document.head.appendChild(m);
+    }
+  });
+  /* Register service worker */
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('./sw.js',{scope:'./'})
+        .then(function(r){console.log('[SW] registered scope:',r.scope);})
+        .catch(function(e){console.warn('[SW] registration failed:',e);});
+    });
+  }
+})();
+</script>
+
+<script id="vFix1-import-overlay-home-js">
+(function(){
+  if(window.__vFix1ImportHome) return;
+  window.__vFix1ImportHome = true;
+  var fi = document.getElementById('limitlessHomeDeckFile');
+  if(!fi) return;
+  fi.addEventListener('change', function(){
+    setTimeout(function(){
+      try{
+        var ov = document.getElementById('importNeededOverlay351');
+        if(ov) ov.classList.remove('visible');
+      }catch(e){}
+      setTimeout(function(){
+        try{ if(typeof window.home==='function') window.home(); }catch(e){}
+      }, 300);
+    }, 500);
+  }, false);
+})();
+</script>
 </body></html>
