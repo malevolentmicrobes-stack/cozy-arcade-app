@@ -39,6 +39,7 @@
 | In-game: Session card counter overlay | ✅ Added (vFix16 — "N cards" or "N/max" bottom-right) |
 | Home: Today: N cards studied stat | ✅ Added (vFix17 — 6th tile in mastery panel) |
 | Reveal: 📌 Pin toggle button | ✅ Added (vFix18 — pin/unpin mid-game, persists via saveState) |
+| Reveal: 🔁 Later flag button | ✅ Added (vFix19 — queue cards; "Study Flagged (N)" drill button at end modal) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |

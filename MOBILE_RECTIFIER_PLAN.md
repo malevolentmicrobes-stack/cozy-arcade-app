@@ -35,6 +35,7 @@
 | vFix16 | **Fix: reveal scroll-to-top** (regression from vFix14 auto-open) + **session card counter** bottom-right overlay ("N cards" or "N/max") | ✅ | 1847316 |
 | vFix17 | **Today: N cards studied** stat tile in mastery panel; outermost updateKpis wrapper; counts last_seen_at/last == today ISO date | ✅ | c54eea7 |
 | vFix18 | **📌 Pin toggle in reveal** — Pin/Pinned button in controls row of Solo + KE reveal; toggles p.pinned, calls saveState(); refreshes per card via MutationObserver | ✅ | 3ec71c6 |
+| vFix19 | **🔁 Later flag in reveal + Study Flagged end modal** — queues cards mid-game into __cozyFlagQueue529; end modal shows "Study Flagged (N)" drill button if queue non-empty | ✅ | b80f21f |
 
 ## Remaining Items
 
