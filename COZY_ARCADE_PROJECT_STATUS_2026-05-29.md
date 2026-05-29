@@ -1,5 +1,5 @@
 # Cozy Arcade Board Prep — Project Status
-*Updated: 2026-05-29 (autonomous session)*
+*Updated: 2026-05-29 (autonomous session — vFix5 through vFix8 shipped)*
 
 ---
 
@@ -18,7 +18,16 @@
 | Export deck + FSRS progress | ✅ Working |
 | Undo last answer (Cmd+Z / shake) | ✅ Working |
 | PWA offline support | ✅ Working (sw.js) |
-| HUD single-row compact bar | ✅ Fixed (vFix4 JS) |
+| HUD single-row compact bar | ✅ Fixed (vFix4+vFix5 JS) |
+| HUD home button visible in game | ✅ Fixed (vFix5 — rescued from orphan group) |
+| Home screen: FSRS-accurate due/new counts | ✅ Fixed (vFix5) |
+| Home screen: ⚔️ Study Now quick-launch | ✅ Added (vFix5) |
+| KE orbs: no overlap on mobile | ✅ Fixed (vFix6 — separation pass) |
+| End-of-game: Missed cards list | ✅ Added (vFix7) |
+| Home: FSRS due/new counts (bug fixed) | ✅ Fixed (vFix8 — p.reps→seen_count) |
+| Home: Mastered/In Review/Retention stats | ✅ Added (vFix8) |
+| Home: Study streak counter | ✅ Added (vFix8) |
+| Home: Weak-system focus chips | ✅ Added (vFix8 — opens Atlas pre-filtered) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |

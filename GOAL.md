@@ -87,8 +87,11 @@
 - ✅ `vFix1`: ceChip centered; import overlay → home() after upload
 - ✅ `vA9/A10`: Atlas card detail "▶ Study" buttons + Pin/Bury toggles (commit f16a04f)
 - ✅ `vFix3`: question font weight 950→700, size reduced, 4-col solo choices, card edge-to-edge (commit 86c4409)
-- ✅ `vFix4`: HUD single-row forced via JS `setProperty('important')` — overrides any CSS regardless of cascade, fires on DOMContentLoaded + 300/800/1800ms + on game-start click (commit pending)
-- ✅ `vA11`: Atlas card detail personal note textarea — writes to `phase3State.progress[id].user_one_thing`, auto-save on blur or Cmd+Enter (commit pending)
+- ✅ `vFix4`: HUD single-row forced via JS `setProperty('important')` — overrides any CSS regardless of cascade, fires on DOMContentLoaded + 300/800/1800ms + on game-start click (commit 5779719)
+- ✅ `vA11`: Atlas card detail personal note textarea — writes to `phase3State.progress[id].user_one_thing`, auto-save on blur or Cmd+Enter (commit 5779719)
+- ✅ `vFix5`: HUD home button rescue; FSRS-accurate due/new KPI counts; ⚔️ Study Now quick-launch (commit 8d9a9fa)
+- ✅ `vFix6`: KE orb overlap fix — 5-pass separation algorithm; raised starting radius so orbs are spread at game start, not collapsed at center (commit 16076b9)
+- ✅ `vFix7`: Session missed-cards summary — "Missed this session (N)" list injected into end modal; reads `phase3State.progress[id].last` + `.rating` since session start timestamp (commit 16076b9)
 
 ### Atlas Tag Feature (2026-05-28) — all ✅
 - ✅ `003957c`: Tag filter + sortable columns + tag/sys constellation toggle (PHASE2 only)

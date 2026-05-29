@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — all phases shipped*
+*Last updated: 2026-05-29 — vFix5 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -19,19 +19,21 @@
 | vA10 | Atlas card detail Pin/Bury toggles | ✅ | f16a04f |
 | vFix1 | ceChip centered; import overlay → home() after upload | ✅ | prior |
 | vFix3 | Question font weight→700, size reduced; 4-col solo choices; edge-to-edge card | ✅ | 86c4409 |
-| vFix4 | **HUD single-row via JS setProperty (guaranteed, beats all CSS)** | ✅ | pending |
-| vA11 | Atlas personal note textarea → `user_one_thing` in progress | ✅ | pending |
+| vFix4 | HUD single-row via JS setProperty (beats all CSS) | ✅ | 5779719 |
+| vA11 | Atlas personal note textarea → `user_one_thing` in progress | ✅ | 5779719 |
+| vFix5 | Home button rescue; FSRS-accurate due/new KPIs; ⚔️ Study Now quick-launch button | ✅ | 8d9a9fa |
+| vFix6 | **KE orb overlap fix** — 5-pass separation algorithm; starting radius raised to 68px so orbs spread at p=0 | ✅ | 16076b9 |
+| vFix7 | **Session missed-cards summary** — "Missed this session (N)" list in end modal; reads last/rating from progress | ✅ | 16076b9 |
+| vFix8 | **Bug: vFix5 used p.reps (never set) → fixed to seen_count**; mastery stats panel (Mastered/Learning/Retention); streak; weak-system chips → Atlas | ✅ | 3b6edbc |
 
 ## Remaining Items
 
 | Item | Priority | Notes |
 |------|----------|-------|
-| A11 one_thing inline edit | ✅ Done | vA11 appended |
 | P8 CSP headers | Low | `vercel.json` |
 | M2 Stripe | Low | post-ABIM |
-| iOS1 Capacitor | Medium | after boards |
-| KE orb overlap prevention | Low | tuning needed |
-| iOS native `<select>` full fix | Low | vC7 guard in place; complete fix = custom dropdown |
+| iOS1 Capacitor | Medium | after boards — wraps current HTML natively |
+| iOS native `<select>` full fix | Low | vC7 guard in place; full fix = custom dropdown |
 
 ---
 
