@@ -16994,4 +16994,180 @@ setTimeout(scan,800);
   }
 })();
 </script>
+
+<!-- vFix21: ✏️ Quick Note inline editor on Board Pearl in reveal -->
+<style id="vFix21-css">
+.cp-edit {
+  background: none;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0 3px;
+  opacity: 0.55;
+  vertical-align: middle;
+  line-height: 1;
+}
+.cp-edit:active { opacity: 1; transform: scale(0.9); }
+#cozyNoteInline529 {
+  margin-top: 7px;
+}
+.cni-ta {
+  width: 100%;
+  min-height: 62px;
+  background: #0b1c27;
+  border: 1px solid rgba(34,211,238,0.3);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 8px 10px;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.cni-ta:focus { outline: none; border-color: rgba(34,211,238,0.6); }
+.cni-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 5px;
+  justify-content: flex-end;
+}
+.cni-save {
+  background: rgba(34,211,238,0.18);
+  border: 1px solid rgba(34,211,238,0.35);
+  color: #22d3ee;
+  border-radius: 8px;
+  padding: 5px 14px;
+  min-height: 32px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.cni-cancel {
+  background: none;
+  border: 1px solid #334155;
+  color: #64748b;
+  border-radius: 8px;
+  padding: 5px 12px;
+  min-height: 32px;
+  font-size: 12px;
+  cursor: pointer;
+}
+</style>
+<script id="vFix21-quicknote-js">(function(){
+  'use strict';
+  if(window.__vFix21Note) return;
+  window.__vFix21Note = true;
+
+  function getCardId(){
+    var c = window.current;
+    return c && (c.id || c.qid || c.card_id) || null;
+  }
+
+  function enhancePearl(revealEl){
+    var id = getCardId();
+    if(!id) return;
+
+    var prog = window.phase3State && window.phase3State.progress;
+    var p    = prog && prog[id];
+    var userNote  = p && String(p.user_one_thing || '').trim();
+    var deckPearl = window.current && String(window.current.one_thing || '').trim();
+
+    var pearlDiv = document.getElementById('cozyPearl529');
+
+    /* If no pearl injected by vFix11 but user has a note, create one */
+    if(!pearlDiv && userNote){
+      var ratings = revealEl.querySelector('[id$="RevealRatings"],[id*="Ratings"]');
+      if(!ratings) return;
+      pearlDiv = document.createElement('div');
+      pearlDiv.id = 'cozyPearl529';
+      pearlDiv.innerHTML =
+        '<span class="cp-label">📌 Board Pearl</span>' +
+        '<span class="cp-text">' + userNote + '</span>';
+      ratings.parentNode.insertBefore(pearlDiv, ratings);
+    }
+
+    if(!pearlDiv) return;
+    if(pearlDiv.dataset.v21) return; /* already enhanced this card */
+    pearlDiv.dataset.v21 = '1';
+
+    /* Override pearl text with user note if available */
+    var cpText = pearlDiv.querySelector('.cp-text');
+    if(cpText && userNote) cpText.textContent = userNote;
+
+    /* Add edit button */
+    var editBtn = document.createElement('button');
+    editBtn.className = 'cp-edit';
+    editBtn.textContent = '✏️';
+    editBtn.title = 'Edit note';
+    editBtn.onclick = function(e){
+      e.stopPropagation();
+      var existing = document.getElementById('cozyNoteInline529');
+      if(existing){ existing.remove(); return; }
+
+      var currentNote = (prog && prog[id] && String(prog[id].user_one_thing || '').trim()) || deckPearl || '';
+
+      var inlineDiv = document.createElement('div');
+      inlineDiv.id = 'cozyNoteInline529';
+      inlineDiv.innerHTML =
+        '<textarea class="cni-ta" rows="3" placeholder="Your mnemonic or pearl...">' +
+        currentNote +
+        '</textarea>' +
+        '<div class="cni-actions">' +
+          '<button class="cni-cancel">✕ Cancel</button>' +
+          '<button class="cni-save">✓ Save</button>' +
+        '</div>';
+
+      pearlDiv.parentNode.insertBefore(inlineDiv, pearlDiv.nextSibling);
+
+      var ta = inlineDiv.querySelector('.cni-ta');
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+      setTimeout(function(){ ta.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 60);
+
+      function doSave(){
+        var v = ta.value.trim();
+        if(!prog[id]) prog[id] = {};
+        prog[id].user_one_thing = v;
+        if(window.current) window.current.one_thing = v || deckPearl;
+        if(window.saveState) window.saveState();
+        if(cpText) cpText.textContent = v || deckPearl;
+        inlineDiv.remove();
+      }
+
+      inlineDiv.querySelector('.cni-save').onclick = function(e){ e.stopPropagation(); doSave(); };
+      inlineDiv.querySelector('.cni-cancel').onclick = function(e){ e.stopPropagation(); inlineDiv.remove(); };
+      ta.addEventListener('keydown', function(e){
+        if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ e.preventDefault(); doSave(); }
+        if(e.key === 'Escape'){ inlineDiv.remove(); }
+      });
+    };
+
+    pearlDiv.appendChild(editBtn);
+  }
+
+  function attachObs21(id){
+    var el = document.getElementById(id);
+    if(!el || el.dataset.v21obs) return;
+    el.dataset.v21obs = '1';
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.attributeName === 'class' && !el.classList.contains('hidden')){
+          setTimeout(function(){ enhancePearl(el); }, 110);
+        }
+      });
+    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function init21(){
+    attachObs21('soloReveal');
+    attachObs21('domainReveal');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init21);
+  } else {
+    init21();
+  }
+})();
+</script>
 </body></html>
