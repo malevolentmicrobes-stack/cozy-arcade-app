@@ -17276,4 +17276,122 @@ setTimeout(scan,800);
   }
 }
 </style>
+
+<!-- vFix24: Study pacing projection in hero — unseen cards / days until ABIM -->
+<style id="vFix24-css">
+#cozyPacing529 {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(148,163,184,0.20);
+  background: rgba(148,163,184,0.05);
+  color: #94a3b8;
+  text-align: center;
+  cursor: default;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+#cozyPacing529.pace-ok {
+  border-color: rgba(34,197,94,0.30);
+  background: rgba(34,197,94,0.07);
+  color: #4ade80;
+}
+#cozyPacing529.pace-behind {
+  border-color: rgba(245,201,122,0.30);
+  background: rgba(245,201,122,0.07);
+  color: #f5c97a;
+}
+#cozyPacing529.pace-urgent {
+  border-color: rgba(251,88,118,0.35);
+  background: rgba(251,88,118,0.08);
+  color: #fb5876;
+}
+</style>
+<script id="vFix24-pacing-js">(function(){
+  'use strict';
+  if(window.__vFix24Pacing) return;
+  window.__vFix24Pacing = true;
+
+  var ABIM_TARGET = new Date('2026-08-04T08:00:00');
+  var WIN_DAYS = 7;
+
+  function calcPacing(){
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    var totalCards = cards.length;
+    if(!prog || !totalCards) return null;
+
+    var daysLeft = Math.max(1, Math.ceil((ABIM_TARGET - new Date()) / 86400000));
+    var winStart = Date.now() - WIN_DAYS * 86400000;
+
+    var studiedCount = 0;
+    var recentCount = 0;
+    var entries = Object.values(prog);
+
+    for(var i = 0; i < entries.length; i++){
+      var p = entries[i];
+      if(p.seen_count && p.seen_count > 0) studiedCount++;
+      var ls = p.last_seen_at || p.last;
+      if(ls && new Date(ls).getTime() > winStart) recentCount++;
+    }
+
+    var unseenCount = Math.max(0, totalCards - studiedCount);
+    var avgPerDay = Math.round(recentCount / WIN_DAYS * 10) / 10;
+    var dailyNeeded = unseenCount > 0 ? Math.ceil(unseenCount / daysLeft) : 0;
+
+    return { unseenCount: unseenCount, totalCards: totalCards, avgPerDay: avgPerDay, dailyNeeded: dailyNeeded };
+  }
+
+  function renderPacing(){
+    var chip = document.getElementById('cozyPacing529');
+    if(!chip) return;
+
+    var info = calcPacing();
+    if(!info){ chip.style.display = 'none'; return; }
+    chip.style.display = '';
+
+    if(info.unseenCount === 0){
+      chip.className = 'pace-ok';
+      chip.textContent = '✓ All ' + info.totalCards + ' cards seen';
+      return;
+    }
+
+    chip.textContent = '📊 ' + info.unseenCount + ' unseen · ' + info.dailyNeeded + '/day needed · avg ' + info.avgPerDay + '/day';
+    if(info.avgPerDay >= info.dailyNeeded){
+      chip.className = 'pace-ok';
+    } else if(info.avgPerDay >= info.dailyNeeded * 0.6){
+      chip.className = 'pace-behind';
+    } else {
+      chip.className = 'pace-urgent';
+    }
+  }
+
+  function init24(){
+    var hero = document.querySelector('#home .hero');
+    if(!hero || document.getElementById('cozyPacing529')) return;
+    var div = document.createElement('div');
+    div.id = 'cozyPacing529';
+    hero.appendChild(div);
+    renderPacing();
+  }
+
+  /* Refresh pacing each time KPIs update */
+  var _prevKpis24 = window.updateKpis;
+  window.updateKpis = function(){
+    var r = _prevKpis24 && _prevKpis24.apply(this, arguments);
+    setTimeout(renderPacing, 50);
+    return r;
+  };
+  window.updateKpis.__vFix24Pacing = true;
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init24);
+  } else {
+    init24();
+  }
+})();
+</script>
 </body></html>

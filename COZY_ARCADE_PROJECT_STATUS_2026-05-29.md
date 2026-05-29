@@ -1,5 +1,5 @@
 # Cozy Arcade Board Prep — Project Status
-*Updated: 2026-05-29 (autonomous session — vFix5 through vFix16 shipped)*
+*Updated: 2026-05-29 (autonomous session — vFix5 through vFix24 shipped)*
 
 ---
 
@@ -43,6 +43,8 @@
 | Home: Daily Goal progress bar | ✅ Added (vFix20 — 10/20/30/50 goal picker; blue→green fill; persists) |
 | Reveal: ✏️ Quick Note on Board Pearl | ✅ Added (vFix21 — inline textarea; saves to user_one_thing; user note overrides deck pearl) |
 | Home hero: ABIM countdown chip | ✅ Added (vFix22 — amber pill "N days · ABIM"; red ≤30d; green post-boards) |
+| KE orbs: no overlap on mobile (CSS fix) | ✅ Fixed (vFix23 — #orbArena ID selector; promptBox max-height cap) |
+| Home hero: Study pacing projection | ✅ Added (vFix24 — "X unseen · Y/day needed · avg Z/day"; green/amber/red) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |
