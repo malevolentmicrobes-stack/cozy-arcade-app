@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix11 shipped*
+*Last updated: 2026-05-29 — vFix15 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -28,6 +28,10 @@
 | vFix9 | **Bug: chips called showAtlasScreen → fixed to naLaunchSysReview**; "Drill N Missed Cards" button in end modal; drill cardPool filter + home() cleanup | ✅ | 019f554 |
 | vFix10 | **Board Readiness Map** — per-system mastery bars (color-coded red/amber/green), ABIM countdown in toggle header, each row launches naLaunchSysReview | ✅ | 209cd9d |
 | vFix11 | **Board Pearl in reveal** — `one_thing` shown as amber-gold "📌 Board Pearl" box in Solo + KE reveal panels via MutationObserver; re-injects per card | ✅ | 923121b |
+| vFix12 | **Session stats in end modal** — N cards studied, % correct, rating breakdown (again/hard/good/easy) | ✅ | 9683ea2 |
+| vFix13 | **Session size limit** — "Cards: 10/25/50/All" picker; persists; cardPool wrapper slices after FSRS sort | ✅ | 46c330b |
+| vFix14 | **Explanation in reveal** — `<details>` collapsible, auto-opens on wrong answers; 150ms MutationObserver | ✅ | a1cdec7 |
+| vFix15 | **Leech warning badge** — amber/red "Missed N times" below diagnosis when p.lapses ≥ 2 | ✅ | b2f28a5 |
 
 ## Remaining Items
 

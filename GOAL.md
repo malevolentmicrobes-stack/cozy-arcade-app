@@ -96,6 +96,10 @@
 - ✅ `vFix9`: Weak-system chip onclick → naLaunchSysReview (direct study launch, zero extra taps); "🔁 Drill N Missed Cards" button in end modal; cardPool drill filter via __cozyDrillSet529 Set; home() clears drill mode (commit 019f554)
 - ✅ `vFix10`: Board Readiness Map — full per-system mastery breakdown panel on home screen; color-coded progress bars (red/amber/green by mastery %); ABIM countdown in toggle header; each system row directly launches naLaunchSysReview (commit 209cd9d)
 - ✅ `vFix11`: Board Pearl in reveal — `one_thing` now shown automatically in Solo + KE reveal panels via MutationObserver; amber-gold "📌 Board Pearl" box between trigger text and FSRS rating buttons; re-injects per card; zero FSRS interference (commit 923121b)
+- ✅ `vFix12`: Session accuracy stats in end modal — N cards studied, % correct, rating breakdown (🔄 again | ⚡ hard | ✓ good | ★ easy); injected after endBody, before missed-cards list (commit 9683ea2)
+- ✅ `vFix13`: Session size limit — "Cards: 10 | 25 | 50 | All" pill picker below Study Now button; persists in localStorage; cardPool wrapper slices after FSRS sort + drill filter; toast on game start (commit 46c330b)
+- ✅ `vFix14`: Explanation in reveal panel — `explanation` field shown as collapsible `<details>` element; auto-opens on wrong answers ("Learning Moment"); fires at 150ms after reveal via MutationObserver (commit a1cdec7)
+- ✅ `vFix15`: Leech warning in reveal — amber/red badge "Missed N times — encode carefully" below diagnosis when p.lapses ≥ 2; fires at 40ms; reads p.lapses (FSRS field) (commit b2f28a5)
 
 ### Atlas Tag Feature (2026-05-28) — all ✅
 - ✅ `003957c`: Tag filter + sortable columns + tag/sys constellation toggle (PHASE2 only)

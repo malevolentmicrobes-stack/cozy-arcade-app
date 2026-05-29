@@ -1,5 +1,5 @@
 # Cozy Arcade Board Prep — Project Status
-*Updated: 2026-05-29 (autonomous session — vFix5 through vFix11 shipped)*
+*Updated: 2026-05-29 (autonomous session — vFix5 through vFix15 shipped)*
 
 ---
 
@@ -31,6 +31,10 @@
 | End-of-game: "Drill N Missed Cards" button | ✅ Added (vFix9 — targeted re-run of missed cards) |
 | Home: Board Readiness Map (all systems) | ✅ Added (vFix10 — per-system bars, ABIM countdown) |
 | Reveal: "Board Pearl" one_thing shown automatically | ✅ Added (vFix11 — MutationObserver, Solo + KE) |
+| End modal: Session accuracy + rating breakdown | ✅ Added (vFix12 — N cards, % correct, again/hard/good/easy) |
+| Home: Session size picker (10/25/50/All) | ✅ Added (vFix13 — persists in localStorage) |
+| Reveal: Explanation auto-shown on wrong answers | ✅ Added (vFix14 — <details> element, auto-opens) |
+| Reveal: Leech warning badge (Missed N times) | ✅ Added (vFix15 — amber/red badge, p.lapses ≥ 2) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |
