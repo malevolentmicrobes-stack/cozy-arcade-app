@@ -17277,6 +17277,102 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix25: "Drill Weak" home screen button — targets cards with lapses ≥ 2 -->
+<style id="vFix25-css">
+#cozyDrillWeakBtn529 {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
+  margin: 6px auto 0;
+  padding: 11px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(251,88,118,0.35);
+  background: rgba(251,88,118,0.07);
+  color: #fb5876;
+  font-family: Orbitron, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+}
+#cozyDrillWeakBtn529:hover,
+#cozyDrillWeakBtn529:active {
+  background: rgba(251,88,118,0.15);
+  border-color: rgba(251,88,118,0.55);
+}
+#cozyDrillWeakBtn529 .dwb-count {
+  background: rgba(251,88,118,0.18);
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+}
+</style>
+<script id="vFix25-drillweak-js">(function(){
+  'use strict';
+  if(window.__vFix25DrillWeak) return;
+  window.__vFix25DrillWeak = true;
+
+  function getLapseIds(){
+    var prog = window.phase3State && window.phase3State.progress;
+    if(!prog) return [];
+    return Object.keys(prog).filter(function(id){
+      return Number(prog[id].lapses || 0) >= 2;
+    });
+  }
+
+  function refreshDrillWeakBtn(){
+    var lapseIds = getLapseIds();
+    var btn = document.getElementById('cozyDrillWeakBtn529');
+
+    if(!btn){
+      btn = document.createElement('button');
+      btn.id = 'cozyDrillWeakBtn529';
+      btn.type = 'button';
+      /* Insert between Study Now and Session Picker */
+      var qBtn = document.getElementById('cozyQuickStudy529');
+      if(!qBtn) return;
+      qBtn.parentNode.insertBefore(btn, qBtn.nextSibling);
+    }
+
+    if(lapseIds.length === 0){
+      btn.style.display = 'none';
+      return;
+    }
+
+    btn.style.display = 'flex';
+    btn.innerHTML = '🔁 Drill Weak <span class="dwb-count">' + lapseIds.length + '</span>';
+    btn.onclick = function(){
+      var ids = getLapseIds();
+      if(!ids.length) return;
+      window.__cozyDrillSet529 = new Set(ids);
+      var s = document.getElementById('startSolo');
+      if(s) s.click();
+    };
+  }
+
+  /* Refresh with each KPI update */
+  var _prevKpis25 = window.updateKpis;
+  window.updateKpis = function(){
+    var r = _prevKpis25 && _prevKpis25.apply(this, arguments);
+    setTimeout(refreshDrillWeakBtn, 80);
+    return r;
+  };
+  window.updateKpis.__vFix25DrillWeak = true;
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(refreshDrillWeakBtn, 1400);
+    });
+  } else {
+    setTimeout(refreshDrillWeakBtn, 1400);
+  }
+})();
+</script>
+
 <!-- vFix24: Study pacing projection in hero — unseen cards / days until ABIM -->
 <style id="vFix24-css">
 #cozyPacing529 {
