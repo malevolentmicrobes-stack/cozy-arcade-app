@@ -104,6 +104,7 @@
 - ✅ `vFix17`: "Today: N cards studied" stat tile appended to mastery panel; outermost updateKpis wrapper reads last_seen_at/last == today ISO; green when >0, muted gray otherwise (commit c54eea7)
 - ✅ `vFix18`: 📌 Pin toggle in reveal panel controls — "Pin/Pinned" button in Solo + KE reveal; toggles p.pinned in phase3State.progress, calls saveState(); MutationObserver at 20ms, refreshes each card (commit 3ec71c6)
 - ✅ `vFix19`: 🔁 Later flag in reveal + Study Flagged end modal — "🔁 Later/Queued" button (30ms) accumulates cards into __cozyFlagQueue529; end modal injects "Study Flagged (N)" drill button; queue persists through drill sessions, resets on fresh game start (commit b80f21f)
+- ✅ `vFix20`: Daily Goal tracker on home — compact bar between mastery stats and weak chips; goal picker [10|20|30|50] (default 20, cozy_dailygoal_v20); fills blue → green when reached; outermost updateKpis wrapper (commit a382b5b)
 
 ### Atlas Tag Feature (2026-05-28) — all ✅
 - ✅ `003957c`: Tag filter + sortable columns + tag/sys constellation toggle (PHASE2 only)

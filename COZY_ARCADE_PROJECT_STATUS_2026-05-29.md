@@ -40,6 +40,7 @@
 | Home: Today: N cards studied stat | ✅ Added (vFix17 — 6th tile in mastery panel) |
 | Reveal: 📌 Pin toggle button | ✅ Added (vFix18 — pin/unpin mid-game, persists via saveState) |
 | Reveal: 🔁 Later flag button | ✅ Added (vFix19 — queue cards; "Study Flagged (N)" drill button at end modal) |
+| Home: Daily Goal progress bar | ✅ Added (vFix20 — 10/20/30/50 goal picker; blue→green fill; persists) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |
