@@ -1,5 +1,5 @@
 # Cozy Arcade Board Prep — Project Status
-*Updated: 2026-05-29 (autonomous session — vFix5 through vFix24 shipped)*
+*Updated: 2026-05-29 (autonomous session — vFix5 through vFix26 shipped)*
 
 ---
 
@@ -46,6 +46,8 @@
 | KE orbs: no overlap on mobile (CSS fix) | ✅ Fixed (vFix23 — #orbArena ID selector; promptBox max-height cap) |
 | Home hero: Study pacing projection | ✅ Added (vFix24 — "X unseen · Y/day needed · avg Z/day"; green/amber/red) |
 | Home: 🔁 Drill Weak Cards button | ✅ Added (vFix25 — red CTA for lapses ≥ 2 cards; direct drill launch) |
+| Mobile: bgMove animation disabled on phones | ✅ Fixed (vFix26 — saves GPU compositor layer during game play) |
+| Home: 🎯 Daily Goal celebration | ✅ Added (vFix26 — confetti sparks + toast on first goal completion each day) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |
