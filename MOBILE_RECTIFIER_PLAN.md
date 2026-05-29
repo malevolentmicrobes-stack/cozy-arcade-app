@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix40 shipped*
+*Last updated: 2026-05-29 — vFix41 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -57,6 +57,7 @@
 | vFix38 | **Study Board Pearls** — teal "💎 Study Board Pearls (N)" button; includes c.one_thing (deck) + user_one_thing (vFix21 notes); vFix11 auto-shows pearl on each reveal; inserted after #cozyPinnedBtn529 | ✅ | 96ddb06 |
 | vFix39 | **Progress backup reminder** — amber toast once/day on return to home after ≥5 cards studied; one-tap Export calls exportProgress351; auto-dismisses 10s; cozy_backup_v39 guard | ✅ | a0edead |
 | vFix40 | **30-day study calendar** — expandable 7-col week-aligned grid below 7-day heatmap; same gray/amber/cyan/green scale; DOW headers; today cyan outline; lazy render; cozy_cal30_v40 state | ✅ | 1b154bc |
+| vFix41 | **📊 ABIM Board Est. score** — blueprint-weighted mastery tile in mastery panel; ABIM IM category weights (CV=14%, GI/Pulm/Rheum/ID=9%ea, Hem/Endo=8%ea, Nephro/Neuro=6%ea, 8 more); green ≥65% / amber ≥50% / red <50%; normalized by matched coverage; tooltip shows coverage% | ✅ | 5daef88 |
 
 ## Remaining Items
 

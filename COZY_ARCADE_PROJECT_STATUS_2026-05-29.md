@@ -61,6 +61,7 @@
 | Home: Study Board Pearls drill | ✅ Added (vFix38 — teal 💎 button; deck one_thing + user notes; pearl auto-shown in reveal via vFix11) |
 | Safety: Progress backup reminder | ✅ Added (vFix39 — amber toast after session; one-tap export; once/day guard; auto-dismisses 10s) |
 | Home: 30-day study calendar | ✅ Added (vFix40 — expandable grid below heatmap; week-aligned; same color scale; lazy renders when opened) |
+| Home: 📊 ABIM Board Est. score | ✅ Added (vFix41 — blueprint-weighted mastery tile "Board Est. X%"; CV=14%, GI/Pulm/Rheum/ID=9%ea, Hem/Endo=8%ea, Nephro/Neuro=6%ea; green ≥65%, amber ≥50%, red <50%) |
 | Home: 🎯 Daily Goal celebration | ✅ Added (vFix26 — confetti sparks + toast on first goal completion each day) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
