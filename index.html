@@ -14733,4 +14733,250 @@ setTimeout(scan,800);
   }
 }
 </style>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     vFix4 — JS-guaranteed HUD single-row (inline setProperty beats any CSS)
+     vA11  — Atlas card detail: personal note textarea
+     Appended 2026-05-29 · append-only · no inline edits
+     ═══════════════════════════════════════════════════════════════ -->
+<style id="vA11-css">
+/* ── Personal note section in Atlas card detail ──── */
+.na-note-wrap351 {
+  padding: 10px 12px 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  margin-top: 6px;
+}
+.na-note-label351 {
+  font-family: Orbitron, monospace;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #7dd3fc;
+  margin-bottom: 6px;
+  display: block;
+}
+.na-note-ta351 {
+  width: 100%;
+  min-height: 70px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(103,232,249,.18);
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  line-height: 1.45;
+  padding: 8px 10px;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color .15s;
+}
+.na-note-ta351:focus {
+  outline: none;
+  border-color: rgba(103,232,249,.45);
+}
+.na-note-saved351 {
+  font-size: 10px;
+  color: #6ee7b7;
+  margin-top: 4px;
+  display: none;
+  animation: noteSaved .6s ease both;
+}
+@keyframes noteSaved { from{opacity:0} 20%{opacity:1} 80%{opacity:1} to{opacity:0} }
+</style>
+<script id="vFix4-hud-js">
+/* vFix4: force HUD single-row via inline styles — cannot be overridden by any CSS */
+(function(){
+  'use strict';
+  function mobile(){ return window.innerWidth <= 900 || ('ontouchstart' in window); }
+  function sp(el, prop, val){ el.style.setProperty(prop, val, 'important'); }
+
+  function fixHud(gameId){
+    if(!mobile()) return;
+    var game = document.getElementById(gameId);
+    if(!game) return;
+    var hud = game.querySelector(':scope > .hud, :scope > .gameHud');
+    if(!hud) return;
+
+    /* Outer HUD → single-row flex */
+    sp(hud,'display','flex'); sp(hud,'flex-direction','row');
+    sp(hud,'align-items','center'); sp(hud,'flex-wrap','nowrap');
+    sp(hud,'min-height','46px'); sp(hud,'max-height','46px');
+    sp(hud,'height','46px');
+    sp(hud,'padding','5px 8px'); sp(hud,'gap','5px');
+    sp(hud,'overflow','hidden');
+    /* Disable grid from earlier patches */
+    sp(hud,'grid-template-rows','initial');
+    sp(hud,'grid-template-columns','initial');
+    sp(hud,'justify-items','initial');
+
+    /* Hide energy pill — ceChip handles it */
+    hud.querySelectorAll('.energyHud352').forEach(function(el){
+      sp(el,'display','none');
+    });
+
+    /* Hide orphan hudGroups not created by normalizeHud */
+    [].forEach.call(hud.children, function(ch){
+      if(ch.classList && ch.classList.contains('hudGroup') &&
+         !ch.classList.contains('hudStats371') &&
+         !ch.classList.contains('hudActions371')){
+        sp(ch,'display','none');
+      }
+    });
+
+    /* Stats (left, flex 1): energy pill removed above → home + score + streak */
+    var stats = hud.querySelector('.hudStats371');
+    if(stats){
+      sp(stats,'display','flex'); sp(stats,'flex','1 1 0');
+      sp(stats,'min-width','0'); sp(stats,'width','auto');
+      sp(stats,'max-width','none'); sp(stats,'gap','4px');
+      sp(stats,'align-items','center');
+      sp(stats,'grid-template-columns','initial');
+
+      [].forEach.call(stats.querySelectorAll('.hudPill'), function(p){
+        sp(p,'height','28px'); sp(p,'min-height','28px'); sp(p,'max-height','28px');
+        sp(p,'font-size','10px'); sp(p,'padding','3px 7px');
+        sp(p,'white-space','nowrap'); sp(p,'flex-shrink','1');
+        sp(p,'min-width','0'); sp(p,'overflow','hidden');
+        sp(p,'text-overflow','ellipsis');
+      });
+      /* Home button → small circle */
+      var homeBtn = stats.querySelector('.hudHome1751511,.hudHome1751512,.hudIconButton371[data-hud-icon="⌂"]');
+      if(homeBtn){
+        sp(homeBtn,'flex-shrink','0'); sp(homeBtn,'width','28px');
+        sp(homeBtn,'min-width','28px'); sp(homeBtn,'height','28px');
+        sp(homeBtn,'padding','0'); sp(homeBtn,'border-radius','50%');
+        sp(homeBtn,'font-size','14px');
+      }
+    }
+
+    /* Actions (right, flex shrink 0): phase + pause */
+    var actions = hud.querySelector('.hudActions371');
+    if(actions){
+      sp(actions,'display','flex'); sp(actions,'flex-shrink','0');
+      sp(actions,'width','auto'); sp(actions,'max-width','none');
+      sp(actions,'gap','4px'); sp(actions,'align-items','center');
+      sp(actions,'grid-template-columns','initial');
+
+      [].forEach.call(actions.querySelectorAll('.hudPill,.hudIconButton371'), function(btn){
+        sp(btn,'height','28px'); sp(btn,'min-height','28px'); sp(btn,'max-height','28px');
+        sp(btn,'font-size','10px'); sp(btn,'padding','3px 7px');
+      });
+      [].forEach.call(actions.querySelectorAll('.hudIconButton371'), function(btn){
+        sp(btn,'width','28px'); sp(btn,'min-width','28px');
+        sp(btn,'padding','0'); sp(btn,'border-radius','50%');
+      });
+      /* Hide "|" orphan button (extra separator from older patches) */
+      [].forEach.call(actions.querySelectorAll('button'), function(btn){
+        if((btn.textContent||'').trim()==='|') sp(btn,'display','none');
+      });
+    }
+  }
+
+  function run(){ fixHud('solo'); fixHud('domain'); }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run);
+  else run();
+  [300,800,1800].forEach(function(ms){ setTimeout(run,ms); });
+
+  /* Re-apply whenever a game button is clicked (game start resets DOM) */
+  document.addEventListener('click', function(e){
+    if(e.target.closest('#startSolo,#startDomain,#endRestart,#shadowStart351,#pauseResume')){
+      setTimeout(run, 120);
+      setTimeout(run, 450);
+    }
+  }, true);
+})();
+</script>
+<script id="vA11-note-js">
+/* vA11: Personal note textarea in Atlas card detail */
+(function(){
+  'use strict';
+
+  function saveNote(id, val){
+    var p3 = window.phase3State && window.phase3State.progress && window.phase3State.progress[id];
+    var at = window.progress && window.progress[id];
+    if(p3)  p3.user_one_thing  = val;
+    if(at)  at.user_one_thing  = val;
+    try{ window.saveState && window.saveState(); }catch(e){}
+  }
+
+  function getNote(id){
+    var p3 = window.phase3State && window.phase3State.progress && window.phase3State.progress[id];
+    var at = window.progress && window.progress[id];
+    return (p3 && p3.user_one_thing) || (at && at.user_one_thing) || '';
+  }
+
+  window.injectNoteEditor = function(id){
+    var cd = document.getElementById('na-cd-content');
+    if(!cd) return;
+
+    /* Remove stale */
+    var old = cd.querySelector('.na-note-wrap351');
+    if(old) old.remove();
+
+    var wrap = document.createElement('div');
+    wrap.className = 'na-note-wrap351';
+
+    var label = document.createElement('span');
+    label.className = 'na-note-label351';
+    label.textContent = 'My Note';
+
+    var ta = document.createElement('textarea');
+    ta.className = 'na-note-ta351';
+    ta.placeholder = 'Your personal annotation for this card…';
+    ta.value = getNote(id);
+
+    var saved = document.createElement('div');
+    saved.className = 'na-note-saved351';
+    saved.textContent = '✓ Saved';
+
+    function persist(){
+      saveNote(id, ta.value.trim());
+      saved.style.display = 'block';
+      saved.style.animation = 'none';
+      void saved.offsetHeight; /* reflow to restart animation */
+      saved.style.animation = '';
+      setTimeout(function(){ saved.style.display = 'none'; }, 650);
+    }
+
+    ta.addEventListener('blur', persist);
+    ta.addEventListener('keydown', function(e){
+      if((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); persist(); ta.blur(); }
+    });
+
+    wrap.appendChild(label);
+    wrap.appendChild(ta);
+    wrap.appendChild(saved);
+    cd.appendChild(wrap); /* append at BOTTOM of card detail */
+  };
+
+  /* Hook into the existing naOpenCardDetail chain */
+  function patchA11(){
+    var fn = window.naOpenCardDetail;
+    if(fn && !fn.__a11){
+      window.naOpenCardDetail = function(id){
+        var r = fn.apply(this, arguments);
+        setTimeout(function(){ window.injectNoteEditor && window.injectNoteEditor(id); }, 110);
+        return r;
+      };
+      window.naOpenCardDetail.__a11 = true;
+      window.naOpenCardDetail.__a10 = fn.__a10 || true;
+      window.naOpenCardDetail.__a9  = fn.__a9  || true;
+    }
+  }
+  patchA11();
+  setTimeout(patchA11, 600);
+  setTimeout(patchA11, 1800);
+
+  var _prevShow = window.showAtlasScreen;
+  if(_prevShow && !_prevShow.__a11show){
+    window.showAtlasScreen = function(){
+      var r = _prevShow.apply(this, arguments);
+      setTimeout(patchA11, 200);
+      return r;
+    };
+    window.showAtlasScreen.__a11show = true;
+  }
+})();
+</script>
 </body></html>

@@ -1,5 +1,5 @@
 # Project Goal Tracker
-*Updated 2026-05-28 — reflects session compactions + 2026-05-28 session*
+*Updated 2026-05-29 — autonomous session: vFix3/4 HUD + vA11 note editor*
 
 ---
 
@@ -82,6 +82,14 @@
 - ✅ **TEST MODE removed from drawer** — checkbox at line 9195 removed; dev-only, its open-drawer layout shift triggers font reflow glitch
 - ✅ **`renderSolo` body.className fix** — `document.body.className=''` wiped `cozyDrawerOpen351` causing promptBox width snap on every card; now preserves `cozy*/na-/Drawer` classes
 
+### Mobile UX + Atlas Notes (2026-05-29) — all ✅
+- ✅ `vC3C5/C6/C7/PhaseD`: All 8 mobile rectifier phases shipped (warm palette, HUD simplification, import overlay, iOS select guard)
+- ✅ `vFix1`: ceChip centered; import overlay → home() after upload
+- ✅ `vA9/A10`: Atlas card detail "▶ Study" buttons + Pin/Bury toggles (commit f16a04f)
+- ✅ `vFix3`: question font weight 950→700, size reduced, 4-col solo choices, card edge-to-edge (commit 86c4409)
+- ✅ `vFix4`: HUD single-row forced via JS `setProperty('important')` — overrides any CSS regardless of cascade, fires on DOMContentLoaded + 300/800/1800ms + on game-start click (commit pending)
+- ✅ `vA11`: Atlas card detail personal note textarea — writes to `phase3State.progress[id].user_one_thing`, auto-save on blur or Cmd+Enter (commit pending)
+
 ### Atlas Tag Feature (2026-05-28) — all ✅
 - ✅ `003957c`: Tag filter + sortable columns + tag/sys constellation toggle (PHASE2 only)
   - `parseTags(card)` helper handles string or array `tags` field
@@ -119,10 +127,10 @@ Run in order — do not proceed to P7 until all pass:
 
 | Priority | Goal | Gate |
 |----------|------|------|
-| A9 | Atlas: "▶ Review Tag" button in card detail → triggers home `browseTag351` + review session | Opens solo study filtered to selected tag |
-| A10 | Atlas: pin/bury toggle from card detail panel (write to `phase3State.progress`) | `p.pinned`/`p.buried` toggles persist after atlas close |
-| A11 | Atlas: one_thing inline edit from card detail (write to `window.phase3State.progress[id].user_one_thing`) | Card detail shows updated text immediately |
-| P7 | PWA service worker (`sw.js` + register before `</body>`) | Chrome DevTools → Application → Service Workers registered |
+| A9  | ✅ Atlas: "▶ Study [tag]" + "▶ Study [SYS]" buttons in card detail | Done — f16a04f |
+| A10 | ✅ Atlas: Pin/Bury toggle from card detail panel | Done — f16a04f |
+| A11 | ✅ Atlas: Personal note textarea → `phase3State.progress[id].user_one_thing` | Done — pending commit |
+| P7  | ✅ PWA service worker (`sw.js` + manifest + registration) | Done — 9f0ef43 |
 | P8 | CSP headers via `vercel.json` | `curl -I` shows `Content-Security-Policy` header |
 | M2 | Stripe Payment Link | Test purchase + `localStorage.getItem('cozy_paid_v1') === '1'` |
 | iOS1 | Capacitor scaffold | `npx cap sync` exits 0 |
