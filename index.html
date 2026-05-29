@@ -15583,4 +15583,158 @@ setTimeout(scan,800);
   setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 2800);
 })();
 </script>
+<style id="vFix9-css">
+/* vFix9: mobile layout for mastery stats + drill button */
+@media (max-width: 480px) {
+  #cozyMasteryStats529 {
+    gap: 5px;
+    padding: 10px 12px;
+  }
+  .cms-stat-n { font-size: 15px; }
+  .cms-stat-l { font-size: 8px; }
+  .cms-divider { height: 22px; }
+}
+#cozyDrillBtn529 {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(103,232,249,.14), rgba(124,58,237,.12));
+  border: 1.5px solid rgba(103,232,249,.30);
+  color: #e9f8ff;
+  font-weight: 950;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+#cozyDrillBtn529:hover { border-color: rgba(103,232,249,.60); }
+</style>
+<script id="vFix9-drill-js">
+/* vFix9: fix chip onclick → naLaunchSysReview; add Drill Missed button */
+(function(){
+  'use strict';
+
+  /* ── 1. Patch weak-system chips to use naLaunchSysReview ── */
+  function patchChips(){
+    document.querySelectorAll('#cozyWeakSystems529 .cws-chip').forEach(function(btn){
+      if(btn.dataset.vFix9) return;
+      btn.dataset.vFix9 = '1';
+      var sysSpan = btn.querySelector('span:first-child');
+      var sys = sysSpan && sysSpan.textContent.trim();
+      if(!sys) return;
+      btn.onclick = function(e){
+        e.stopPropagation();
+        if(window.naLaunchSysReview){
+          window.naLaunchSysReview(sys);
+        } else {
+          try{ window.naSelectedSys = sys; window.showAtlasScreen && window.showAtlasScreen(); }catch(err){}
+        }
+      };
+      /* Update title to clarify action */
+      btn.title = 'Start Solo filtered to ' + sys + ' due/hard cards';
+    });
+  }
+
+  /* Run after each updateKpis renders chips */
+  var _prevKpis9 = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis9) _prevKpis9.apply(this, arguments);
+    setTimeout(patchChips, 60);
+  };
+  setTimeout(patchChips, 1200);
+  setTimeout(patchChips, 3000);
+
+  /* ── 2. Drill Missed Cards mode ── */
+  function getSessionMissed(){
+    var sess = window['__cozySession529'];
+    if(!sess || !sess.start) return [];
+    var startMs = sess.start;
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    if(!prog || !cards.length) return [];
+    var missed = [];
+    cards.forEach(function(c){
+      var id = c.id || c.qid || c.card_id;
+      var p = prog[id]; if(!p) return;
+      var raw = p.last || p.last_seen_at; if(!raw) return;
+      if(new Date(raw).getTime() < startMs) return;
+      var r = p.rating || p.last_rating;
+      if(r === 'again') missed.push(c);
+    });
+    return missed;
+  }
+
+  /* Wrap cardPool once to support drill mode */
+  (function installDrillFilter(){
+    if(window.cardPool && !window.cardPool.__vFix9Drill){
+      var _pool = window.cardPool;
+      window.cardPool = cardPool = function(){
+        var arr = _pool.apply(this, arguments);
+        var drillSet = window['__cozyDrillSet529'];
+        if(drillSet && drillSet.size){
+          var filtered = arr.filter(function(c){
+            return drillSet.has(c.id || c.qid || c.card_id);
+          });
+          if(filtered.length) return filtered;
+          /* All drill cards exhausted — clear and return full pool */
+          window['__cozyDrillSet529'] = null;
+        }
+        return arr;
+      };
+      window.cardPool.__vFix9Drill = true;
+    }
+  })();
+
+  /* Clear drill mode on home navigation */
+  (function patchHomeForDrill(){
+    if(window.home && !window.home.__vFix9Clear){
+      var _home = window.home;
+      window.home = home = function(){
+        window['__cozyDrillSet529'] = null;
+        return _home.apply(this, arguments);
+      };
+      window.home.__vFix9Clear = true;
+    }
+  })();
+
+  /* Inject Drill button into end modal */
+  function injectDrillButton(){
+    var missed = getSessionMissed();
+    var box = document.getElementById('endBox') || document.querySelector('.endBox');
+    if(!box) return;
+    var old = document.getElementById('cozyDrillBtn529'); if(old) old.remove();
+    if(!missed.length) return;
+    var btn = document.createElement('button');
+    btn.id = 'cozyDrillBtn529';
+    btn.type = 'button';
+    btn.textContent = '🔁 Drill ' + missed.length + ' Missed Card' + (missed.length !== 1 ? 's' : '');
+    btn.onclick = function(){
+      var ids = new Set(missed.map(function(c){ return c.id || c.qid || c.card_id; }));
+      window['__cozyDrillSet529'] = ids;
+      var endEl = document.getElementById('end');
+      if(endEl) endEl.classList.add('hidden');
+      setTimeout(function(){
+        try{ if(window.startSolo) window.startSolo(); }catch(e){}
+      }, 80);
+    };
+    /* Insert after missed summary, before controls */
+    var controls = box.querySelector('.controls');
+    if(controls) box.insertBefore(btn, controls);
+    else box.appendChild(btn);
+  }
+
+  /* Hook into endRun one more time */
+  setTimeout(function(){
+    if(window.endRun && !window.endRun.__vFix9){
+      var _end = window.endRun;
+      window.endRun = endRun = function(t){
+        if(_end) _end.apply(this, arguments);
+        try{ injectDrillButton(); }catch(e){}
+      };
+      window.endRun.__vFix9 = true;
+    }
+  }, 1000);
+})();
+</script>
 </body></html>
