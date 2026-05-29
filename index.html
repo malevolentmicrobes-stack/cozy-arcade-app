@@ -17277,6 +17277,153 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix39: Progress backup reminder toast (once per day, after session) -->
+<style id="vFix39-css">
+#cozyBackupToast529 {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  max-width: 340px;
+  width: calc(100% - 32px);
+  background: rgba(30,20,5,0.97);
+  border: 1px solid rgba(245,179,60,0.55);
+  border-radius: 12px;
+  padding: 11px 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #fde68a;
+}
+#cozyBackupToast529.show {
+  display: flex;
+  animation: v39FadeIn 0.25s ease;
+}
+@keyframes v39FadeIn { from{opacity:0;transform:translateX(-50%) translateY(-8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+.v39-msg  { flex: 1; line-height: 1.35; }
+.v39-export {
+  padding: 5px 11px;
+  background: rgba(245,179,60,0.2);
+  border: 1px solid rgba(245,179,60,0.5);
+  border-radius: 7px;
+  color: #fbbf24;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.v39-export:hover { background: rgba(245,179,60,0.35); }
+.v39-dismiss {
+  font-size: 16px;
+  color: rgba(253,230,138,0.5);
+  cursor: pointer;
+  line-height: 1;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+.v39-dismiss:hover { color: #fde68a; }
+</style>
+<script id="vFix39-backup-js">(function(){
+  'use strict';
+  if(window.__vFix39Backup) return;
+  window.__vFix39Backup = true;
+
+  var BACKUP_KEY = 'cozy_backup_v39';
+  var autoTimer  = null;
+  var wasInGame  = false;
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function alreadyReminded(){ return localStorage.getItem(BACKUP_KEY) === todayStr(); }
+  function markReminded(){ localStorage.setItem(BACKUP_KEY, todayStr()); }
+
+  function getTodayCount(){
+    var prog  = window.phase3State && window.phase3State.progress;
+    if(!prog) return 0;
+    var today = todayStr();
+    return Object.values(prog).filter(function(p){
+      var ls = p.last_seen_at || p.last;
+      return ls && ls.slice(0,10) === today;
+    }).length;
+  }
+
+  function doExport(){
+    try{
+      if(typeof window.exportProgress351 === 'function') window.exportProgress351();
+      else if(typeof window.exportProgress17526 === 'function') window.exportProgress17526();
+    }catch(e){}
+    hideToast();
+    markReminded();
+  }
+
+  function hideToast(){
+    var t = document.getElementById('cozyBackupToast529');
+    if(t){ t.classList.remove('show'); }
+    clearTimeout(autoTimer);
+  }
+
+  function showToast(){
+    if(alreadyReminded()) return;
+    if(getTodayCount() < 5) return;
+    var t = document.getElementById('cozyBackupToast529');
+    if(!t) return;
+    markReminded();
+    t.classList.add('show');
+    autoTimer = setTimeout(hideToast, 10000);
+  }
+
+  function injectToast(){
+    if(document.getElementById('cozyBackupToast529')) return;
+    var el = document.createElement('div');
+    el.id = 'cozyBackupToast529';
+    el.innerHTML =
+      '<span class="v39-msg">💾 Back up your progress before closing</span>' +
+      '<button class="v39-export">Export</button>' +
+      '<span class="v39-dismiss" title="Dismiss">✕</span>';
+    el.querySelector('.v39-export').addEventListener('click', doExport);
+    el.querySelector('.v39-dismiss').addEventListener('click', function(){ hideToast(); markReminded(); });
+    document.body.appendChild(el);
+  }
+
+  function watchHome(){
+    var home = document.getElementById('home');
+    if(!home) return;
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.attributeName !== 'class') return;
+        var hidden = home.classList.contains('hidden');
+        if(!hidden && wasInGame){
+          wasInGame = false;
+          setTimeout(showToast, 800);
+        }
+      });
+    }).observe(home, { attributes: true, attributeFilter: ['class'] });
+
+    ['solo','domain'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      new MutationObserver(function(mutations){
+        mutations.forEach(function(m){
+          if(m.attributeName === 'class' && !el.classList.contains('hidden')){
+            wasInGame = true;
+          }
+        });
+      }).observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ injectToast(); watchHome(); });
+  } else {
+    setTimeout(function(){ injectToast(); watchHome(); }, 300);
+  }
+})();
+</script>
+
 <!-- vFix38: Study Board Pearls — drill all cards with one_thing data -->
 <style id="vFix38-css">
 #cozyPearlsBtn529 {
