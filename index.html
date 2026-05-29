@@ -19110,20 +19110,6 @@ setTimeout(scan,800);
 })();
 </script>
 
-<!-- vFix43a: Fix stuck-after-import — document capture fires before element-level stopImmediatePropagation kills bubble; home() resets game state so start buttons respond -->
-<script id="vFix43-import-home">(function(){
-  if(window.__vFix43ImportHome) return;
-  window.__vFix43ImportHome = true;
-  document.addEventListener('change', function(e){
-    if(e.target && e.target.id === 'limitlessHomeDeckFile'){
-      setTimeout(function(){
-        try{ if(typeof window.home === 'function') window.home(); }catch(_){}
-      }, 900);
-    }
-  }, true);
-})();
-</script>
-
 <!-- vFix43b: Heatmap + calendar → bottom (order:8); kpis → very bottom (order:9); kpis redesign — atlas cyan theme, 2-col on mobile -->
 <style id="vFix43-layout-stats">
 /* Move 7-day heatmap + 30-day calendar to bottom of home screen */
