@@ -17277,6 +17277,133 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix28: 7-day study heatmap on home screen -->
+<style id="vFix28-css">
+#cozyHeatmap529 {
+  max-width: 360px;
+  margin: 8px auto 0;
+}
+.chm-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+.chm-day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.chm-dot {
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 40px;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+.chm-day.chm-today .chm-dot {
+  outline: 2px solid rgba(103,232,249,0.60);
+  outline-offset: 2px;
+}
+.chm-label {
+  font-size: 9px;
+  font-family: Orbitron, monospace;
+  letter-spacing: 0.04em;
+  color: #9aa0b8;
+  text-transform: uppercase;
+}
+.chm-count {
+  font-size: 10px;
+  font-weight: 700;
+  color: #cbd5e1;
+  line-height: 1;
+}
+</style>
+<script id="vFix28-heatmap-js">(function(){
+  'use strict';
+  if(window.__vFix28Heatmap) return;
+  window.__vFix28Heatmap = true;
+
+  var DAY_NAMES = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  function buildDailyMap(){
+    var prog = window.phase3State && window.phase3State.progress;
+    var map = {};
+    var now = Date.now();
+    for(var i = 6; i >= 0; i--){
+      map[new Date(now - i * 86400000).toISOString().slice(0,10)] = 0;
+    }
+    if(!prog) return map;
+    Object.values(prog).forEach(function(p){
+      var ls = p.last_seen_at || p.last;
+      if(ls){ var d = ls.slice(0,10); if(d in map) map[d]++; }
+    });
+    return map;
+  }
+
+  function renderHeatmap(){
+    var wrap = document.getElementById('cozyHeatmap529');
+    if(!wrap) return;
+
+    var goal = window.__cozyDailyGoalVal529 || 20;
+    var map  = buildDailyMap();
+    var today = new Date().toISOString().slice(0,10);
+    var days  = Object.keys(map).sort();
+
+    var html = '<div class="chm-row">';
+    days.forEach(function(d){
+      var n   = map[d];
+      var pct = goal ? n / goal : 0;
+      var bg;
+      if(n === 0)       bg = 'rgba(148,163,184,0.12)';
+      else if(pct >= 1) bg = 'rgba(34,197,94,0.65)';
+      else if(pct >= 0.5) bg = 'rgba(103,232,249,0.50)';
+      else              bg = 'rgba(245,201,122,0.40)';
+
+      var dow  = DAY_NAMES[new Date(d + 'T12:00:00').getDay()];
+      var cls  = d === today ? ' chm-today' : '';
+      html += '<div class="chm-day' + cls + '" title="' + dow + ' ' + d + ': ' + n + ' cards">' +
+        '<div class="chm-dot" style="background:' + bg + '"></div>' +
+        '<div class="chm-label">' + dow + '</div>' +
+        (n > 0 ? '<div class="chm-count">' + n + '</div>' : '') +
+      '</div>';
+    });
+    html += '</div>';
+    wrap.innerHTML = html;
+  }
+
+  function injectHeatmap(){
+    var goalDiv = document.getElementById('cozyDailyGoal529');
+    if(!goalDiv) return;
+    var wrap = document.getElementById('cozyHeatmap529');
+    if(!wrap){
+      wrap = document.createElement('div');
+      wrap.id = 'cozyHeatmap529';
+      goalDiv.parentNode.insertBefore(wrap, goalDiv.nextSibling);
+    }
+    renderHeatmap();
+  }
+
+  /* Refresh with each KPI update */
+  var _prevKpis28 = window.updateKpis;
+  window.updateKpis = function(){
+    var r = _prevKpis28 && _prevKpis28.apply(this, arguments);
+    setTimeout(injectHeatmap, 80);
+    return r;
+  };
+  window.updateKpis.__vFix28Heatmap = true;
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(injectHeatmap, 1600);
+    });
+  } else {
+    setTimeout(injectHeatmap, 1600);
+  }
+})();
+</script>
+
 <!-- vFix27: Swipe-to-rate in reveal panel + haptic feedback -->
 <style id="vFix27-css">
 /* Default: hint hidden; shown only on touch devices */
