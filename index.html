@@ -16138,4 +16138,128 @@ setTimeout(scan,800);
   }, 1100);
 })();
 </script>
+<style id="vFix13-css">
+/* vFix13: Session size picker */
+#cozySessionPicker529 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.csp-label {
+  font-size: 11px;
+  font-weight: 900;
+  color: #6b7594;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+.csp-btn {
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.11);
+  color: #9aa0b8;
+  font-size: 12px;
+  font-weight: 950;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.csp-btn:hover { border-color: rgba(103,232,249,.3); color: #c8eeff; }
+.csp-btn.active {
+  background: rgba(103,232,249,.12);
+  border-color: rgba(103,232,249,.45);
+  color: #67e8f9;
+}
+</style>
+<script id="vFix13-sesslimit-js">
+/* vFix13: Session size limit — caps cardPool at N due-weighted cards */
+(function(){
+  'use strict';
+
+  var LS_KEY = 'cozy_sessmax_v13';
+  var OPTIONS = [10, 25, 50, null]; /* null = All */
+
+  /* Load saved preference */
+  function loadMax(){
+    var raw = localStorage.getItem(LS_KEY);
+    if(raw === 'null' || raw === null || raw === '') return null;
+    var n = parseInt(raw, 10);
+    return isNaN(n) ? null : n;
+  }
+  window['__cozySessionMax529'] = loadMax();
+
+  /* Wrap cardPool to apply limit (runs after FSRS sort + drill filter) */
+  (function installLimit(){
+    if(window.cardPool && !window.cardPool.__vFix13Limit){
+      var _pool = window.cardPool;
+      window.cardPool = cardPool = function(){
+        var arr = _pool.apply(this, arguments);
+        var max = window['__cozySessionMax529'];
+        if(max && arr.length > max) return arr.slice(0, max);
+        return arr;
+      };
+      window.cardPool.__vFix13Limit = true;
+    }
+  })();
+
+  /* Render picker UI */
+  function renderPicker(){
+    var quickBtn = document.getElementById('cozyQuickStudy529');
+    if(!quickBtn) return;
+    var existing = document.getElementById('cozySessionPicker529');
+    if(existing) { updateActive(existing); return; }
+    var div = document.createElement('div');
+    div.id = 'cozySessionPicker529';
+    var html = '<span class="csp-label">Cards:</span>';
+    OPTIONS.forEach(function(n){
+      var label = n === null ? 'All' : String(n);
+      html += '<button class="csp-btn" data-max="' + (n===null?'null':n) + '">' + label + '</button>';
+    });
+    div.innerHTML = html;
+    quickBtn.parentNode.insertBefore(div, quickBtn.nextSibling);
+    updateActive(div);
+    div.addEventListener('click', function(e){
+      var btn = e.target.closest('.csp-btn');
+      if(!btn) return;
+      var raw = btn.dataset.max;
+      var max = raw === 'null' ? null : parseInt(raw, 10);
+      window['__cozySessionMax529'] = max;
+      localStorage.setItem(LS_KEY, String(max));
+      updateActive(div);
+    });
+  }
+
+  function updateActive(div){
+    var cur = window['__cozySessionMax529'];
+    div.querySelectorAll('.csp-btn').forEach(function(btn){
+      var raw = btn.dataset.max;
+      var n = raw === 'null' ? null : parseInt(raw, 10);
+      btn.classList.toggle('active', n === cur);
+    });
+  }
+
+  /* Toast on game start */
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('#startSolo,#startDomain,#cozyQuickStudy529')) return;
+    var max = window['__cozySessionMax529'];
+    if(!max) return;
+    setTimeout(function(){
+      try{ if(window.toast) window.toast('Studying first ' + max + ' cards'); }catch(ex){}
+    }, 180);
+  }, true);
+
+  /* Init after kpis render */
+  setTimeout(renderPicker, 1300);
+  setTimeout(renderPicker, 3000);
+
+  /* Re-render after each updateKpis (in case home re-renders) */
+  var _prevKpis13 = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis13) _prevKpis13.apply(this, arguments);
+    setTimeout(renderPicker, 60);
+  };
+})();
+</script>
 </body></html>
