@@ -102,6 +102,7 @@
 - ✅ `vFix15`: Leech warning in reveal — amber/red badge "Missed N times — encode carefully" below diagnosis when p.lapses ≥ 2; fires at 40ms; reads p.lapses (FSRS field) (commit b2f28a5)
 - ✅ `vFix16`: Fix reveal scroll-to-top (vFix14 regression — explanation auto-open left panel mid-scroll); session card counter bottom-right overlay "N cards"/"N/max"; advance() wrapped (__v16Count) (commit 1847316)
 - ✅ `vFix17`: "Today: N cards studied" stat tile appended to mastery panel; outermost updateKpis wrapper reads last_seen_at/last == today ISO; green when >0, muted gray otherwise (commit c54eea7)
+- ✅ `vFix18`: 📌 Pin toggle in reveal panel controls — "Pin/Pinned" button in Solo + KE reveal; toggles p.pinned in phase3State.progress, calls saveState(); MutationObserver at 20ms, refreshes each card (commit 3ec71c6)
 
 ### Atlas Tag Feature (2026-05-28) — all ✅
 - ✅ `003957c`: Tag filter + sortable columns + tag/sys constellation toggle (PHASE2 only)
