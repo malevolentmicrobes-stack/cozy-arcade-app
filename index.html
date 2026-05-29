@@ -16353,4 +16353,83 @@ setTimeout(scan,800);
   }
 })();
 </script>
+<style id="vFix15-css">
+/* vFix15: Leech / struggle warning badge in reveal */
+#cozyLeechWarn529 {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 6px auto 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  pointer-events: none;
+}
+#cozyLeechWarn529.warn-amber {
+  background: rgba(245,201,122,.14);
+  border: 1px solid rgba(245,201,122,.38);
+  color: #f5c97a;
+}
+#cozyLeechWarn529.warn-red {
+  background: rgba(251,88,118,.14);
+  border: 1px solid rgba(251,88,118,.38);
+  color: #fb7e9a;
+}
+</style>
+<script id="vFix15-leech-js">
+/* vFix15: Show struggle warning badge in reveal when card has lapses ≥ 2 */
+(function(){
+  'use strict';
+
+  function injectLeechWarn(revealEl){
+    var c = window.current;
+    var prog = window.phase3State && window.phase3State.progress;
+    var old = document.getElementById('cozyLeechWarn529');
+    if(old) old.remove();
+    if(!c || !prog) return;
+    var id = c.id || c.qid || c.card_id;
+    var p = prog[id];
+    var lapses = p ? Number(p.lapses || 0) : 0;
+    if(lapses < 2) return;
+    /* Find the diagnosis element to insert after */
+    var dxEl = revealEl.querySelector('[id$="RevealDx"],[id$="Dx"],[id$="dx"]');
+    if(!dxEl) return;
+    var badge = document.createElement('div');
+    badge.id = 'cozyLeechWarn529';
+    badge.className = lapses >= 4 ? 'warn-red' : 'warn-amber';
+    badge.textContent = (lapses >= 4 ? '💀' : '⚠️') + ' Missed ' + lapses + ' time' + (lapses !== 1 ? 's' : '') + ' — encode carefully';
+    dxEl.parentNode.insertBefore(badge, dxEl.nextSibling);
+  }
+
+  function watchReveal15(id){
+    var el = document.getElementById(id);
+    if(!el || el.dataset.v15obs) return;
+    el.dataset.v15obs = '1';
+    var obs = new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.type === 'attributes' && m.attributeName === 'class'){
+          if(!el.classList.contains('hidden')){
+            /* 40ms — fires before vFix11 (80ms) and vFix14 (150ms) */
+            setTimeout(function(){ try{ injectLeechWarn(el); }catch(e){} }, 40);
+          }
+        }
+      });
+    });
+    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function init15(){
+    watchReveal15('soloReveal');
+    watchReveal15('domainReveal');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init15);
+  } else {
+    init15();
+  }
+})();
+</script>
 </body></html>
