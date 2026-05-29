@@ -16605,4 +16605,99 @@ setTimeout(scan,800);
   }
 })();
 </script>
+
+<!-- vFix18: Pin toggle button in reveal panel controls -->
+<style id="vFix18-css">
+.cpin-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  border-radius: 20px;
+  padding: 6px 16px;
+  min-height: 38px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.cpin-btn.pinned {
+  background: rgba(120,53,15,0.28);
+  border-color: rgba(245,201,122,0.55);
+  color: #f5c97a;
+}
+.cpin-btn:active { transform: scale(0.94); }
+</style>
+<script id="vFix18-pin-js">(function(){
+  'use strict';
+  if(window.__vFix18Pin) return;
+  window.__vFix18Pin = true;
+
+  function getCardId(){
+    var c = window.current;
+    return c && (c.id || c.qid || c.card_id) || null;
+  }
+
+  function injectPinBtn(revealEl){
+    var btnId = 'cozyPinBtn529_' + revealEl.id;
+    var old = document.getElementById(btnId);
+    if(old) old.remove();
+
+    var id = getCardId();
+    if(!id) return;
+
+    var prog = window.phase3State && window.phase3State.progress;
+    var p = prog && prog[id];
+    var isPinned = !!(p && p.pinned);
+
+    var btn = document.createElement('button');
+    btn.id = btnId;
+    btn.className = 'cpin-btn' + (isPinned ? ' pinned' : '');
+    btn.textContent = isPinned ? '📌 Pinned' : '📌 Pin';
+
+    btn.onclick = function(e){
+      e.stopPropagation();
+      var cid = getCardId();
+      if(!cid) return;
+      var pr = window.phase3State && window.phase3State.progress;
+      if(!pr) return;
+      if(!pr[cid]) pr[cid] = {};
+      pr[cid].pinned = !pr[cid].pinned;
+      var now = pr[cid].pinned;
+      btn.className = 'cpin-btn' + (now ? ' pinned' : '');
+      btn.textContent = now ? '📌 Pinned' : '📌 Pin';
+      if(window.saveState) window.saveState();
+    };
+
+    var controls = revealEl.querySelector('.controls');
+    if(controls) {
+      controls.style.gap = '10px';
+      controls.appendChild(btn);
+    }
+  }
+
+  function attachObs18(id){
+    var el = document.getElementById(id);
+    if(!el || el.dataset.v18obs) return;
+    el.dataset.v18obs = '1';
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.attributeName === 'class' && !el.classList.contains('hidden')){
+          setTimeout(function(){ injectPinBtn(el); }, 20);
+        }
+      });
+    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function init18(){
+    attachObs18('soloReveal');
+    attachObs18('domainReveal');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init18);
+  } else {
+    init18();
+  }
+})();
+</script>
 </body></html>
