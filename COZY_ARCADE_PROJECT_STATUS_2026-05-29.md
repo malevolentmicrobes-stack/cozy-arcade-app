@@ -61,7 +61,7 @@
 | Home: Study Board Pearls drill | ✅ Added (vFix38 — teal 💎 button; deck one_thing + user notes; pearl auto-shown in reveal via vFix11) |
 | Safety: Progress backup reminder | ✅ Added (vFix39 — amber toast after session; one-tap export; once/day guard; auto-dismisses 10s) |
 | Home: 30-day study calendar | ✅ Added (vFix40 — expandable grid below heatmap; week-aligned; same color scale; lazy renders when opened) |
-| Home: 📊 ABIM Board Est. score | ✅ Added (vFix41 — blueprint-weighted mastery tile "Board Est. X%"; CV=14%, GI/Pulm/Rheum/ID=9%ea, Hem/Endo=8%ea, Nephro/Neuro=6%ea; green ≥65%, amber ≥50%, red <50%) |
+| Home: 📊 ABIM Board Est. score | ⏪ Reverted (vFix41 removed from `index.html` after hard-stop diagnostic; pre-vFix41 comparison also reproduced Solo-click freeze, so score tile is not proven as sole root cause; any future version must be moved into consolidated analytics instead of another `updateKpis` wrapper) |
 | Home: COZY ARCADE logo at very top | ✅ Fixed (vFix42a — order:-1 on .hero beats all prior order:1 injections) |
 | Home: Import overlay auto-closes after upload | ⏸ Reverted (vFix42b removed — ✕ button is correct UX; auto-close caused unnecessary global listener) |
 | Game HUD: ⚙ Settings button | ⏸ Reverted (vFix42c removed — dead normalizeHud wrapper + HUD layout break + settingsReturnMode bug sent user to home; Phase 2 scope) |

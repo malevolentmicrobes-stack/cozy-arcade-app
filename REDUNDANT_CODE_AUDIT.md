@@ -192,6 +192,14 @@
 
 ---
 
+### R21 — vFix41 ABIM Board Est. score appended as another `updateKpis` wrapper (REVERTED)
+**Location:** vFix41 final script block after vFix24; wrapped `window.updateKpis` and injected `#cozyAbimScore529` into `#cozyMasteryStats529`.
+**Root cause:** The feature was implemented as another end-of-file `updateKpis` wrapper in a file already carrying many KPI/render wrappers. This increases wrapper-chain risk and makes home/import/gameplay regressions harder to reason about.
+**Diagnostic result:** Static parse passed (98 inline scripts, no duplicate script IDs). Staged Chrome validation loaded the home screen, uploaded `example_deck_template.json`, and updated cards `0 → 3`. The Solo-click freeze reproduced in both current vFix41 and the pre-vFix41 worktree at `b69ed83`, so vFix41 is not proven as the sole cause of that click-freeze class.
+**Reverted:** Removed vFix41 from `index.html` per hard-stop request. Future Board Est. work should be relocated into a consolidated analytics render path instead of adding another KPI wrapper.
+
+---
+
 ## Phase 2 Action Plan
 
 | Priority | Item | Scope | Risk |
@@ -224,9 +232,10 @@
 | R18 dead normalizeHud wrapper | Removed with vFix42c | current |
 | R19 hudStats371 hide disrupts HUD | Removed with vFix42c | current |
 | R20 settingsReturnMode not set | Removed with vFix42c — Phase 2 fix required | current |
+| R21 vFix41 Board Est. score wrapper | Removed from `index.html`; diagnostic says click-freeze also exists pre-vFix41 | current |
 
 ---
 
-*Last updated: 2026-05-29 — vFix42b + vFix42c reverted; R17–R20 added*  
-*This audit is for Phase 2 planning. All items above are NON-BLOCKING for ABIM August 2026.*  
+*Last updated: 2026-05-29 — vFix41 reverted; R21 diagnostic added*
+*This audit is for Phase 2 planning. All items above are NON-BLOCKING for ABIM August 2026.*
 *Phase 2 = post-boards Capacitor scaffold + clean CSS architecture.*
