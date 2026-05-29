@@ -15127,4 +15127,206 @@ setTimeout(scan,800);
   setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 2300);
 })();
 </script>
+<style id="vFix6-css">
+/* vFix6: Session missed-cards summary styles */
+#cozyMissedSummary529 {
+  margin-top: 18px;
+  text-align: left;
+  width: 100%;
+  max-height: 210px;
+  overflow-y: auto;
+}
+.cozy-missed-header {
+  font-family: Orbitron, monospace;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  color: #fb5876;
+  font-size: 10px;
+  margin-bottom: 8px;
+  font-weight: 950;
+}
+.cozy-missed-item {
+  padding: 7px 12px;
+  border: 1px solid rgba(251,88,118,.18);
+  border-radius: 9px;
+  background: rgba(251,88,118,.05);
+  margin-bottom: 5px;
+  line-height: 1.25;
+}
+.cozy-missed-item b {
+  color: #ffd0d8;
+  font-size: 13px;
+  display: block;
+  font-weight: 950;
+}
+.cozy-missed-item span {
+  color: rgba(255,210,220,.55);
+  font-size: 11px;
+  font-family: Orbitron, monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+</style>
+<script id="vFix6-orb-js">
+/* vFix6: KE orb overlap prevention — separation pass after radial placement */
+(function(){
+  'use strict';
+  function isMob(){ return window.innerWidth <= 900 || 'ontouchstart' in window; }
+  function clamp(v, lo, hi){ return v < lo ? lo : v > hi ? hi : v; }
+
+  function reclamp(data, rect){
+    data.forEach(function(o){
+      var hw = Math.max(52, (o.el.offsetWidth || 104) / 2);
+      var hh = Math.max(28, (o.el.offsetHeight || 56) / 2);
+      o.x = clamp(o.x, hw + 8, rect.width  - hw - 8);
+      o.y = clamp(o.y, hh + 8, rect.height - hh - 8);
+    });
+  }
+
+  function separateOrbs(data, rect){
+    for(var iter = 0; iter < 5; iter++){
+      for(var i = 0; i < data.length; i++){
+        for(var j = i + 1; j < data.length; j++){
+          var a = data[i], b = data[j];
+          var minX = (Math.max(100, a.el.offsetWidth || 104) + Math.max(100, b.el.offsetWidth || 104)) / 2 + 10;
+          var minY = (Math.max(52,  a.el.offsetHeight|| 56)  + Math.max(52,  b.el.offsetHeight|| 56))  / 2 + 10;
+          var dx = b.x - a.x, dy = b.y - a.y;
+          var ox = minX - Math.abs(dx), oy = minY - Math.abs(dy);
+          if(ox > 0 && oy > 0){
+            var half, sign;
+            if(ox <= oy){
+              half = ox / 2 + 1; sign = dx >= 0 ? 1 : -1;
+              a.x -= sign * half; b.x += sign * half;
+            } else {
+              half = oy / 2 + 1; sign = dy >= 0 ? 1 : -1;
+              a.y -= sign * half; b.y += sign * half;
+            }
+          }
+        }
+      }
+      reclamp(data, rect);
+    }
+    data.forEach(function(o){
+      o.el.style.left = o.x + 'px';
+      o.el.style.top  = o.y + 'px';
+    });
+  }
+
+  function installOrbFix(){
+    if(!window.positionOrbs || window.positionOrbs.__vFix6) return;
+    var prior = window.positionOrbs;
+    window.positionOrbs = positionOrbs = function(p){
+      if(!isMob() || !orbData || !orbData.length) return prior.apply(this, arguments);
+      var arena = document.getElementById('orbArena'); if(!arena) return prior.apply(this, arguments);
+      var rect = arena.getBoundingClientRect(); if(!rect.width || !rect.height) return prior.apply(this, arguments);
+
+      var cx  = rect.width  / 2;
+      var cy  = rect.height / 2;
+      var oW  = Math.max(100, (orbData[0] && orbData[0].el.offsetWidth)  || 108);
+      var minR = Math.max(68, oW * 0.62);
+      var maxR = Math.min((rect.width - oW - 16) / 2, (rect.height - oW * 0.55) / 2, 130);
+      if(maxR < minR + 12) maxR = minR + 12;
+
+      var r = minR + p * (maxR - minR);
+      orbData.forEach(function(o, i){
+        var wob = Math.sin(Date.now() / 650 + i) * 5;
+        o.x = cx + (r + wob) * Math.cos(o.ang);
+        o.y = cy + (r + wob) * Math.sin(o.ang);
+        o.el.style.transform = 'translate(-50%,-50%) scale(' + (1 + p * 0.05) + ')';
+      });
+      reclamp(orbData, rect);
+      separateOrbs(orbData, rect);
+    };
+    window.positionOrbs.__vFix6        = true;
+    window.positionOrbs.__mobileShell371 = true;
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      [500, 1500].forEach(function(ms){ setTimeout(installOrbFix, ms); });
+    });
+  } else {
+    [500, 1500].forEach(function(ms){ setTimeout(installOrbFix, ms); });
+  }
+  document.addEventListener('click', function(e){
+    if(e.target.closest('#startDomain,#shadowStart351')){
+      setTimeout(installOrbFix, 300); setTimeout(installOrbFix, 900);
+    }
+  }, true);
+})();
+</script>
+<script id="vFix7-session-js">
+/* vFix7: Session tracking + missed-cards summary in end modal */
+(function(){
+  'use strict';
+  var SESS = '__cozySession529';
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function startSession(){ window[SESS] = { start: Date.now() }; }
+
+  function getProgress(id){
+    try{
+      var p = window.phase3State && window.phase3State.progress && window.phase3State.progress[id];
+      if(!p && window.state) p = window.state[id];
+      return p || null;
+    }catch(e){ return null; }
+  }
+
+  function getMissedCards(){
+    var sess = window[SESS]; if(!sess || !sess.start) return [];
+    var startMs = sess.start;
+    var cards = window.appCards ? window.appCards() : [];
+    var missed = [];
+    cards.forEach(function(c){
+      var id = c.id || c.qid || c.card_id;
+      var p = getProgress(id); if(!p) return;
+      var raw = p.last || p.last_seen_at;
+      if(!raw) return;
+      if(new Date(raw).getTime() < startMs) return;
+      var r = p.rating || p.last_rating;
+      if(r === 'again') missed.push(c);
+    });
+    return missed;
+  }
+
+  function injectSessionSummary(){
+    var missed = getMissedCards();
+    var box = document.getElementById('endBox') || document.querySelector('.endBox');
+    if(!box) return;
+    var old = document.getElementById('cozyMissedSummary529'); if(old) old.remove();
+    if(!missed.length) return;
+    var shown = missed.slice(0, 6);
+    var extra = missed.length - shown.length;
+    var div = document.createElement('div');
+    div.id = 'cozyMissedSummary529';
+    div.innerHTML =
+      '<div class="cozy-missed-header">Missed this session (' + missed.length + ')</div>' +
+      shown.map(function(c){
+        var sys = c.system || c.sys || '';
+        return '<div class="cozy-missed-item"><b>' + esc(c.diagnosis || '?') + '</b>' +
+               (sys ? '<span>' + esc(sys) + '</span>' : '') + '</div>';
+      }).join('') +
+      (extra > 0 ? '<div style="text-align:center;color:rgba(255,150,160,.45);font-size:11px;margin-top:5px">+ ' + extra + ' more — see Review screen</div>' : '');
+    box.appendChild(div);
+  }
+
+  /* Track session start on any game-start click */
+  document.addEventListener('click', function(e){
+    if(e.target.closest('#startSolo,#startDomain,#shadowStart351,#cozyQuickStudy529')) startSession();
+  }, true);
+
+  /* Wrap endRun to inject summary */
+  setTimeout(function(){
+    if(window.endRun && window.endRun.__vFix7) return;
+    var _old = window.endRun;
+    if(typeof _old !== 'function') return;
+    window.endRun = endRun = function(t){
+      if(_old) _old.apply(this, arguments);
+      try{ injectSessionSummary(); }catch(e){}
+    };
+    window.endRun.__vFix7 = true;
+  }, 900);
+})();
+</script>
 </body></html>
