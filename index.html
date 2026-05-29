@@ -16262,4 +16262,95 @@ setTimeout(scan,800);
   };
 })();
 </script>
+<style id="vFix14-css">
+/* vFix14: Explanation <details> in reveal panel */
+#cozyExplanation529 {
+  margin: 10px 0 12px;
+  border: 1px solid rgba(160,160,210,.18);
+  border-radius: 12px;
+  overflow: hidden;
+}
+#cozyExplanation529 summary.ce-summary {
+  padding: 9px 14px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #9aa0b8;
+  cursor: pointer;
+  background: rgba(255,255,255,.04);
+  list-style: none;
+}
+#cozyExplanation529 summary.ce-summary::-webkit-details-marker { display: none; }
+#cozyExplanation529[open] summary.ce-summary { color: #c8d0e7; border-bottom: 1px solid rgba(160,160,210,.14); }
+#cozyExplanation529 .ce-text {
+  padding: 10px 14px 12px;
+  font-size: clamp(12px, 3.2vw, 14px);
+  line-height: 1.52;
+  color: #d0d8f0;
+  white-space: pre-wrap;
+}
+</style>
+<script id="vFix14-explain-js">
+/* vFix14: Show explanation in reveal panel — auto-opens on wrong answers */
+(function(){
+  'use strict';
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function injectExplanation(revealEl){
+    var c = window.current;
+    var explanation = c && String(c.explanation || '').trim();
+    /* Remove previous */
+    var old = document.getElementById('cozyExplanation529');
+    if(old) old.remove();
+    if(!explanation) return;
+    /* Detect wrong answer by reveal title */
+    var titleEl = revealEl.querySelector('[id$="RevealTitle"]');
+    var isWrong = titleEl && /learning|wrong|incorrect/i.test(titleEl.textContent);
+    /* Build <details> element */
+    var det = document.createElement('details');
+    det.id = 'cozyExplanation529';
+    if(isWrong) det.open = true; /* auto-expand on wrong */
+    det.innerHTML = '<summary class="ce-summary">📖 Explanation</summary>' +
+                    '<div class="ce-text">' + esc(explanation) + '</div>';
+    /* Insert after #cozyPearl529, or before ratings if no pearl */
+    var pearlEl = document.getElementById('cozyPearl529');
+    var ratingsEl = revealEl.querySelector('[id$="RevealRatings"],[id*="Ratings"]');
+    if(!ratingsEl) return;
+    var anchor = (pearlEl && pearlEl.parentNode === ratingsEl.parentNode)
+                 ? pearlEl.nextSibling
+                 : ratingsEl;
+    ratingsEl.parentNode.insertBefore(det, anchor);
+  }
+
+  function watchReveal14(id){
+    var el = document.getElementById(id);
+    if(!el || el.dataset.v14obs) return;
+    el.dataset.v14obs = '1';
+    var obs = new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.type === 'attributes' && m.attributeName === 'class'){
+          if(!el.classList.contains('hidden')){
+            /* 150ms gives vFix11 pearl (80ms) time to run first */
+            setTimeout(function(){ try{ injectExplanation(el); }catch(e){} }, 150);
+          }
+        }
+      });
+    });
+    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function init14(){
+    watchReveal14('soloReveal');
+    watchReveal14('domainReveal');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init14);
+  } else {
+    init14();
+  }
+})();
+</script>
 </body></html>
