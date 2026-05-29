@@ -17277,6 +17277,160 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix33: Keyword card search — filter all cards by text, launch drill -->
+<style id="vFix33-css">
+#cozySearch529 {
+  display: none;
+  max-width: 360px;
+  margin: 8px auto 0;
+  box-sizing: border-box;
+}
+#cozySearch529.visible { display: block; }
+.v33-input {
+  width: 100%;
+  padding: 9px 12px 9px 32px;
+  background: rgba(15,23,42,0.75);
+  border: 1px solid rgba(99,102,241,0.28);
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+.v33-input:focus { border-color: rgba(99,102,241,0.65); }
+.v33-result {
+  display: none;
+  margin-top: 5px;
+  text-align: center;
+  padding: 2px 0;
+}
+.v33-result.visible { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.v33-launch {
+  padding: 5px 14px;
+  background: rgba(99,102,241,0.2);
+  border: 1px solid rgba(99,102,241,0.42);
+  border-radius: 8px;
+  color: #a5b4fc;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.v33-launch:hover { background: rgba(99,102,241,0.34); }
+.v33-count { font-size: 12px; color: rgba(148,163,184,0.7); }
+.v33-none  { font-size: 12px; color: rgba(148,163,184,0.5); padding: 4px 0; text-align: center; }
+</style>
+<script id="vFix33-search-js">(function(){
+  'use strict';
+  if(window.__vFix33Search) return;
+  window.__vFix33Search = true;
+
+  var debTimer = null;
+  var lastIds  = [];
+
+  function cardText(c){
+    return [
+      c.prompt||c.presentation||c.front||c.clinical_vignette_summary||c.question||'',
+      c.answer||c.correct_answer||'',
+      c.system||c.sys||'',
+      Array.isArray(c.tags) ? c.tags.join(' ') : (c.tags||''),
+      c.one_thing||''
+    ].join(' ').toLowerCase();
+  }
+
+  function searchCards(q){
+    var cards = window.appCards ? window.appCards() : [];
+    return cards.filter(function(c){ return cardText(c).indexOf(q) !== -1; });
+  }
+
+  function getId(c){
+    return window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
+  }
+
+  function onInput(input, resultDiv){
+    var q = input.value.trim().toLowerCase();
+    resultDiv.innerHTML = '';
+    resultDiv.classList.remove('visible');
+    lastIds = [];
+    if(!q){ return; }
+    var matches = searchCards(q);
+    lastIds = matches.map(getId).filter(Boolean);
+    if(!lastIds.length){
+      resultDiv.innerHTML = '<span class="v33-none">No cards match</span>';
+      resultDiv.classList.add('visible');
+      return;
+    }
+    var countSpan = document.createElement('span');
+    countSpan.className = 'v33-count';
+    countSpan.textContent = lastIds.length + ' match' + (lastIds.length===1?'':'es');
+    var btn = document.createElement('button');
+    btn.className = 'v33-launch';
+    btn.textContent = '▶ Study ' + lastIds.length;
+    btn.addEventListener('click', function(){
+      if(!lastIds.length) return;
+      window.__cozyDrillSet529 = new Set(lastIds);
+      var s = document.getElementById('startSolo');
+      if(s) s.click();
+    });
+    resultDiv.appendChild(countSpan);
+    resultDiv.appendChild(btn);
+    resultDiv.classList.add('visible');
+  }
+
+  function injectSearch(){
+    if(document.getElementById('cozySearch529')) return;
+    var anchor = document.getElementById('cozyCramBtn529');
+    if(!anchor) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'cozySearch529';
+    var input = document.createElement('input');
+    input.type = 'search';
+    input.className = 'v33-input';
+    input.placeholder = 'Search cards… topic, keyword, system';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    var resultDiv = document.createElement('div');
+    resultDiv.className = 'v33-result';
+    input.addEventListener('input', function(){
+      clearTimeout(debTimer);
+      debTimer = setTimeout(function(){ onInput(input, resultDiv); }, 280);
+    });
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && lastIds.length){
+        window.__cozyDrillSet529 = new Set(lastIds);
+        var s = document.getElementById('startSolo');
+        if(s) s.click();
+      }
+    });
+    wrap.appendChild(input);
+    wrap.appendChild(resultDiv);
+    anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
+    var cards = window.appCards ? window.appCards() : [];
+    if(cards.length) wrap.classList.add('visible');
+  }
+
+  /* Show once cards are available */
+  var _prevKpis33 = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis33) _prevKpis33.apply(this, arguments);
+    var wrap = document.getElementById('cozySearch529');
+    if(wrap){
+      var cards = window.appCards ? window.appCards() : [];
+      if(cards.length) wrap.classList.add('visible');
+    }
+  };
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', injectSearch);
+  } else {
+    setTimeout(injectSearch, 450);
+  }
+})();
+</script>
+
 <!-- vFix32: Per-system Cram pill on Board Readiness Map rows -->
 <style id="vFix32-css">
 .v32-cram {
