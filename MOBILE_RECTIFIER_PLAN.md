@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix30 shipped*
+*Last updated: 2026-05-29 — vFix31 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -47,6 +47,7 @@
 | vFix28 | **7-day study heatmap** — row of colored squares below daily goal bar; green=goal met, cyan=half, amber=started, gray=zero; today has cyan outline; card count below each day; updates with KPI refresh | ✅ | 90bbfe3 |
 | vFix29 | **In-session elapsed timer** — ⏱ M:SS fixed bottom-left; MutationObserver on #solo/#domain class removes hidden; starts fresh each game entry, hides on home | ✅ | b8faba7 |
 | vFix30 | **Keyboard shortcuts in reveal** — 1=Again 2=Hard 3=Good 4=Easy; capture-phase keydown fires before question-phase handler; stopImmediatePropagation prevents conflict; hint row visible on pointer-fine devices only | ✅ | b16b4bf |
+| vFix31 | **Cram Mode** — purple "📚 Cram All (N)" home button; populates __cozyDrillSet529 with all card IDs; bypasses FSRS schedule; vFix13 size limit still applies; clears on home() | ✅ | 8ecf515 |
 
 ## Remaining Items
 
