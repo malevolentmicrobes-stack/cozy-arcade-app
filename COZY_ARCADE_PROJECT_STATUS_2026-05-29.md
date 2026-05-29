@@ -50,6 +50,7 @@
 | Reveal: swipe-to-rate gesture | ✅ Added (vFix27 — left/right swipe rates card; scroll unaffected; flash + haptic) |
 | Home: 7-day study heatmap | ✅ Added (vFix28 — colored squares below daily goal bar; green/cyan/amber/gray scale) |
 | Game: In-session elapsed timer | ✅ Added (vFix29 — ⏱ M:SS fixed bottom-left; starts on game entry; stops on home) |
+| Reveal: Keyboard shortcuts (1-4 to rate) | ✅ Added (vFix30 — 1=Again 2=Hard 3=Good 4=Easy; capture-phase guard; hint row on desktop) |
 | Home: 🎯 Daily Goal celebration | ✅ Added (vFix26 — confetti sparks + toast on first goal completion each day) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
