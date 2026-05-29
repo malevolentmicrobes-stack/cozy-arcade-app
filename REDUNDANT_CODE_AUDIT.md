@@ -149,10 +149,12 @@
 |----|----------|--------|
 | R01 `p.reps` | vFix8 (runtime fix — wrapped, not deleted) | 3b6edbc |
 | R04 `cursorGlow` CSS hide on touch | `@media (hover: none)` — existing patch | pre-session |
-| R05 `bgMove` on mobile | vFix26 (CSS disable on mobile) | pending |
-| orbArena specificity battle | vFix23 (`#orbArena` ID selector) | c2570df |
+| R05 `bgMove` on mobile | vFix26 (CSS `animation:none` on `.game::before` at 760px) | d7d9994 |
+| orbArena specificity battle | vFix23 (`#orbArena` ID selector beats all class rules) | c2570df |
+| Mobile rating UX gap | vFix27 (swipe-to-rate + haptic feedback in reveal panels) | 3790ea7 |
 
 ---
 
+*Last updated: 2026-05-29 — vFix27 shipped*  
 *This audit is for Phase 2 planning. All items above are NON-BLOCKING for ABIM August 2026.*  
 *Phase 2 = post-boards Capacitor scaffold + clean CSS architecture.*
