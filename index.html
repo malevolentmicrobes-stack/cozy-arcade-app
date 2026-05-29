@@ -15329,4 +15329,258 @@ setTimeout(scan,800);
   }, 900);
 })();
 </script>
+<style id="vFix8-css">
+/* vFix8: Mastery stats panel + weak-system chips */
+#cozyMasteryStats529 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 16px;
+  border: 1px solid rgba(103,232,249,.13);
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+}
+.cms-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 56px;
+}
+.cms-stat-n {
+  font-family: Orbitron, monospace;
+  font-weight: 950;
+  font-size: 18px;
+  line-height: 1;
+}
+.cms-stat-l {
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #9aa0b8;
+  margin-top: 3px;
+}
+.cms-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(255,255,255,.09);
+  flex-shrink: 0;
+}
+#cozyWeakSystems529 {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.cws-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(251,88,118,.22);
+  background: rgba(251,88,118,.06);
+  font-size: 12px;
+  font-weight: 950;
+  color: #ffd0d8;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.cws-chip:hover { border-color: rgba(251,88,118,.50); }
+.cws-chip .cws-pct {
+  font-family: Orbitron, monospace;
+  font-size: 11px;
+  color: #fb5876;
+  font-weight: 950;
+}
+.cws-label {
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,160,170,.6);
+  margin-bottom: 4px;
+}
+</style>
+<script id="vFix8-stats-js">
+/* vFix8: Fix vFix5 p.reps bug + home mastery stats + weak-system chips */
+(function(){
+  'use strict';
+
+  /* ── helpers ── */
+  function isSeen(p){ return !!(p && (Number(p.seen_count||0)>0 || Number(p.reviewed_count||0)>0 || p.seen)); }
+  function isDueNow(p){
+    if(!p || !isSeen(p)) return false;
+    var d = p.due || p.next_due_at;
+    if(!d) return (Number(p.seen_count||0)>0 || Number(p.reviewed_count||0)>0);
+    return new Date(d) <= new Date();
+  }
+
+  /* ── FSRS accurate counts (fixes vFix5 p.reps bug) ── */
+  function getFSRSCounts(){
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    if(!prog || !cards.length) return null;
+    var dueN = 0, newN = 0;
+    cards.forEach(function(c){
+      var id = c.id || c.qid || c.card_id;
+      var p = prog[id];
+      if(!isSeen(p)){ newN++; }
+      else if(isDueNow(p)){ dueN++; }
+    });
+    return { dueN: dueN, newN: newN };
+  }
+
+  /* ── mastery stats ── */
+  function getMasteryStats(){
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    if(!prog || !cards.length) return null;
+    var mastered = 0, learning = 0, newN = 0;
+    var totalCorrect = 0, totalReviewed = 0;
+    cards.forEach(function(c){
+      var id = c.id || c.qid || c.card_id;
+      var p = prog[id];
+      if(!isSeen(p)){ newN++; return; }
+      var ivl = Number(p.interval_days || 0);
+      if(ivl >= 21) mastered++;
+      else learning++;
+      totalCorrect  += Number(p.correct_count  || p.correct  || 0);
+      totalReviewed += Number(p.reviewed_count || p.reviewed || p.seen_count || 1);
+    });
+    var ret = totalReviewed > 0 ? Math.round(totalCorrect / totalReviewed * 100) : null;
+    return { mastered: mastered, learning: learning, newN: newN, ret: ret };
+  }
+
+  /* ── study streak ── */
+  function getStreak(){
+    try{
+      var prog = window.phase3State && window.phase3State.progress;
+      if(!prog) return 0;
+      var today = new Date().toISOString().slice(0, 10);
+      var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      var studiedToday = Object.keys(prog).some(function(id){
+        var p = prog[id];
+        var last = (p.last_seen_at || p.last || '').slice(0, 10);
+        return last === today;
+      });
+      var stored = JSON.parse(localStorage.getItem('cozy_streak_v529') || '{"last":"","count":0}');
+      if(studiedToday){
+        if(stored.last === today) return stored.count;
+        var n = stored.last === yesterday ? stored.count + 1 : 1;
+        localStorage.setItem('cozy_streak_v529', JSON.stringify({last: today, count: n}));
+        return n;
+      }
+      if(stored.last === today || stored.last === yesterday) return stored.count;
+      return 0;
+    }catch(e){ return 0; }
+  }
+
+  /* ── weak systems ── */
+  function getWeakSystems(){
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    if(!prog || !cards.length) return [];
+    var map = {};
+    cards.forEach(function(c){
+      var id = c.id || c.qid || c.card_id;
+      var sys = c.system || c.sys || ''; if(!sys) return;
+      var p = prog[id]; if(!isSeen(p)) return;
+      if(!map[sys]) map[sys] = { c: 0, t: 0 };
+      map[sys].c += Number(p.correct_count || p.correct || 0);
+      map[sys].t += Number(p.reviewed_count || p.reviewed || p.seen_count || 1);
+    });
+    return Object.keys(map)
+      .filter(function(s){ return map[s].t >= 5; })
+      .map(function(s){ return { sys: s, pct: Math.round(map[s].c / map[s].t * 100) }; })
+      .sort(function(a, b){ return a.pct - b.pct; })
+      .slice(0, 3);
+  }
+
+  /* ── DOM rendering ── */
+  function renderStats(){
+    var home = document.getElementById('home'); if(!home) return;
+    var kpis = home.querySelector('.kpis'); if(!kpis) return;
+
+    /* Mastery panel */
+    var panel = document.getElementById('cozyMasteryStats529');
+    if(!panel){
+      panel = document.createElement('div');
+      panel.id = 'cozyMasteryStats529';
+      kpis.parentNode.insertBefore(panel, kpis.nextSibling);
+    }
+    var ms = getMasteryStats();
+    var streak = getStreak();
+    if(!ms){ panel.style.display = 'none'; return; }
+    panel.style.display = 'flex';
+    var retStr = ms.ret !== null ? ms.ret + '%' : '—';
+    panel.innerHTML =
+      stat(ms.mastered, 'Mastered', '#22c55e') +
+      div() +
+      stat(ms.learning,  'In Review', '#67e8f9') +
+      div() +
+      stat(ms.newN,      'Unseen',    '#9aa0b8') +
+      div() +
+      stat(retStr,       'Retention', ms.ret >= 70 ? '#22c55e' : ms.ret >= 50 ? '#f5c97a' : '#fb5876') +
+      (streak > 1 ? div() + stat('🔥 ' + streak, 'Day Streak', '#f5c97a') : '');
+
+    /* Weak systems chips */
+    var weakDiv = document.getElementById('cozyWeakSystems529');
+    if(!weakDiv){
+      weakDiv = document.createElement('div');
+      weakDiv.id = 'cozyWeakSystems529';
+      panel.parentNode.insertBefore(weakDiv, panel.nextSibling);
+    }
+    var weak = getWeakSystems();
+    if(!weak.length){ weakDiv.style.display = 'none'; return; }
+    weakDiv.style.display = 'flex';
+    weakDiv.innerHTML = '<div class="cws-label">Focus areas</div>' +
+      weak.map(function(w){
+        return '<button class="cws-chip" onclick="(function(){try{window.showAtlasScreen&&window.showAtlasScreen();}catch(e){}})()" title="Open Atlas → ' + w.sys + '">' +
+               '<span>' + w.sys + '</span><span class="cws-pct">' + w.pct + '%</span></button>';
+      }).join('');
+    /* Override chip onclick to pre-select the system in Atlas */
+    [].forEach.call(weakDiv.querySelectorAll('.cws-chip'), function(btn, i){
+      var sys = weak[i] && weak[i].sys;
+      btn.onclick = function(){
+        try{
+          window.naSelectedSys = sys;
+          window.showAtlasScreen && window.showAtlasScreen();
+        }catch(e){}
+      };
+    });
+  }
+
+  function stat(val, label, color){
+    return '<div class="cms-stat"><span class="cms-stat-n" style="color:' + color + '">' + val + '</span><span class="cms-stat-l">' + label + '</span></div>';
+  }
+  function div(){ return '<div class="cms-divider"></div>'; }
+
+  /* ── Re-override updateKpis to fix p.reps bug ── */
+  var _prevKpis = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis) _prevKpis.apply(this, arguments);
+    /* Correct the due/new counts (vFix5 used p.reps which is never set) */
+    var counts = getFSRSCounts();
+    if(counts){
+      var dEl = document.getElementById('dueCount');
+      var nEl = document.getElementById('newCount');
+      if(dEl) dEl.textContent = counts.dueN;
+      if(nEl) nEl.textContent = counts.newN;
+      /* Fix quick-study button label */
+      var qBtn = document.getElementById('cozyQuickStudy529');
+      if(qBtn){
+        var total = counts.dueN + counts.newN;
+        qBtn.style.display = total > 0 ? 'flex' : 'none';
+        var label = counts.dueN > 0 ? (counts.dueN + ' due') : (counts.newN + ' new');
+        qBtn.innerHTML = '<span>⚔️ Study Now</span><span class="cqs-count">' + label + '</span>';
+      }
+    }
+    renderStats();
+  };
+
+  setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 1100);
+  setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 2800);
+})();
+</script>
 </body></html>
