@@ -14024,4 +14024,198 @@ setTimeout(scan,800);
   .orb{min-width:66px!important;max-width:110px!important;min-height:38px!important;}
 }
 </style>
+
+<!-- vC3C5: KE font consistency + home KPI 2-col + compact mobile upload buttons -->
+<style id="vC3C5-mobile-proportions-css">
+/* C3: prompt text on smallest phones */
+@media(max-width:480px){
+  .promptText{font-size:clamp(14px,4.5vw,19px)!important;}
+}
+/* C5: KPI 2-column grid on mobile */
+@media(max-width:820px){
+  #home .kpis{grid-template-columns:repeat(2,1fr)!important;gap:8px!important;}
+}
+/* C5: compact Upload/Download row — prevent full-width stacking */
+@media(max-width:820px){
+  #limitlessHomeImport{flex-wrap:nowrap!important;gap:6px!important;margin-top:12px!important;}
+  #limitlessHomeImport label.btn,
+  #limitlessHomeImport button.btn{
+    flex:1 1 0!important;min-width:0!important;
+    min-height:46px!important;font-size:15px!important;
+    padding:10px 8px!important;
+  }
+}
+</style>
+
+<!-- vC6: "Import a deck first" overlay with ✕ dismiss + upload shortcut -->
+<style id="vC6-import-overlay-css">
+#importNeededOverlay351{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.72);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+#importNeededOverlay351.visible{display:flex!important;}
+.importOverlayBox351{
+  position:relative;
+  background:#040d1c;
+  border:1px solid rgba(103,232,249,.38);
+  border-radius:24px;
+  padding:36px 32px 32px;
+  max-width:360px;width:100%;
+  text-align:center;
+  box-shadow:0 0 60px rgba(103,232,249,.10),0 24px 64px rgba(0,0,0,.55);
+}
+.importOverlayClose351{
+  position:absolute;top:14px;right:16px;
+  background:none;border:none;
+  color:rgba(255,255,255,.4);font-size:20px;
+  cursor:pointer;line-height:1;padding:4px 6px;
+  transition:color .15s;
+}
+.importOverlayClose351:hover{color:rgba(255,255,255,.85);}
+.importOverlayLabel351{
+  font-family:Orbitron,monospace;font-size:11px;
+  letter-spacing:.22em;color:#67e8f9;
+  text-transform:uppercase;margin-bottom:16px;
+}
+.importOverlayText351{
+  color:#c8d8f0;font-size:15px;
+  line-height:1.5;margin:0 0 24px;
+}
+.importOverlayUpload351{
+  display:inline-block;
+  background:linear-gradient(135deg,#0ea5e9,#67e8f9);
+  color:#020611;border-radius:999px;
+  padding:13px 30px;font-weight:950;
+  cursor:pointer;font-size:16px;
+  box-shadow:0 0 24px rgba(103,232,249,.22);
+  transition:box-shadow .18s;
+}
+.importOverlayUpload351:hover{box-shadow:0 0 36px rgba(103,232,249,.40);}
+</style>
+<script id="vC6-import-overlay-js">
+(function(){
+  if(window.__vC6ImportOverlay) return;
+  window.__vC6ImportOverlay = true;
+
+  function showImportNeededOverlay(){
+    let ov = document.getElementById('importNeededOverlay351');
+    if(!ov){
+      ov = document.createElement('div');
+      ov.id = 'importNeededOverlay351';
+      ov.innerHTML = '<div class="importOverlayBox351">'
+        +'<button class="importOverlayClose351" aria-label="Close">✕</button>'
+        +'<div class="importOverlayLabel351">No deck loaded</div>'
+        +'<p class="importOverlayText351">Upload a JSON or CSV deck to begin studying.</p>'
+        +'<label for="limitlessHomeDeckFile" class="importOverlayUpload351">Upload Deck</label>'
+        +'</div>';
+      document.body.appendChild(ov);
+      const close = function(){ ov.classList.remove('visible'); };
+      ov.querySelector('.importOverlayClose351').onclick = close;
+      ov.addEventListener('click', function(e){ if(e.target===ov) close(); });
+      var fileInput = document.getElementById('limitlessHomeDeckFile');
+      if(fileInput) fileInput.addEventListener('change', function(){ setTimeout(close, 400); }, false);
+    }
+    ov.classList.add('visible');
+  }
+
+  window.showImportNeededOverlay351 = showImportNeededOverlay;
+
+  var _origToast = window.toast;
+  window.toast = function(msg){
+    if(typeof msg==='string' && /import.*deck/i.test(msg)){
+      try{ showImportNeededOverlay(); }catch(e){}
+      return;
+    }
+    return _origToast && _origToast.apply(this, arguments);
+  };
+
+  var _origToastSafe = window.toastSafe;
+  window.toastSafe = function(msg){
+    if(typeof msg==='string' && (/import.*deck/i.test(msg) || /import.*json.*csv/i.test(msg))){
+      try{ showImportNeededOverlay(); }catch(e){}
+      return;
+    }
+    return _origToastSafe && _origToastSafe.apply(this, arguments);
+  };
+})();
+</script>
+
+<!-- vC7: iOS select flicker guard — prevents observer-triggered option rebuilds while picker is open -->
+<script id="vC7-select-guard-js">
+(function(){
+  if(window.__vC7SelectGuard) return;
+  window.__vC7SelectGuard = true;
+
+  function isSelectFocused(){
+    try{ return document.activeElement && document.activeElement.tagName === 'SELECT'; }catch(e){ return false; }
+  }
+
+  /* Guard refreshHomeFilters — the main option-list rebuilder */
+  function guardFn(fn){
+    return function(){
+      if(isSelectFocused()) return;
+      return fn.apply(this, arguments);
+    };
+  }
+
+  /* Wrap as soon as possible, then retry in case it's not yet defined */
+  function applyGuards(){
+    if(window.refreshHomeFilters && !window.refreshHomeFilters.__selectGuarded){
+      var orig = window.refreshHomeFilters;
+      window.refreshHomeFilters = guardFn(orig);
+      window.refreshHomeFilters.__selectGuarded = true;
+    }
+    /* Guard installHomeActions / installHomeActions351 rebuild */
+    ['installHomeActions','installHomeActions351','ensureHomeActions351'].forEach(function(name){
+      if(window[name] && !window[name].__selectGuarded){
+        var o = window[name];
+        window[name] = guardFn(o);
+        window[name].__selectGuarded = true;
+      }
+    });
+  }
+
+  applyGuards();
+  setTimeout(applyGuards, 200);
+  setTimeout(applyGuards, 800);
+})();
+</script>
+
+<!-- Phase D: Warm/cold aesthetic palette — home + settings screens get amber warmth -->
+<style id="vPhaseD-warm-palette-css">
+/* Home screen: warm near-black with amber radials */
+#home.screen{
+  background:
+    radial-gradient(circle at 38% 18%, rgba(245,201,122,.09), transparent 36%),
+    radial-gradient(circle at 78% 72%, rgba(200,120,40,.07), transparent 38%),
+    linear-gradient(180deg, #0e0a06 0%, #0a0704 58%, #07050a 100%) !important;
+}
+/* Settings screen: warm-neutral (softer amber, feels less cold) */
+#settings.screen{
+  background:
+    radial-gradient(circle at 50% -10%, rgba(245,201,122,.06), transparent 32%),
+    radial-gradient(circle at 18% 22%, rgba(180,90,30,.05), transparent 34%),
+    linear-gradient(180deg, #0c0907 0%, #090807 58%, #05060a 100%) !important;
+}
+/* Review / Spaced Rep screen: same warm-neutral */
+#review.screen{
+  background:
+    radial-gradient(circle at 50% -10%, rgba(245,201,122,.06), transparent 32%),
+    linear-gradient(180deg, #0c0907 0%, #090807 60%, #05060a 100%) !important;
+}
+/* Review screen heading polish */
+#review .box h1{
+  font-family:Orbitron,monospace!important;
+  letter-spacing:.18em!important;
+  color:#f5c97a!important;
+  font-size:clamp(18px,2.2vw,28px)!important;
+  text-transform:uppercase!important;
+  margin-bottom:18px!important;
+}
+/* Game screens stay cold — reinforce vA01 pin */
+#solo.game, #domain.game{
+  background:#020611!important;
+}
+</style>
 </body></html>
