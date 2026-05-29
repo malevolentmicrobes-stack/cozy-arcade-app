@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix41 shipped*
+*Last updated: 2026-05-29 — vFix42b + vFix42c + vFix43a reverted; R17–R20 documented*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -58,6 +58,8 @@
 | vFix39 | **Progress backup reminder** — amber toast once/day on return to home after ≥5 cards studied; one-tap Export calls exportProgress351; auto-dismisses 10s; cozy_backup_v39 guard | ✅ | a0edead |
 | vFix40 | **30-day study calendar** — expandable 7-col week-aligned grid below 7-day heatmap; same gray/amber/cyan/green scale; DOW headers; today cyan outline; lazy render; cozy_cal30_v40 state | ✅ | 1b154bc |
 | vFix41 | **📊 ABIM Board Est. score** — blueprint-weighted mastery tile in mastery panel; ABIM IM category weights (CV=14%, GI/Pulm/Rheum/ID=9%ea, Hem/Endo=8%ea, Nephro/Neuro=6%ea, 8 more); green ≥65% / amber ≥50% / red <50%; normalized by matched coverage; tooltip shows coverage% | ✅ | 5daef88 |
+| vFix42 | **Logo to top** — (a) only: `#home .homeWrap > .hero { order:-1 }` stays ✅; (b) overlay auto-close REVERTED (✕ button sufficient; R17); (c) game HUD settings REVERTED (dead normalizeHud wrapper R18, HUD layout break R19, settingsReturnMode bug R20) | ⚠️ partial | f540bcf |
+| vFix43 | **Bottom redesign** — heatmap+calendar order:8; kpis order:9; 2-col cyan kpis ✅; stuck-after-import fix (vFix43a) REVERTED (importObject already refreshes state; home() at 900ms caused scroll-jump freeze on mobile) | ⚠️ partial | dfd488b |
 
 ## Remaining Items
 

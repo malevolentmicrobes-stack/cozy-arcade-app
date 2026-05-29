@@ -62,6 +62,12 @@
 | Safety: Progress backup reminder | ✅ Added (vFix39 — amber toast after session; one-tap export; once/day guard; auto-dismisses 10s) |
 | Home: 30-day study calendar | ✅ Added (vFix40 — expandable grid below heatmap; week-aligned; same color scale; lazy renders when opened) |
 | Home: 📊 ABIM Board Est. score | ✅ Added (vFix41 — blueprint-weighted mastery tile "Board Est. X%"; CV=14%, GI/Pulm/Rheum/ID=9%ea, Hem/Endo=8%ea, Nephro/Neuro=6%ea; green ≥65%, amber ≥50%, red <50%) |
+| Home: COZY ARCADE logo at very top | ✅ Fixed (vFix42a — order:-1 on .hero beats all prior order:1 injections) |
+| Home: Import overlay auto-closes after upload | ⏸ Reverted (vFix42b removed — ✕ button is correct UX; auto-close caused unnecessary global listener) |
+| Game HUD: ⚙ Settings button | ⏸ Reverted (vFix42c removed — dead normalizeHud wrapper + HUD layout break + settingsReturnMode bug sent user to home; Phase 2 scope) |
+| Import: Game buttons respond after deck upload | ⏸ Reverted (vFix43a removed — importObject() already refreshes state; 900ms home() call caused scroll-jump freeze on mobile) |
+| Home: 7-day heatmap + calendar moved to bottom | ✅ Fixed (vFix43b — order:8, below all other content) |
+| Home: Kpis redesigned — atlas cyan theme, 2-col mobile | ✅ Fixed (vFix43b — order:9, gradient numbers, navy tiles, Orbitron labels) |
 | Home: 🎯 Daily Goal celebration | ✅ Added (vFix26 — confetti sparks + toast on first goal completion each day) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |

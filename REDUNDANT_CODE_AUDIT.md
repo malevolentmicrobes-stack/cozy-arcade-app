@@ -128,6 +128,70 @@
 
 ---
 
+### R13 — Import overlay listener orphaned by `panel.innerHTML` rebuild — WORKAROUND: ✕ button
+**Location:** vC6 line 14117, vFix1 line 14265 — both attach `addEventListener('change')` directly to `#limitlessHomeDeckFile` at script-run time.  
+**Root cause:** Line 8506 later runs `panel.innerHTML = '...'`, creating a new `#limitlessHomeDeckFile` DOM element. The old elements with listeners become detached ghosts — the change event never fires on them.  
+**Effect:** Upload overlay never auto-closes after import; user must manually tap ✕.  
+**vFix42b (REVERTED):** Document-level 'change' delegation was attempted but later removed — the ✕ close button is the intended UX. See R17 for why vFix42b was reverted.
+
+---
+
+### R14 — `ensureSettingsButton()` written but never called
+**Location:** Lines 12601–12621 define `ensureSettingsButton(hud)`. Lines 12634–12688 define `normalizeHud(gameId)` which restructures the HUD but never calls `ensureSettingsButton`.  
+**Root cause:** `#gearBtn` is also explicitly hidden by `body.cozyGameShellActive371 #gearBtn { display:none !important }` (lines 12198–12201), so the floating gear button is inaccessible during gameplay.  
+**Effect:** No settings access during a study session.  
+**vFix42c (REVERTED):** Attempt to add settings button via `window.normalizeHud` wrapper — but the wrapper was dead code (see R18) AND clicking settings without setting `settingsReturnMode` sent user back to home instead of game (see R20). Reverted.
+
+---
+
+### R16 — `wire()` import handler `stopImmediatePropagation` kills vFix1's `home()` call
+**Location:** Line 8524: `event.stopImmediatePropagation()` inside element-level capture handler in `wire()`  
+**Root cause:** `stopImmediatePropagation()` at the element capture phase stops all bubble-phase listeners — including vFix1's `fi.addEventListener('change', fn, false)` which was supposed to call `home()` 800ms after upload.  
+**Effect:** After importing a deck, `home()` was never called → game state machine not reset → game start buttons unresponsive (stuck on "Imported N cards").  
+**vFix43a (REVERTED):** Called `home()` at 900ms via document-level capture. Reverted because `importObject()` (line 8465) already calls `updateKpis()` + `installHomeActions()` — so the post-import state IS refreshed. The actual stuck state was caused by vFix42c side effects (R18/R20), not a missing `home()` call. Calling `home()` at 900ms also caused a visible scroll-jump and re-render freeze on mobile (10-wrapper chain firing on 1249 cards).
+
+---
+
+### R15 — CSS flex `order` — injected elements default `order:0`, appear above logo ✅ FIXED vFix42a
+**Location:** Base CSS sets `.hero { order:1 }`. All vFix20–41 injected elements (daily goal, heatmap, mastery stats, etc.) have no explicit `order` → default `order:0` → render before `.hero`.  
+**Root cause:** Patch-append pattern: each new element just gets `order:0` by default, which sorts before `order:1`.  
+**Effect:** COZY ARCADE logo appears below the daily goal bar, heatmap, and stats on home screen.  
+**Fix (vFix42a):** Single rule `#home .homeWrap > .hero { order:-1 !important }` — logo is always first since no other element will have `order < 0`.
+
+---
+
+### R17 — vFix42b auto-close: unnecessary global 'change' listener (REVERTED)
+**Location:** vFix42b `<script id="vFix42-upload-close">` — attached document-level `change` listener in capture phase  
+**Root cause:** Over-engineering. The import overlay already has a functional ✕ close button. Auto-close is a convenience, not a fix.  
+**Effect:** The listener was harmless but added a permanent document-level capture handler that fired on every `<input>` change in the app.  
+**Reverted:** User confirmed ✕ button is sufficient UX. Removed vFix42b entirely.
+
+---
+
+### R18 — vFix42c `window.normalizeHud` wrapper: dead code (REVERTED)
+**Location:** vFix42c lines 19221–19227 wrapped `window.normalizeHud`  
+**Root cause:** `normalizeHud` is a LOCAL closure variable inside vFix4's IIFE (not exported to `window`). Lines 12776–12777 call the local var directly — `window.normalizeHud` is never set and the wrapper wraps `undefined`. `typeof _origNH === 'function'` is always false → body never runs.  
+**Effect:** The settings-button-inject-on-HUD-rebuild path was silently broken from the start. The MutationObserver fallback ran instead but introduced R20.  
+**Reverted:** Entire vFix42c removed.
+
+---
+
+### R19 — `.hudStats371 { display: none }` on mobile: HUD layout disruption (REVERTED)
+**Location:** vFix42c `<style id="vFix42-hud-css">` — hid `.hudStats371` at ≤760px  
+**Root cause:** `.hudStats371` contains energy/score/streak pills. Hiding it on mobile collapsed the flex row, altering `.hudActions371` positioning and making the home/exit button (`button[data-home]`) unreliable to tap on small screens.  
+**Effect:** HUD layout broke on mobile; tap targets shifted.  
+**Reverted:** Entire vFix42c removed.
+
+---
+
+### R20 — Settings opened from game without `settingsReturnMode` → lands on home (REVERTED)
+**Location:** vFix42c `btn.addEventListener('click', ...)` at line 19210–19216  
+**Root cause:** `returnToPrior()` (line 1280) checks `settingsReturnMode`. If it's `'solo'` or `'domain'`, it returns to the game. Otherwise it calls `home()`. vFix42c's button called `gearBtn.click()` without first setting `settingsReturnMode = 'solo'` or `'domain'`. Every settings visit from game → user lands on home screen instead of back in game.  
+**Effect:** "Break in returning to home" — after opening settings mid-game, pressing ← or close returns to home screen, not the game.  
+**Reverted:** Entire vFix42c removed. Settings button in game HUD is Phase 2 scope — requires proper `settingsReturnMode` integration.
+
+---
+
 ## Phase 2 Action Plan
 
 | Priority | Item | Scope | Risk |
@@ -152,9 +216,17 @@
 | R05 `bgMove` on mobile | vFix26 (CSS `animation:none` on `.game::before` at 760px) | d7d9994 |
 | orbArena specificity battle | vFix23 (`#orbArena` ID selector beats all class rules) | c2570df |
 | Mobile rating UX gap | vFix27 (swipe-to-rate + haptic feedback in reveal panels) | 3790ea7 |
+| `.hero` flex order — injected elements above logo (R15) | vFix42a (`order:-1` on `.hero`) | f540bcf |
+| R13 overlay auto-close | vFix42b REVERTED — ✕ button is sufficient | — |
+| R14 ensureSettingsButton | vFix42c REVERTED — causes R18/R19/R20 regressions | — |
+| R16 stopImmediatePropagation | vFix43a REVERTED — importObject() already refreshes state; home() at 900ms caused scroll-jump freeze | 6d7e70b |
+| R17 vFix42b global listener | Removed with vFix42b | current |
+| R18 dead normalizeHud wrapper | Removed with vFix42c | current |
+| R19 hudStats371 hide disrupts HUD | Removed with vFix42c | current |
+| R20 settingsReturnMode not set | Removed with vFix42c — Phase 2 fix required | current |
 
 ---
 
-*Last updated: 2026-05-29 — vFix41 shipped*  
+*Last updated: 2026-05-29 — vFix42b + vFix42c reverted; R17–R20 added*  
 *This audit is for Phase 2 planning. All items above are NON-BLOCKING for ABIM August 2026.*  
 *Phase 2 = post-boards Capacitor scaffold + clean CSS architecture.*
