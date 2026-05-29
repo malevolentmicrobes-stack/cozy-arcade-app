@@ -17277,6 +17277,122 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix37: Audio feedback on correct/incorrect ratings (opt-in) -->
+<style id="vFix37-css">
+#cozyAudioToggle529 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 360px;
+  margin: 8px auto 0;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  color: rgba(148,163,184,0.55);
+  letter-spacing: 0.03em;
+}
+#cozyAudioToggle529:hover { color: rgba(148,163,184,0.85); }
+#cozyAudioToggle529 .v37-icon { font-size: 14px; }
+</style>
+<script id="vFix37-audio-js">(function(){
+  'use strict';
+  if(window.__vFix37Audio) return;
+  window.__vFix37Audio = true;
+
+  var AUDIO_KEY = 'cozy_audio_v37';
+  var audioCtx  = null;
+  var enabled   = localStorage.getItem(AUDIO_KEY) === '1';
+
+  function getCtx(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+    }
+    return audioCtx;
+  }
+
+  /* Prime AudioContext on first user gesture (browser autoplay policy) */
+  document.addEventListener('click', function prime(){
+    getCtx();
+    document.removeEventListener('click', prime);
+  }, { once: true });
+
+  function playTone(correct){
+    if(!enabled) return;
+    try{
+      var ctx = getCtx();
+      if(!ctx) return;
+      if(ctx.state === 'suspended') ctx.resume();
+      var freqs  = correct ? [440, 660] : [300];
+      var delays = correct ? [0, 0.055] : [0];
+      freqs.forEach(function(freq, i){
+        var osc  = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        var t = ctx.currentTime + delays[i];
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(correct ? 0.07 : 0.05, t + 0.012);
+        gain.gain.linearRampToValueAtTime(0, t + (correct ? 0.06 : 0.09));
+        osc.start(t);
+        osc.stop(t + (correct ? 0.07 : 0.10));
+      });
+    }catch(e){}
+  }
+
+  /* Wrap window.rate */
+  function wrapRate(){
+    var _orig = window.rate;
+    if(!_orig || _orig.__v37) return;
+    window.rate = function(card, rating){
+      try{
+        var r = (typeof card === 'string' ? card : rating || '').toLowerCase();
+        if(r === 'good' || r === 'easy') playTone(true);
+        else if(r === 'again' || r === 'hard') playTone(false);
+      }catch(e){}
+      return _orig.apply(this, arguments);
+    };
+    window.rate.__v37 = true;
+  }
+
+  function updateToggleUI(){
+    var el = document.getElementById('cozyAudioToggle529');
+    if(!el) return;
+    el.querySelector('.v37-icon').textContent = enabled ? '🔔' : '🔕';
+    el.querySelector('.v37-label').textContent = enabled ? 'Sound: On' : 'Sound: Off';
+  }
+
+  function injectToggle(){
+    if(document.getElementById('cozyAudioToggle529')) return;
+    var anchor = document.getElementById('cozySessionPicker529');
+    if(!anchor) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'cozyAudioToggle529';
+    wrap.innerHTML = '<span class="v37-icon">' + (enabled?'🔔':'🔕') + '</span>' +
+                     '<span class="v37-label">' + (enabled?'Sound: On':'Sound: Off') + '</span>';
+    wrap.addEventListener('click', function(){
+      enabled = !enabled;
+      localStorage.setItem(AUDIO_KEY, enabled ? '1' : '0');
+      updateToggleUI();
+      if(enabled) playTone(true); /* preview tone on enable */
+    });
+    anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(wrapRate, 100);
+      setTimeout(injectToggle, 480);
+    });
+  } else {
+    setTimeout(wrapRate, 100);
+    setTimeout(injectToggle, 480);
+  }
+})();
+</script>
+
 <!-- vFix36: Dynamic browser tab title with due count -->
 <script id="vFix36-tabtitle-js">(function(){
   'use strict';
