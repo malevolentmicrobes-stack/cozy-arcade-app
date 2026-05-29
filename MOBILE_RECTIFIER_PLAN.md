@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix38 shipped*
+*Last updated: 2026-05-29 — vFix40 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -55,6 +55,7 @@
 | vFix36 | **Dynamic browser tab title** — "⚔️ N due", "✨ N new", "✅ All caught up", "📚 Studying" states; MutationObserver on #solo/#domain; updates on every updateKpis; zero UI footprint | ✅ | 7b65ad8 |
 | vFix37 | **Audio feedback (opt-in)** — Web Audio API tones, no external files; correct=440→660Hz two-tone, incorrect=300Hz; 🔔/🔕 toggle below session picker; default OFF; cozy_audio_v37 localStorage; wraps window.rate | ✅ | 6a9e4df |
 | vFix38 | **Study Board Pearls** — teal "💎 Study Board Pearls (N)" button; includes c.one_thing (deck) + user_one_thing (vFix21 notes); vFix11 auto-shows pearl on each reveal; inserted after #cozyPinnedBtn529 | ✅ | 96ddb06 |
+| vFix39 | **Progress backup reminder** — amber toast once/day on return to home after ≥5 cards studied; one-tap Export calls exportProgress351; auto-dismisses 10s; cozy_backup_v39 guard | ✅ | a0edead |
 
 ## Remaining Items
 
