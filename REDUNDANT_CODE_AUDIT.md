@@ -155,6 +155,6 @@
 
 ---
 
-*Last updated: 2026-05-29 — vFix34 shipped*  
+*Last updated: 2026-05-29 — vFix35 shipped*  
 *This audit is for Phase 2 planning. All items above are NON-BLOCKING for ABIM August 2026.*  
 *Phase 2 = post-boards Capacitor scaffold + clean CSS architecture.*
