@@ -40,7 +40,8 @@
 | vFix21 | **✏️ Quick Note on Board Pearl** — ✏️ button on pearl fires at 110ms; inline textarea; saves to progress.user_one_thing + saveState(); user note overrides deck pearl text; creates pearl for user-note-only cards | ✅ | 772761f |
 | vFix22 | **ABIM countdown chip in hero** — amber pill below heroSub; "N days · ABIM"; amber >30d, red ≤30d, green post-boards; updates every 60s | ✅ | a74cefc |
 | vFix23 | **KE orb/prompt overlap fix (CSS)** — `#orbArena` ID selector sets `inset:338px 0 0` in mobile media query; caps promptBox to `max-height:25vh`; beats all class-rule overrides permanently | ✅ | c2570df |
-| vFix24 | **📊 Study pacing projection in hero** — chip below countdown: "X unseen · Y/day needed · avg Z/day"; green/amber/red vs. 7-day rolling avg; wraps updateKpis; "✓ All N cards seen" when coverage complete | ✅ | pending |
+| vFix24 | **📊 Study pacing projection in hero** — chip below countdown: "X unseen · Y/day needed · avg Z/day"; green/amber/red vs. 7-day rolling avg; wraps updateKpis; "✓ All N cards seen" when coverage complete | ✅ | f39a656 |
+| vFix25 | **🔁 Drill Weak button on home** — red CTA below Study Now when lapses ≥ 2 cards exist; sets __cozyDrillSet529 → launches Solo; vFix9 drill filter + vFix13 size limit both apply | ✅ | f927f21 |
 
 ## Remaining Items
 
