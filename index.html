@@ -16700,4 +16700,145 @@ setTimeout(scan,800);
   }
 })();
 </script>
+
+<!-- vFix19: 🔁 Flag for later in reveal + Study Flagged button in end modal -->
+<style id="vFix19-css">
+.cflag-btn {
+  background: #0f1e2a;
+  border: 1px solid #1e3a4a;
+  color: #64748b;
+  border-radius: 20px;
+  padding: 6px 16px;
+  min-height: 38px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.cflag-btn.flagged {
+  background: rgba(14,116,144,0.22);
+  border-color: rgba(34,211,238,0.45);
+  color: #22d3ee;
+}
+.cflag-btn:active { transform: scale(0.94); }
+#cozyFlagDrillBtn529 {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(14,116,144,0.22);
+  border: 1px solid rgba(34,211,238,0.35);
+  color: #22d3ee;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+}
+#cozyFlagDrillBtn529:active { opacity: 0.7; }
+</style>
+<script id="vFix19-flag-js">(function(){
+  'use strict';
+  if(window.__vFix19Flag) return;
+  window.__vFix19Flag = true;
+
+  window.__cozyFlagQueue529 = new Set();
+
+  function getCardId(){
+    var c = window.current;
+    return c && (c.id || c.qid || c.card_id) || null;
+  }
+
+  function injectFlagBtn(revealEl){
+    var btnId = 'cozyFlagBtn529_' + revealEl.id;
+    var old = document.getElementById(btnId);
+    if(old) old.remove();
+    var id = getCardId();
+    if(!id) return;
+    var isFlagged = window.__cozyFlagQueue529.has(id);
+    var btn = document.createElement('button');
+    btn.id = btnId;
+    btn.className = 'cflag-btn' + (isFlagged ? ' flagged' : '');
+    btn.textContent = isFlagged ? '🔁 Queued' : '🔁 Later';
+    btn.onclick = function(e){
+      e.stopPropagation();
+      var cid = getCardId();
+      if(!cid) return;
+      if(window.__cozyFlagQueue529.has(cid)){
+        window.__cozyFlagQueue529.delete(cid);
+        btn.className = 'cflag-btn';
+        btn.textContent = '🔁 Later';
+      } else {
+        window.__cozyFlagQueue529.add(cid);
+        btn.className = 'cflag-btn flagged';
+        btn.textContent = '🔁 Queued';
+      }
+    };
+    var controls = revealEl.querySelector('.controls');
+    if(controls) controls.appendChild(btn);
+  }
+
+  function attachObs19(id){
+    var el = document.getElementById(id);
+    if(!el || el.dataset.v19obs) return;
+    el.dataset.v19obs = '1';
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.attributeName === 'class' && !el.classList.contains('hidden')){
+          setTimeout(function(){ injectFlagBtn(el); }, 30);
+        }
+      });
+    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  /* Wrap endRun — outermost in chain (after vFix12) */
+  if(window.endRun && !window.endRun.__vFix19){
+    var _prevEnd19 = window.endRun;
+    window.endRun = endRun = function(t){
+      var r = _prevEnd19.apply(this, arguments);
+      var fq = window.__cozyFlagQueue529;
+      if(!fq || !fq.size) return r;
+      var old = document.getElementById('cozyFlagDrillBtn529');
+      if(old) old.remove();
+      var btn = document.createElement('button');
+      btn.id = 'cozyFlagDrillBtn529';
+      btn.textContent = '🔁 Study Flagged (' + fq.size + ')';
+      btn.onclick = function(){
+        window['__cozyDrillSet529'] = new Set(fq);
+        window.__cozyFlagQueue529 = new Set();
+        document.getElementById('end').classList.add('hidden');
+        setTimeout(function(){ window.startSolo && window.startSolo(); }, 80);
+      };
+      /* Insert after vFix9 drill button, or after endBody */
+      var anchor = document.getElementById('cozyDrillBtn529') ||
+                   document.getElementById('endBody');
+      if(anchor && anchor.parentNode){
+        anchor.parentNode.insertBefore(btn, anchor.nextSibling);
+      }
+      return r;
+    };
+    window.endRun.__vFix19 = true;
+  }
+
+  /* Clear flag queue on fresh game start (not drill launches) */
+  var _prevSS19 = window.startSolo;
+  if(_prevSS19 && !_prevSS19.__vFix19SS){
+    window.startSolo = function(){
+      if(!window['__cozyDrillSet529']) window.__cozyFlagQueue529 = new Set();
+      return _prevSS19.apply(this, arguments);
+    };
+    window.startSolo.__vFix19SS = true;
+  }
+
+  function init19(){
+    attachObs19('soloReveal');
+    attachObs19('domainReveal');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init19);
+  } else {
+    init19();
+  }
+})();
+</script>
 </body></html>
