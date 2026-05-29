@@ -14447,4 +14447,140 @@ setTimeout(scan,800);
   };
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     vA10 — Atlas card detail: Pin / Bury toggle
+     Appended 2026-05-28 · append-only · no inline edits
+     ═══════════════════════════════════════════════════════════════ -->
+<style id="vA10-css">
+.na-action-row351{
+  display:flex;gap:8px;padding:8px 12px 4px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  margin-bottom:6px;flex-wrap:wrap;
+}
+.na-action-btn351{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06);color:#d4d4d8;
+  font-size:12px;font-family:inherit;cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s;
+  white-space:nowrap;
+}
+.na-action-btn351:hover{background:rgba(255,255,255,.12);color:#fff;}
+.na-action-btn351.na-action-active--pin{
+  background:rgba(251,191,36,.18);border-color:rgba(251,191,36,.55);
+  color:#fbbf24;
+}
+.na-action-btn351.na-action-active--bury{
+  background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.45);
+  color:#f87171;
+}
+</style>
+<script id="vA10-pin-bury-js">
+(function(){
+  'use strict';
+
+  /* ── helpers ──────────────────────────────────────────────── */
+  function getCard(id){
+    var p = (window.phase3State&&window.phase3State.progress) ? window.phase3State.progress[id] : null;
+    var a = window.progress ? window.progress[id] : null;
+    return {p3:p, atlas:a};
+  }
+
+  function persistToggle(id, field, val){
+    var c = getCard(id);
+    if(c.p3)    c.p3[field]    = val;
+    if(c.atlas) c.atlas[field] = val;
+    try{ window.saveState && window.saveState(); }catch(e){}
+    try{ window.updateKpis && window.updateKpis(); }catch(e){}
+  }
+
+  /* ── public toggle APIs ───────────────────────────────────── */
+  window.naTogglePin = function(id){
+    var c = getCard(id);
+    var cur = c.p3 ? !!c.p3.pinned : (c.atlas ? !!c.atlas.pinned : false);
+    persistToggle(id, 'pinned', !cur);
+    setTimeout(function(){
+      try{ window.naOpenCardDetail && window.naOpenCardDetail(id); }catch(e){}
+      try{ renderTable && renderTable(); }catch(e){}
+    }, 30);
+  };
+
+  window.naToggleBury = function(id){
+    var c = getCard(id);
+    var curB = c.p3 ? !!c.p3.buried    : (c.atlas ? !!c.atlas.buried    : false);
+    var curS = c.p3 ? !!c.p3.suspended : (c.atlas ? !!c.atlas.suspended : false);
+    var newVal = !(curB || curS);
+    persistToggle(id, 'buried',    newVal);
+    persistToggle(id, 'suspended', newVal);
+    setTimeout(function(){
+      try{ window.naOpenCardDetail && window.naOpenCardDetail(id); }catch(e){}
+      try{ renderTable && renderTable(); }catch(e){}
+    }, 30);
+  };
+
+  /* ── inject action row into card detail ───────────────────── */
+  window.injectCardActions = function(id){
+    var cd = document.getElementById('na-cd-content');
+    if(!cd) return;
+
+    /* remove stale row so it re-renders with fresh state */
+    var old = cd.querySelector('.na-action-row351');
+    if(old) old.remove();
+
+    var c = getCard(id);
+    var pinned = c.p3 ? !!c.p3.pinned : (c.atlas ? !!c.atlas.pinned : false);
+    var buried = c.p3
+      ? !!(c.p3.buried || c.p3.suspended)
+      : (c.atlas ? !!(c.atlas.buried || c.atlas.suspended) : false);
+
+    var row = document.createElement('div');
+    row.className = 'na-action-row351';
+
+    var pinBtn = document.createElement('button');
+    pinBtn.type = 'button';
+    pinBtn.className = 'na-action-btn351' + (pinned ? ' na-action-active--pin' : '');
+    pinBtn.innerHTML = '&#128204; ' + (pinned ? 'Pinned' : 'Pin');
+    pinBtn.onclick = function(e){ e.stopPropagation(); window.naTogglePin(id); };
+
+    var buryBtn = document.createElement('button');
+    buryBtn.type = 'button';
+    buryBtn.className = 'na-action-btn351' + (buried ? ' na-action-active--bury' : '');
+    buryBtn.innerHTML = '&#128683; ' + (buried ? 'Buried' : 'Bury');
+    buryBtn.onclick = function(e){ e.stopPropagation(); window.naToggleBury(id); };
+
+    row.appendChild(pinBtn);
+    row.appendChild(buryBtn);
+    cd.insertBefore(row, cd.firstChild);
+  };
+
+  /* ── extend A9 wrapper with A10 layer ────────────────────── */
+  function patchA10(){
+    var fn = window.naOpenCardDetail;
+    if(fn && !fn.__a10){
+      window.naOpenCardDetail = function(id){
+        var r = fn.apply(this, arguments);
+        setTimeout(function(){ window.injectCardActions && window.injectCardActions(id); }, 80);
+        return r;
+      };
+      window.naOpenCardDetail.__a10 = true;
+      window.naOpenCardDetail.__a9  = true; /* preserve so A9 patcher doesn't re-wrap */
+    }
+  }
+  patchA10();
+  setTimeout(patchA10, 500);
+  setTimeout(patchA10, 1500);
+
+  /* Re-patch whenever Atlas screen opens */
+  var _prevShow = window.showAtlasScreen;
+  if(_prevShow && !_prevShow.__a10show){
+    window.showAtlasScreen = function(){
+      var r = _prevShow.apply(this, arguments);
+      setTimeout(patchA10, 200);
+      return r;
+    };
+    window.showAtlasScreen.__a10show = true;
+  }
+})();
+</script>
 </body></html>
