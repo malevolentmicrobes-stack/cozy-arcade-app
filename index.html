@@ -13686,6 +13686,109 @@ else boot160();
 setTimeout(boot160,900);
 })();
 </script>
+<!-- vC1C2 — HUD simplification + Energy Shift minimal redesign -->
+<style id="vC1C2-hud-energy-css">
+/* ── C2: Suppress verbose energy overlay in ratings row ── */
+.energyGlow352{display:none!important;}
+
+/* ── C2: Minimal energy delta chip — reading font, fades after 1.8s ── */
+.ceChip{
+  position:fixed;top:44px;right:14px;
+  z-index:9500;pointer-events:none;
+  background:rgba(3,8,24,.90);
+  border-radius:999px;
+  padding:4px 12px 4px 9px;
+  font-family:'DM Sans',system-ui,sans-serif;
+  font-size:14px;font-weight:900;
+  letter-spacing:.01em;
+  opacity:0;
+  animation:ceIn .15s ease-out forwards, ceOut .3s ease-in 1.55s forwards;
+}
+.ceChip.gain{border:1px solid rgba(103,232,249,.55);color:#7ff4ff;}
+.ceChip.loss{border:1px solid rgba(251,113,133,.55);color:#fb9aaa;}
+.ceChip.gold{border:1px solid rgba(255,209,102,.55);color:#ffd166;}
+@keyframes ceIn{to{opacity:1;}}
+@keyframes ceOut{to{opacity:0;transform:translateY(-6px);}}
+
+/* ── C2: Suppress verbose "miss" pulse toast — keep milestone ones ── */
+.pulseToast351.suppress352{display:none!important;}
+
+/* ── C1: HUD — tighter on mobile, hide redundant energy pill label ── */
+@media(max-width:760px){
+  .hudPill{padding:5px 9px!important;font-size:11px!important;line-height:1.2!important;}
+  /* Energy Lv pill: abbreviate to just the level number on small screens */
+  .energyHud352{
+    font-size:10px!important;
+    max-width:72px!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  /* Gate/Round pill: compact */
+  #soloGate,#domainRound{font-size:11px!important;}
+}
+</style>
+<script id="vC1C2-hud-energy-js">
+;(function(){
+'use strict';
+if(window.__vC1C2) return;
+window.__vC1C2=true;
+
+/* ── C2: Replace showEnergyGlow with minimal delta chip ── */
+var _origGlow=window.showEnergyGlow;
+window.showEnergyGlow=function(which,kind,amount){
+  var cls=kind==='wrong'?'loss':kind==='reversal'||kind==='bury'?'gold':'gain';
+  var sign=amount>0?'+':'';
+  var label=kind==='bury'?'⚡ buried':'⚡ '+sign+amount+' CE';
+  var chip=document.createElement('div');
+  chip.className='ceChip '+cls;
+  chip.textContent=label;
+  document.body.appendChild(chip);
+  setTimeout(function(){try{chip.remove();}catch(e){}},1950);
+  /* don't call _origGlow — that inserts the now-hidden energyGlow352 box */
+};
+
+/* ── C2: Intercept showPulseToast — suppress verbose "miss" energy popup ── */
+var _origPulse=window.showPulseToast;
+window.showPulseToast=function(title,body,color){
+  var t=String(title||'').toLowerCase().trim();
+  /* Suppress: empty title (→ defaults to "Energy Shift"), explicit energy titles */
+  if(t===''||t==='energy shift'||t==='signal restoration'||t==='energy unstable'){
+    /* Show compact chip instead of verbose toast */
+    var chip=document.createElement('div');
+    chip.className='ceChip '+(color==='red'?'loss':color==='gold'?'gold':'gain');
+    /* Extract any CE number from body if present */
+    var m=String(body||'').match(/[+\-]?\d+ CE/);
+    chip.textContent=m?'⚡ '+m[0]:(color==='red'?'⚡ Review trigger':'⚡ Signal anchored');
+    document.body.appendChild(chip);
+    setTimeout(function(){try{chip.remove();}catch(e){}},1950);
+    return;
+  }
+  /* Pass milestone toasts (5/10/25/50 correct, anchor weak system) through unchanged */
+  if(typeof _origPulse==='function') _origPulse(title,body,color);
+};
+
+/* ── C1: HUD energy pill — shorten label from "Energy Lv 1 · +23 CE" to "Lv1 +23⚡" ── */
+function shortenEnergyPills(){
+  document.querySelectorAll('.energyHud352').forEach(function(el){
+    var t=el.textContent||'';
+    /* "Energy Lv 3 · +47 CE" → "Lv3 +47⚡" */
+    var m=t.match(/Lv\s*(\d+)[^\d]*\+(\d+)/);
+    if(m) el.textContent='Lv'+m[1]+' +'+m[2]+'⚡';
+  });
+}
+/* Run after HUD updates */
+var _origUpdateEnergy=window.updateEnergyHud;
+if(typeof _origUpdateEnergy==='function'){
+  window.updateEnergyHud=function(){
+    _origUpdateEnergy.apply(this,arguments);
+    setTimeout(shortenEnergyPills,0);
+  };
+}
+setTimeout(shortenEnergyPills,1200);
+})();
+</script>
+
 <!-- vC4 — Prompt AI: collapsible <details> dropdown in settings drawer -->
 <style id="vC4-prompt-ai-css">
 /* Reset panel container — visual chrome moves to <details> */
