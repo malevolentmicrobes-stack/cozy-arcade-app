@@ -17277,6 +17277,95 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix29: In-session elapsed timer -->
+<style id="vFix29-css">
+#cozySessionTimer529 {
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  z-index: 55;
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  color: rgba(148,163,184,0.55);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.3s;
+}
+#cozySessionTimer529.hidden { opacity: 0; }
+</style>
+<script id="vFix29-timer-js">(function(){
+  'use strict';
+  if(window.__vFix29Timer) return;
+  window.__vFix29Timer = true;
+
+  var timerEl = null;
+  var startTs = 0;
+  var tickId = null;
+
+  function getOrCreateEl(){
+    if(timerEl) return timerEl;
+    timerEl = document.createElement('div');
+    timerEl.id = 'cozySessionTimer529';
+    timerEl.classList.add('hidden');
+    document.body.appendChild(timerEl);
+    return timerEl;
+  }
+
+  function fmt(ms){
+    var s = Math.floor(ms / 1000);
+    var m = Math.floor(s / 60);
+    s = s % 60;
+    return '⏱ ' + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function tick(){
+    var el = getOrCreateEl();
+    el.textContent = fmt(Date.now() - startTs);
+  }
+
+  function startTimer(){
+    if(tickId) return;
+    startTs = Date.now();
+    var el = getOrCreateEl();
+    el.classList.remove('hidden');
+    tick();
+    tickId = setInterval(tick, 1000);
+  }
+
+  function stopTimer(){
+    if(tickId){ clearInterval(tickId); tickId = null; }
+    var el = getOrCreateEl();
+    el.classList.add('hidden');
+  }
+
+  function watchScreen(id, onShow){
+    var el = document.getElementById(id);
+    if(!el) return;
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.attributeName !== 'class') return;
+        var hidden = el.classList.contains('hidden');
+        if(!hidden && onShow) onShow();
+        else if(hidden) stopTimer();
+      });
+    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function init29(){
+    watchScreen('solo', startTimer);
+    watchScreen('domain', startTimer);
+    watchScreen('home', stopTimer);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init29);
+  } else {
+    setTimeout(init29, 200);
+  }
+})();
+</script>
+
 <!-- vFix28: 7-day study heatmap on home screen -->
 <style id="vFix28-css">
 #cozyHeatmap529 {
