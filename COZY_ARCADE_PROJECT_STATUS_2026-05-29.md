@@ -57,6 +57,7 @@
 | Board Readiness Map: per-system accuracy % | ✅ Added (vFix34 — correct_count/seen_count per system; green/amber/red; tooltip shows raw fraction) |
 | Home: Study Pinned Cards button | ✅ Added (vFix35 — gold button; p.pinned===true cards; hidden when none pinned; also clamps vFix34 accuracy to 100% max) |
 | Browser tab: dynamic due count title | ✅ Added (vFix36 — ⚔️ N due / ✨ N new / ✅ caught up / 📚 Studying; passive ambient reminder) |
+| Reveal: Audio feedback on rating (opt-in) | ✅ Added (vFix37 — Web Audio tones; 🔔/🔕 toggle; default OFF; correct=ascending chime, incorrect=low tone) |
 | Home: 🎯 Daily Goal celebration | ✅ Added (vFix26 — confetti sparks + toast on first goal completion each day) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
