@@ -17277,6 +17277,87 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix36: Dynamic browser tab title with due count -->
+<script id="vFix36-tabtitle-js">(function(){
+  'use strict';
+  if(window.__vFix36TabTitle) return;
+  window.__vFix36TabTitle = true;
+
+  var BASE_TITLE = 'Cozy Arcade';
+  var inGame = false;
+
+  function getDueCount(){
+    var prog = window.phase3State && window.phase3State.progress;
+    if(!prog) return 0;
+    var now = new Date().toISOString();
+    var due = 0;
+    Object.values(prog).forEach(function(p){
+      var seen = Number(p.seen_count||0) > 0 || Number(p.reviewed_count||0) > 0;
+      var dueDate = p.next_due_at || p.due;
+      if(seen && dueDate && dueDate <= now) due++;
+    });
+    return due;
+  }
+
+  function getNewCount(){
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    if(!prog || !cards.length) return 0;
+    return cards.filter(function(c){
+      var id = window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
+      var p = prog[id];
+      return !p || (Number(p.seen_count||0) === 0 && Number(p.reviewed_count||0) === 0);
+    }).length;
+  }
+
+  function updateTitle(){
+    if(inGame){ document.title = '📚 Studying | ' + BASE_TITLE; return; }
+    var due = getDueCount();
+    var newCards = getNewCount();
+    if(due > 0){
+      document.title = '⚔️ ' + due + ' due | ' + BASE_TITLE;
+    } else if(newCards > 0){
+      document.title = '✨ ' + newCards + ' new | ' + BASE_TITLE;
+    } else {
+      document.title = '✅ All caught up | ' + BASE_TITLE;
+    }
+  }
+
+  function watchScreen(id, onShow, onHide){
+    var el = document.getElementById(id);
+    if(!el) return;
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.attributeName !== 'class') return;
+        var hidden = el.classList.contains('hidden');
+        if(!hidden && onShow) onShow();
+        else if(hidden && onHide) onHide();
+      });
+    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  var _prevKpis36 = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis36) _prevKpis36.apply(this, arguments);
+    try{ if(!inGame) updateTitle(); }catch(e){}
+  };
+
+  function init36(){
+    watchScreen('solo',   function(){ inGame=true;  updateTitle(); },
+                          function(){ inGame=false; updateTitle(); });
+    watchScreen('domain', function(){ inGame=true;  updateTitle(); },
+                          function(){ inGame=false; updateTitle(); });
+    updateTitle();
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init36);
+  } else {
+    setTimeout(init36, 250);
+  }
+})();
+</script>
+
 <!-- vFix35: Study Pinned Cards button + vFix34 accuracy clamp -->
 <style id="vFix35-css">
 #cozyPinnedBtn529 {
