@@ -14277,4 +14277,174 @@ setTimeout(scan,800);
   }, false);
 })();
 </script>
+
+<!-- vA9: Atlas → "▶ Study [tag]" / "▶ Study [sys]" — launch filtered solo session directly from card detail -->
+<style id="vA9-review-tag-css">
+/* ▶ Study buttons inside Atlas card detail + sidebar title */
+.na-rtag-btn{
+  background:linear-gradient(135deg,rgba(103,232,249,.12),rgba(14,165,233,.18));
+  border:1px solid rgba(103,232,249,.48);
+  border-radius:999px;
+  color:#7ff4ff;
+  font-size:10px;font-weight:900;
+  padding:4px 11px;
+  cursor:pointer;
+  font-family:inherit;
+  letter-spacing:.04em;
+  transition:background .14s,border-color .14s;
+  white-space:nowrap;
+}
+.na-rtag-btn:hover{
+  background:linear-gradient(135deg,rgba(103,232,249,.26),rgba(14,165,233,.36));
+  border-color:#67e8f9;
+}
+/* Sys button in sidebar title row — sits beside the title text */
+#na-sb-title .na-rsys-btn{
+  font-size:9px;padding:3px 9px;margin-left:8px;
+}
+</style>
+<script id="vA9-review-tag-js">
+(function(){
+  if(window.__vA9ReviewTag) return;
+  window.__vA9ReviewTag = true;
+
+  /* ── Core: set filters on home then launch Solo filtered to tag ── */
+  window.naLaunchTagReview = function(tag){
+    /* Pre-set dataset (filteredCards reads this at game start) */
+    document.documentElement.dataset.cozyLaunchScope = 'tagged';
+    document.documentElement.dataset.cozyLaunchTag   = tag;
+    /* Also set the selects so home UI reflects the choice */
+    try{
+      var bt=document.getElementById('browseTag351');
+      if(bt){
+        var hasOpt=Array.prototype.some.call(bt.options,function(o){return o.value===tag;});
+        if(!hasOpt){var o=document.createElement('option');o.value=tag;o.textContent=tag;bt.appendChild(o);}
+        bt.value=tag;
+      }
+      var bs=document.getElementById('browseScope351');
+      if(bs) bs.value='tagged';
+    }catch(e){}
+    /* Close Atlas → small delay → start Solo (reads dataset filters) */
+    try{ window.hideAtlasScreen&&window.hideAtlasScreen(); }catch(e){}
+    setTimeout(function(){
+      try{ window.startSolo&&window.startSolo(); }catch(e){}
+    }, 340);
+  };
+
+  /* ── Bonus: same but for system node → due-weighted solo ── */
+  window.naLaunchSysReview = function(sys){
+    document.documentElement.dataset.cozyLaunchSystem = sys;
+    document.documentElement.dataset.cozyLaunchScope  = 'due';
+    try{
+      var by=document.getElementById('browseSystem351');
+      if(by){
+        var hasOpt=Array.prototype.some.call(by.options,function(o){return o.value===sys;});
+        if(!hasOpt){var o=document.createElement('option');o.value=sys;o.textContent=sys;by.appendChild(o);}
+        by.value=sys;
+      }
+      var bs=document.getElementById('browseScope351');
+      if(bs) bs.value='due';
+    }catch(e){}
+    try{ window.hideAtlasScreen&&window.hideAtlasScreen(); }catch(e){}
+    setTimeout(function(){
+      try{ window.startSolo&&window.startSolo(); }catch(e){}
+    }, 340);
+  };
+
+  /* ── Inject "▶ Study [tag]" buttons below tag pills in card detail ── */
+  function injectTagButtons(){
+    var cd=document.getElementById('na-cd-content');
+    if(!cd||cd.querySelector('.na-rtag-btn')) return;
+    /* Tag pills are spans with onclick="naClickTag('...')" */
+    var pills=cd.querySelectorAll('[onclick*="naClickTag"]');
+    if(!pills.length) return;
+    var container=pills[0].parentElement;
+    if(!container) return;
+    var wrap=document.createElement('div');
+    wrap.style.cssText='margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;';
+    var seen={};
+    pills.forEach(function(pill){
+      var m=(pill.getAttribute('onclick')||'').match(/naClickTag\('([^']+)'\)/);
+      if(!m||seen[m[1]]) return;
+      seen[m[1]]=1;
+      var tag=m[1];
+      var btn=document.createElement('button');
+      btn.className='na-rtag-btn';btn.type='button';
+      btn.textContent='▶ Study '+tag;
+      btn.onclick=function(e){e.stopPropagation();window.naLaunchTagReview(tag);};
+      wrap.appendChild(btn);
+    });
+    if(wrap.children.length) container.appendChild(wrap);
+  }
+
+  /* ── Wrap window.naOpenCardDetail (already exported at line 13428) ── */
+  function patchOpen(){
+    var fn=window.naOpenCardDetail;
+    if(fn&&!fn.__a9){
+      window.naOpenCardDetail=function(id){
+        var r=fn.apply(this,arguments);
+        setTimeout(injectTagButtons,55);
+        return r;
+      };
+      window.naOpenCardDetail.__a9=true;
+    }
+  }
+  patchOpen();
+  setTimeout(patchOpen,400);
+  setTimeout(patchOpen,1200);
+
+  /* Re-patch when Atlas opens (showAtlasScreen may reassign naOpenCardDetail) */
+  var _oShow=window.showAtlasScreen;
+  if(_oShow){
+    window.showAtlasScreen=function(){
+      var r=_oShow.apply(this,arguments);
+      setTimeout(patchOpen,150);
+      return r;
+    };
+  }
+
+  /* ── Sys study button in sidebar title when a sys node is selected ── */
+  function updateSysStudyBtn(sys){
+    var titleEl=document.getElementById('na-sb-title-text');
+    if(!titleEl) return;
+    var par=titleEl.parentElement;
+    var old=par.querySelector('.na-rsys-btn');
+    if(sys){
+      if(old&&old.dataset.sys===sys) return; /* already correct */
+      if(old) old.remove();
+      var btn=document.createElement('button');
+      btn.className='na-rsys-btn na-rtag-btn';
+      btn.type='button';
+      btn.dataset.sys=sys;
+      btn.textContent='▶ Study '+sys;
+      btn.onclick=function(e){e.stopPropagation();window.naLaunchSysReview(sys);};
+      par.appendChild(btn);
+    } else {
+      if(old) old.remove();
+    }
+  }
+
+  /* Watch sys-list for active-row changes to insert/remove the sys button */
+  function watchSysList(){
+    var list=document.querySelector('#atlas .sys-list, #na-sys-list');
+    if(!list||list.__a9obs) return;
+    list.__a9obs=true;
+    new MutationObserver(function(){
+      var activeRow=list.querySelector('.sys-row.active-row .sys-name');
+      updateSysStudyBtn(activeRow ? activeRow.textContent.trim() : null);
+    }).observe(list,{subtree:true,attributes:true,attributeFilter:['class']});
+  }
+
+  /* Try to attach the observer — Atlas may not be rendered yet */
+  setTimeout(watchSysList,600);
+  setTimeout(watchSysList,2000);
+  var _oS2=window.showAtlasScreen||function(){};
+  window.showAtlasScreen=function(){
+    var r=_oS2.apply(this,arguments);
+    setTimeout(watchSysList,200);
+    setTimeout(patchOpen,150);
+    return r;
+  };
+})();
+</script>
 </body></html>
