@@ -33,6 +33,7 @@
 | vFix14 | **Explanation in reveal** — `<details>` collapsible, auto-opens on wrong answers; 150ms MutationObserver | ✅ | a1cdec7 |
 | vFix15 | **Leech warning badge** — amber/red "Missed N times" below diagnosis when p.lapses ≥ 2 | ✅ | b2f28a5 |
 | vFix16 | **Fix: reveal scroll-to-top** (regression from vFix14 auto-open) + **session card counter** bottom-right overlay ("N cards" or "N/max") | ✅ | 1847316 |
+| vFix17 | **Today: N cards studied** stat tile in mastery panel; outermost updateKpis wrapper; counts last_seen_at/last == today ISO date | ✅ | c54eea7 |
 
 ## Remaining Items
 

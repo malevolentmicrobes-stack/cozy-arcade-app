@@ -37,6 +37,7 @@
 | Reveal: Leech warning badge (Missed N times) | ✅ Added (vFix15 — amber/red badge, p.lapses ≥ 2) |
 | Reveal: Scroll-to-top on each card (bug fix) | ✅ Fixed (vFix16 — vFix14 regression resolved) |
 | In-game: Session card counter overlay | ✅ Added (vFix16 — "N cards" or "N/max" bottom-right) |
+| Home: Today: N cards studied stat | ✅ Added (vFix17 — 6th tile in mastery panel) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |
