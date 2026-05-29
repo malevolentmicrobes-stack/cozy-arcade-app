@@ -17277,6 +17277,75 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix32: Per-system Cram pill on Board Readiness Map rows -->
+<style id="vFix32-css">
+.v32-cram {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(139,92,246,0.18);
+  border: 1px solid rgba(139,92,246,0.38);
+  color: #a78bfa;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 5px;
+  line-height: 1.5;
+  user-select: none;
+}
+.v32-cram:hover { background: rgba(139,92,246,0.32); }
+</style>
+<script id="vFix32-syscram-js">(function(){
+  'use strict';
+  if(window.__vFix32SysCram) return;
+  window.__vFix32SysCram = true;
+
+  function getSysIds(sys){
+    var cards = window.appCards ? window.appCards() : [];
+    return cards
+      .filter(function(c){ return ((c.system||c.sys)||'').trim() === sys; })
+      .map(function(c){
+        return window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
+      })
+      .filter(Boolean);
+  }
+
+  function launchSysCram(sys){
+    var ids = getSysIds(sys);
+    if(!ids.length) return;
+    window.__cozyDrillSet529 = new Set(ids);
+    var btn = document.getElementById('startSolo');
+    if(btn) btn.click();
+  }
+
+  function injectCramPills(){
+    var rows = document.querySelectorAll('#cozySysMap529 .csm-row[data-sys]');
+    rows.forEach(function(row){
+      if(row.querySelector('.v32-cram')) return;
+      var sys = row.dataset.sys;
+      if(!sys) return;
+      var pill = document.createElement('span');
+      pill.className = 'v32-cram';
+      pill.textContent = 'Cram';
+      pill.title = 'Study all ' + sys + ' cards (ignore schedule)';
+      pill.addEventListener('click', function(e){
+        e.stopPropagation();
+        launchSysCram(sys);
+      });
+      row.appendChild(pill);
+    });
+  }
+
+  var _prevKpis32 = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis32) _prevKpis32.apply(this, arguments);
+    try{ injectCramPills(); }catch(e){}
+  };
+
+  setTimeout(injectCramPills, 500);
+})();
+</script>
+
 <!-- vFix31: Cram Mode — study all cards ignoring FSRS schedule -->
 <style id="vFix31-css">
 #cozyCramBtn529 {
