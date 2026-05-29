@@ -15737,4 +15737,219 @@ setTimeout(scan,800);
   }, 1000);
 })();
 </script>
+<style id="vFix10-css">
+/* vFix10: Board Readiness Map panel */
+#cozySysMap529 {
+  margin: 10px 0 0;
+  display: none;
+}
+.csm-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(103,232,249,.14);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #9aa0b8;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .06em;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.csm-toggle:hover { border-color: rgba(103,232,249,.3); color: #c8d0e7; }
+.csm-body {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 7px;
+}
+.csm-body.open { display: flex; }
+.csm-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  padding: 7px 11px;
+  cursor: pointer;
+  transition: border-color .15s;
+  text-align: left;
+}
+.csm-row:hover { border-color: rgba(103,232,249,.28); background: rgba(103,232,249,.04); }
+.csm-name {
+  flex: 1;
+  color: #c8d0e7;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.csm-bar {
+  flex: 2;
+  height: 5px;
+  background: rgba(255,255,255,.08);
+  border-radius: 999px;
+  overflow: hidden;
+  min-width: 48px;
+}
+.csm-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+.csm-pct {
+  color: #9aa0b8;
+  font-size: 10px;
+  font-weight: 950;
+  font-family: Orbitron, monospace;
+  white-space: nowrap;
+  min-width: 34px;
+  text-align: right;
+}
+@media (max-width: 480px) {
+  .csm-toggle { font-size: 11px; padding: 9px 12px; }
+  .csm-name { font-size: 11px; }
+  .csm-pct { font-size: 9px; }
+}
+</style>
+<script id="vFix10-sysmap-js">
+/* vFix10: Board Readiness Map (per-system mastery) + ABIM countdown */
+(function(){
+  'use strict';
+
+  var ABIM_DATE = new Date('2026-08-01T00:00:00');
+
+  function isSeen(p){ return !!(p && (Number(p.seen_count||0)>0 || Number(p.reviewed_count||0)>0 || p.seen)); }
+
+  function getAbimDays(){
+    var now = new Date(); now.setHours(0,0,0,0);
+    return Math.max(0, Math.ceil((ABIM_DATE - now) / 86400000));
+  }
+
+  function barColor(pct){
+    if(pct >= 70) return '#22c55e';
+    if(pct >= 35) return '#f5c97a';
+    return '#fb5876';
+  }
+
+  function escH(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function getSysMastery(){
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    if(!prog || !cards.length) return null;
+    var map = {};
+    cards.forEach(function(c){
+      var id = c.id || c.qid || c.card_id;
+      var sys = ((c.system || c.sys) || '').trim();
+      if(!sys) return;
+      if(!map[sys]) map[sys] = {total:0, mastered:0, seen:0};
+      map[sys].total++;
+      var p = prog[id];
+      if(isSeen(p)){
+        map[sys].seen++;
+        if(Number(p.interval_days||0) >= 21) map[sys].mastered++;
+      }
+    });
+    return Object.keys(map)
+      .filter(function(s){ return map[s].total >= 2; })
+      .map(function(s){
+        var d = map[s];
+        return {sys:s, total:d.total, mastered:d.mastered, seen:d.seen,
+                pct: d.total>0 ? Math.round(d.mastered/d.total*100) : 0};
+      })
+      .sort(function(a,b){ return a.pct - b.pct; });
+  }
+
+  function renderSysMap(){
+    var weakDiv = document.getElementById('cozyWeakSystems529');
+    if(!weakDiv) return;
+
+    var wrapper = document.getElementById('cozySysMap529');
+    if(!wrapper){
+      wrapper = document.createElement('div');
+      wrapper.id = 'cozySysMap529';
+      weakDiv.parentNode.insertBefore(wrapper, weakDiv.nextSibling);
+    }
+
+    var data = getSysMastery();
+    if(!data || !data.length){ wrapper.style.display = 'none'; return; }
+    wrapper.style.display = 'block';
+
+    var expanded = localStorage.getItem('cozy_sysmap_v10') === '1';
+    var totalMastered = data.reduce(function(a,d){ return a+d.mastered; }, 0);
+    var totalCards   = data.reduce(function(a,d){ return a+d.total; }, 0);
+    var overallPct   = totalCards > 0 ? Math.round(totalMastered/totalCards*100) : 0;
+    var abimDays     = getAbimDays();
+    var toggleArrow  = expanded ? '▲' : '▼';
+
+    wrapper.innerHTML =
+      '<button class="csm-toggle" id="csmToggle529">' +
+        '<span>📊 Board Readiness &nbsp;' +
+          '<span style="color:'+barColor(overallPct)+';font-variant-numeric:tabular-nums">'+overallPct+'% mastered</span>' +
+          ' &nbsp;·&nbsp; ' +
+          '<span style="color:#f5c97a">'+abimDays+'d to ABIM</span>' +
+        '</span>' +
+        '<span class="csm-arrow" style="font-size:13px;color:#67e8f9">'+toggleArrow+'</span>' +
+      '</button>' +
+      '<div class="csm-body'+(expanded?' open':'')+'" id="csmBody529">' +
+        data.map(function(d){
+          var col = barColor(d.pct);
+          return '<button class="csm-row" data-sys="'+escH(d.sys)+'">' +
+            '<span class="csm-name" title="'+escH(d.sys)+'">'+escH(d.sys)+'</span>' +
+            '<span class="csm-bar"><span class="csm-bar-fill" style="width:'+d.pct+'%;background:'+col+'"></span></span>' +
+            '<span class="csm-pct" style="color:'+col+'">'+d.pct+'%</span>' +
+          '</button>';
+        }).join('') +
+      '</div>';
+
+    var toggleBtn = document.getElementById('csmToggle529');
+    var body      = document.getElementById('csmBody529');
+
+    if(toggleBtn && body){
+      toggleBtn.onclick = function(e){
+        e.stopPropagation();
+        var isOpen = body.classList.contains('open');
+        body.classList.toggle('open', !isOpen);
+        var arrow = toggleBtn.querySelector('.csm-arrow');
+        if(arrow) arrow.textContent = isOpen ? '▼' : '▲';
+        localStorage.setItem('cozy_sysmap_v10', isOpen ? '0' : '1');
+      };
+    }
+
+    wrapper.querySelectorAll('.csm-row[data-sys]').forEach(function(btn){
+      btn.onclick = function(e){
+        e.stopPropagation();
+        var sys = btn.dataset.sys;
+        if(!sys) return;
+        if(window.naLaunchSysReview){
+          window.naLaunchSysReview(sys);
+        } else {
+          document.documentElement.dataset.cozyLaunchSystem = sys;
+          document.documentElement.dataset.cozyLaunchScope  = 'due';
+          setTimeout(function(){ try{ window.startSolo && window.startSolo(); }catch(e2){} }, 80);
+        }
+      };
+    });
+  }
+
+  /* Chain into updateKpis */
+  var _prevKpis10 = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis10) _prevKpis10.apply(this, arguments);
+    try{ renderSysMap(); }catch(e){}
+  };
+
+  setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 1800);
+  setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 4000);
+})();
+</script>
 </body></html>
