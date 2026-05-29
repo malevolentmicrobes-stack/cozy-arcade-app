@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix35 shipped*
+*Last updated: 2026-05-29 — vFix36 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -52,6 +52,7 @@
 | vFix33 | **Keyword card search** — search input on home filters all cards across question/answer/system/tags/one_thing; shows match count + "▶ Study N" button; Enter launches; 280ms debounce | ✅ | b8c2745 |
 | vFix34 | **Per-system accuracy badge** — correct_count/seen_count % injected into each Board Readiness Map row; green ≥80%, amber 60-79%, red <60%; tooltip shows raw fraction; re-injected after each updateKpis | ✅ | 7b55af3 |
 | vFix35 | **Study Pinned Cards button** — gold "📌 Study Pinned (N)" home button; filters p.pinned===true; inserted after #cozyDrillWeakBtn529; hidden when 0 pinned; also clamps vFix34 accuracy badges to 100% | ✅ | 7f7cbc7 |
+| vFix36 | **Dynamic browser tab title** — "⚔️ N due", "✨ N new", "✅ All caught up", "📚 Studying" states; MutationObserver on #solo/#domain; updates on every updateKpis; zero UI footprint | ✅ | 7b65ad8 |
 
 ## Remaining Items
 
