@@ -16544,4 +16544,65 @@ setTimeout(scan,800);
   }
 })();
 </script>
+
+<!-- vFix17: "Today: N cards studied" stat in mastery panel -->
+<script id="vFix17-today-js">(function(){
+  'use strict';
+  if(window.cardPool && window.cardPool.__vFix17Today) return;
+
+  function todayStr(){
+    return new Date().toISOString().slice(0,10);
+  }
+
+  function countToday(){
+    var prog = window.phase3State && window.phase3State.progress;
+    if(!prog) return 0;
+    var today = todayStr();
+    var n = 0;
+    Object.keys(prog).forEach(function(id){
+      var p = prog[id];
+      var last = String(p.last_seen_at || p.last || '');
+      if(last.slice(0,10) === today) n++;
+    });
+    return n;
+  }
+
+  function injectTodayStat(){
+    var panel = document.getElementById('cozyMasteryStats529');
+    if(!panel) return;
+    var old = document.getElementById('cozyTodayStat529');
+    if(old) old.remove();
+    var n = countToday();
+    var div = document.createElement('div');
+    div.id = 'cozyTodayStat529';
+    div.className = 'cms-stat';
+    div.style.cssText = n > 0
+      ? 'border-color:#22c55e33'
+      : 'border-color:#ffffff11;opacity:0.55';
+    div.innerHTML =
+      '<span class="cms-stat-n" style="color:' + (n > 0 ? '#22c55e' : '#aaa') + '">' + n + '</span>' +
+      '<span class="cms-stat-l">Today</span>';
+    panel.appendChild(div);
+  }
+
+  var _prevKpis17 = window.updateKpis;
+  window.updateKpis = function(){
+    var r = _prevKpis17 && _prevKpis17.apply(this, arguments);
+    setTimeout(injectTodayStat, 0);
+    return r;
+  };
+  window.updateKpis.__vFix17Today = true;
+  window.cardPool = window.cardPool || function(){};
+  window.cardPool.__vFix17Today = true;
+
+  // Fire once on load
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(injectTodayStat, 600);
+    });
+  } else {
+    setTimeout(injectTodayStat, 600);
+  }
+})();
+</script>
 </body></html>
