@@ -16841,4 +16841,157 @@ setTimeout(scan,800);
   }
 })();
 </script>
+
+<!-- vFix20: Daily Goal tracker on home screen -->
+<style id="vFix20-css">
+#cozyDailyGoal529 {
+  margin: 6px 0 4px;
+  padding: 9px 12px;
+  background: #0d1925;
+  border: 1px solid #1e2d3d;
+  border-radius: 10px;
+}
+.cdg-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 7px;
+  flex-wrap: wrap;
+}
+.cdg-header-label { margin-right: 2px; }
+.cdg-pill {
+  background: #1e293b;
+  border: 1px solid #2d3f52;
+  color: #64748b;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  min-height: 22px;
+  transition: background 0.12s, color 0.12s;
+}
+.cdg-pill.active {
+  background: rgba(29,78,216,0.22);
+  border-color: rgba(96,165,250,0.45);
+  color: #60a5fa;
+}
+.cdg-pill:active { transform: scale(0.93); }
+.cdg-bar-wrap {
+  width: 100%;
+  height: 5px;
+  background: #1e293b;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+.cdg-bar-fill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 3px;
+  transition: width 0.5s;
+}
+.cdg-bar-fill.done { background: #22c55e; }
+.cdg-label {
+  font-size: 11px;
+  color: #64748b;
+  text-align: right;
+}
+.cdg-label.done { color: #22c55e; }
+</style>
+<script id="vFix20-goal-js">(function(){
+  'use strict';
+  if(window.__vFix20Goal) return;
+  window.__vFix20Goal = true;
+
+  var LS_KEY = 'cozy_dailygoal_v20';
+  var OPTS = [10, 20, 30, 50];
+  var DEFAULT = 20;
+
+  function loadGoal(){
+    var v = parseInt(localStorage.getItem(LS_KEY), 10);
+    return OPTS.indexOf(v) >= 0 ? v : DEFAULT;
+  }
+  function saveGoal(n){
+    localStorage.setItem(LS_KEY, String(n));
+    window.__cozyDailyGoalVal529 = n;
+  }
+  function getGoal(){
+    if(!window.__cozyDailyGoalVal529){
+      window.__cozyDailyGoalVal529 = loadGoal();
+    }
+    return window.__cozyDailyGoalVal529;
+  }
+  function countToday(){
+    var prog = window.phase3State && window.phase3State.progress;
+    if(!prog) return 0;
+    var today = new Date().toISOString().slice(0,10);
+    var n = 0;
+    Object.keys(prog).forEach(function(id){
+      var p = prog[id];
+      var last = String(p.last_seen_at || p.last || '');
+      if(last.slice(0,10) === today) n++;
+    });
+    return n;
+  }
+
+  function renderGoal(){
+    var mastPanel = document.getElementById('cozyMasteryStats529');
+    if(!mastPanel) return;
+
+    var div = document.getElementById('cozyDailyGoal529');
+    if(!div){
+      div = document.createElement('div');
+      div.id = 'cozyDailyGoal529';
+      mastPanel.parentNode.insertBefore(div, mastPanel.nextSibling);
+    }
+
+    var goal = getGoal();
+    var done = countToday();
+    var pct  = goal ? Math.min(100, Math.round(done / goal * 100)) : 0;
+    var won  = done >= goal;
+
+    div.innerHTML =
+      '<div class="cdg-header">' +
+        '<span class="cdg-header-label">Daily Goal</span>' +
+        OPTS.map(function(g){
+          return '<button class="cdg-pill' + (g === goal ? ' active' : '') +
+                 '" data-g="' + g + '">' + g + '</button>';
+        }).join('') +
+      '</div>' +
+      '<div class="cdg-bar-wrap">' +
+        '<div class="cdg-bar-fill' + (won ? ' done' : '') +
+             '" style="width:' + pct + '%"></div>' +
+      '</div>' +
+      '<div class="cdg-label' + (won ? ' done' : '') + '">' +
+        done + ' / ' + goal + ' today' + (won ? ' ✓' : '') +
+      '</div>';
+
+    div.querySelectorAll('.cdg-pill').forEach(function(btn){
+      btn.onclick = function(e){
+        e.stopPropagation();
+        saveGoal(parseInt(btn.dataset.g, 10));
+        renderGoal();
+      };
+    });
+  }
+
+  var _prevKpis20 = window.updateKpis;
+  window.updateKpis = function(){
+    var r = _prevKpis20 && _prevKpis20.apply(this, arguments);
+    setTimeout(renderGoal, 0);
+    return r;
+  };
+  window.updateKpis.__vFix20Goal = true;
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(renderGoal, 700);
+    });
+  } else {
+    setTimeout(renderGoal, 700);
+  }
+})();
+</script>
 </body></html>
