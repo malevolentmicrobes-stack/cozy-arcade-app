@@ -17277,6 +17277,89 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix26: Mobile optimization + daily goal celebration -->
+<style id="vFix26-css">
+/* Disable bgMove grid animation on mobile — saves compositor layer & battery */
+@media(max-width:760px){
+  .game::before { animation: none !important; }
+}
+</style>
+<script id="vFix26-celebrate-js">(function(){
+  'use strict';
+  if(window.__vFix26Celebrate) return;
+  window.__vFix26Celebrate = true;
+
+  var CELE_KEY = 'cozy_goal_celeb_v26';
+
+  function todayStr(){ return new Date().toISOString().slice(0, 10); }
+
+  function alreadyCelebrated(){
+    try{ return localStorage.getItem(CELE_KEY) === todayStr(); }catch(e){ return false; }
+  }
+
+  function markCelebrated(){
+    try{ localStorage.setItem(CELE_KEY, todayStr()); }catch(e){}
+  }
+
+  function fireCelebration(){
+    if(alreadyCelebrated()) return;
+    markCelebrated();
+
+    /* Spark burst from daily goal bar position */
+    var barEl = document.querySelector('#cozyDailyGoal529 .cdg-bar-fill');
+    var fx = document.getElementById('fx');
+    if(!barEl || !fx) return;
+
+    var rect = barEl.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var colors = ['#f5c97a','#4ade80','#67e8f9','#fb5876','#c084fc','#fb923c','#f472b6'];
+    var N = 32;
+
+    for(var i = 0; i < N; i++){
+      var s = document.createElement('div');
+      var col = colors[i % colors.length];
+      var angle = (Math.PI * 2 * i / N) + (Math.random() - 0.5) * 0.5;
+      var dist = 70 + Math.random() * 130;
+      var dx = Math.cos(angle) * dist;
+      var dy = Math.sin(angle) * dist - 80;
+      var sz = 5 + Math.random() * 5;
+      s.className = 'spark';
+      s.style.cssText = 'left:' + cx + 'px;top:' + cy + 'px' +
+        ';--dx:' + dx.toFixed(1) + 'px;--dy:' + dy.toFixed(1) + 'px' +
+        ';background:' + col + ';box-shadow:0 0 14px ' + col +
+        ';width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px' +
+        ';border-radius:' + (Math.random() < 0.5 ? '50%' : '3px');
+      fx.appendChild(s);
+      (function(el){ setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 900); })(s);
+    }
+
+    /* Toast */
+    var toast = document.getElementById('toast');
+    if(toast){
+      toast.textContent = '🎯 Daily Goal Complete!';
+      toast.classList.remove('hidden');
+      clearTimeout(window.__v26ToastT);
+      window.__v26ToastT = setTimeout(function(){ toast.classList.add('hidden'); }, 2600);
+    }
+  }
+
+  /* Hook into updateKpis — fires once per day on first completion */
+  var _prevKpis26 = window.updateKpis;
+  window.updateKpis = function(){
+    var r = _prevKpis26 && _prevKpis26.apply(this, arguments);
+    setTimeout(function(){
+      if(!alreadyCelebrated()){
+        var done = document.querySelector('#cozyDailyGoal529 .cdg-bar-fill.done');
+        if(done) fireCelebration();
+      }
+    }, 120);
+    return r;
+  };
+  window.updateKpis.__vFix26Celebrate = true;
+})();
+</script>
+
 <!-- vFix25: "Drill Weak" home screen button — targets cards with lapses ≥ 2 -->
 <style id="vFix25-css">
 #cozyDrillWeakBtn529 {
