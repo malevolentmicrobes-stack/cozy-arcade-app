@@ -94,6 +94,7 @@
 - ✅ `vFix7`: Session missed-cards summary — "Missed this session (N)" list injected into end modal; reads `phase3State.progress[id].last` + `.rating` since session start timestamp (commit 16076b9)
 - ✅ `vFix8`: FSRS due/new KPI bug (p.reps→seen_count); mastery stats panel (Mastered/Learning/Retention); study streak; weak-system chips showing low-retention systems (commit 3b6edbc)
 - ✅ `vFix9`: Weak-system chip onclick → naLaunchSysReview (direct study launch, zero extra taps); "🔁 Drill N Missed Cards" button in end modal; cardPool drill filter via __cozyDrillSet529 Set; home() clears drill mode (commit 019f554)
+- ✅ `vFix10`: Board Readiness Map — full per-system mastery breakdown panel on home screen; color-coded progress bars (red/amber/green by mastery %); ABIM countdown in toggle header; each system row directly launches naLaunchSysReview (commit 209cd9d)
 
 ### Atlas Tag Feature (2026-05-28) — all ✅
 - ✅ `003957c`: Tag filter + sortable columns + tag/sys constellation toggle (PHASE2 only)

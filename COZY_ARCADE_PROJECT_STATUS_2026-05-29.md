@@ -1,5 +1,5 @@
 # Cozy Arcade Board Prep — Project Status
-*Updated: 2026-05-29 (autonomous session — vFix5 through vFix9 shipped)*
+*Updated: 2026-05-29 (autonomous session — vFix5 through vFix10 shipped)*
 
 ---
 
@@ -29,6 +29,7 @@
 | Home: Study streak counter | ✅ Added (vFix8) |
 | Home: Weak-system focus chips (direct launch) | ✅ Fixed (vFix9 — naLaunchSysReview, zero extra taps) |
 | End-of-game: "Drill N Missed Cards" button | ✅ Added (vFix9 — targeted re-run of missed cards) |
+| Home: Board Readiness Map (all systems) | ✅ Added (vFix10 — per-system bars, ABIM countdown) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |
