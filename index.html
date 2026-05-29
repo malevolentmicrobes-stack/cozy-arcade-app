@@ -16032,4 +16032,110 @@ setTimeout(scan,800);
   }
 })();
 </script>
+<style id="vFix12-css">
+/* vFix12: Session stats row in end modal */
+#cozySessionStats529 {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  background: rgba(103,232,249,.06);
+  border: 1px solid rgba(103,232,249,.16);
+  border-radius: 14px;
+}
+.css-summary {
+  font-size: 14px;
+  font-weight: 950;
+  color: #c8eeff;
+  letter-spacing: .04em;
+}
+.css-breakdown {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+.css-again { color: #fb5876; }
+.css-hard  { color: #f5c97a; }
+.css-good  { color: #67e8f9; }
+.css-easy  { color: #22c55e; }
+@media (max-width: 480px) {
+  .css-summary { font-size: 12px; }
+  .css-breakdown { font-size: 11px; gap: 10px; }
+}
+</style>
+<script id="vFix12-stats-js">
+/* vFix12: Session accuracy stats injected into end modal */
+(function(){
+  'use strict';
+
+  function getSessionStats(){
+    var sess = window['__cozySession529'];
+    if(!sess || !sess.start) return null;
+    var startMs = sess.start;
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    if(!prog || !cards.length) return null;
+    var counts = {again:0, hard:0, good:0, easy:0, total:0};
+    cards.forEach(function(c){
+      var id = c.id || c.qid || c.card_id;
+      var p = prog[id]; if(!p) return;
+      var raw = p.last || p.last_seen_at; if(!raw) return;
+      if(new Date(raw).getTime() < startMs) return;
+      counts.total++;
+      var r = String(p.rating || p.last_rating || '').toLowerCase();
+      if(r === 'again' || r === 'wrong') counts.again++;
+      else if(r === 'hard') counts.hard++;
+      else if(r === 'good') counts.good++;
+      else if(r === 'easy') counts.easy++;
+    });
+    return counts.total > 0 ? counts : null;
+  }
+
+  function injectSessionStats(){
+    var box = document.getElementById('endBox') || document.querySelector('.endBox');
+    if(!box) return;
+    var old = document.getElementById('cozySessionStats529'); if(old) old.remove();
+    var s = getSessionStats();
+    if(!s) return;
+    var correctN = s.good + s.easy;
+    var pct = Math.round(correctN / s.total * 100);
+    var pctColor = pct >= 75 ? '#22c55e' : pct >= 55 ? '#f5c97a' : '#fb5876';
+    var div = document.createElement('div');
+    div.id = 'cozySessionStats529';
+    div.innerHTML =
+      '<div class="css-summary">' +
+        s.total + ' cards studied &nbsp;·&nbsp; ' +
+        '<span style="color:' + pctColor + '">' + pct + '% correct</span>' +
+      '</div>' +
+      '<div class="css-breakdown">' +
+        (s.again > 0 ? '<span class="css-again">🔄 ' + s.again + ' again</span>' : '') +
+        (s.hard  > 0 ? '<span class="css-hard">⚡ '  + s.hard  + ' hard</span>'  : '') +
+        (s.good  > 0 ? '<span class="css-good">✓ '   + s.good  + ' good</span>'  : '') +
+        (s.easy  > 0 ? '<span class="css-easy">★ '   + s.easy  + ' easy</span>'  : '') +
+      '</div>';
+    /* Insert after #endBody (Score • Streak), before missed summary */
+    var endBody = document.getElementById('endBody');
+    var missedDiv = document.getElementById('cozyMissedSummary529');
+    if(missedDiv) box.insertBefore(div, missedDiv);
+    else if(endBody && endBody.nextSibling) box.insertBefore(div, endBody.nextSibling);
+    else box.insertBefore(div, box.firstChild);
+  }
+
+  /* Chain endRun */
+  setTimeout(function(){
+    if(window.endRun && !window.endRun.__vFix12){
+      var _prev = window.endRun;
+      window.endRun = endRun = function(t){
+        if(_prev) _prev.apply(this, arguments);
+        try{ injectSessionStats(); }catch(e){}
+      };
+      window.endRun.__vFix12 = true;
+    }
+  }, 1100);
+})();
+</script>
 </body></html>
