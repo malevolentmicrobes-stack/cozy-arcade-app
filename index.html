@@ -17255,4 +17255,25 @@ setTimeout(scan,800);
   }
 })();
 </script>
+
+<!-- vFix23 / C3: KE prompt card proportions — fix orb/prompt overlap on mobile -->
+<style id="vFix23-ke-mobile-css">
+/*
+  Root cause: .orbArena last set to inset:225px (class selector). promptBox
+  top:70px + max-height 29vh (244px on 844px) = bottom at 314px.
+  Orbs start at 225px → 89px hidden behind the card. Fix: #orbArena (ID
+  selector, beats all class rules at any specificity) pushed to 338px.
+  max-height capped to 25vh to reduce overlap on very tall phones.
+*/
+@media(max-width:760px){
+  .domain .promptBox,
+  .game.domain .promptBox {
+    max-height: 25vh !important;
+    overflow-y: auto !important;
+  }
+  #orbArena {
+    inset: 338px 0 0 !important;
+  }
+}
+</style>
 </body></html>
