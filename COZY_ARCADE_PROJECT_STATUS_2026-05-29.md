@@ -1,5 +1,5 @@
 # Cozy Arcade Board Prep — Project Status
-*Updated: 2026-05-29 (autonomous session — vFix5 through vFix27 shipped)*
+*Updated: 2026-05-29 (autonomous session — vFix5 through vFix28 shipped)*
 
 ---
 
@@ -48,6 +48,7 @@
 | Home: 🔁 Drill Weak Cards button | ✅ Added (vFix25 — red CTA for lapses ≥ 2 cards; direct drill launch) |
 | Mobile: bgMove animation disabled on phones | ✅ Fixed (vFix26 — saves GPU compositor layer during game play) |
 | Reveal: swipe-to-rate gesture | ✅ Added (vFix27 — left/right swipe rates card; scroll unaffected; flash + haptic) |
+| Home: 7-day study heatmap | ✅ Added (vFix28 — colored squares below daily goal bar; green/cyan/amber/gray scale) |
 | Home: 🎯 Daily Goal celebration | ✅ Added (vFix26 — confetti sparks + toast on first goal completion each day) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |

@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix27 shipped*
+*Last updated: 2026-05-29 — vFix28 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -44,6 +44,7 @@
 | vFix25 | **🔁 Drill Weak button on home** — red CTA below Study Now when lapses ≥ 2 cards exist; sets __cozyDrillSet529 → launches Solo; vFix9 drill filter + vFix13 size limit both apply | ✅ | f927f21 |
 | vFix26 | **Mobile optimization + goal celebration** — CSS: disable bgMove animation on mobile (saves GPU compositor layer); JS: 32-spark confetti + toast "🎯 Daily Goal Complete!" fires once per day via localStorage guard | ✅ | d7d9994 |
 | vFix27 | **Swipe-to-rate in reveal** — left/right swipe fires rating: →52px=Good, →110px=Easy, ←52px=Hard, ←110px=Again; dy/dx guard preserves scroll; green/red outline flash; haptic vibrate; "← Hard · Good →" hint on touch | ✅ | 3790ea7 |
+| vFix28 | **7-day study heatmap** — row of colored squares below daily goal bar; green=goal met, cyan=half, amber=started, gray=zero; today has cyan outline; card count below each day; updates with KPI refresh | ✅ | 90bbfe3 |
 
 ## Remaining Items
 
