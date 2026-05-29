@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix37 shipped*
+*Last updated: 2026-05-29 — vFix38 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -54,6 +54,7 @@
 | vFix35 | **Study Pinned Cards button** — gold "📌 Study Pinned (N)" home button; filters p.pinned===true; inserted after #cozyDrillWeakBtn529; hidden when 0 pinned; also clamps vFix34 accuracy badges to 100% | ✅ | 7f7cbc7 |
 | vFix36 | **Dynamic browser tab title** — "⚔️ N due", "✨ N new", "✅ All caught up", "📚 Studying" states; MutationObserver on #solo/#domain; updates on every updateKpis; zero UI footprint | ✅ | 7b65ad8 |
 | vFix37 | **Audio feedback (opt-in)** — Web Audio API tones, no external files; correct=440→660Hz two-tone, incorrect=300Hz; 🔔/🔕 toggle below session picker; default OFF; cozy_audio_v37 localStorage; wraps window.rate | ✅ | 6a9e4df |
+| vFix38 | **Study Board Pearls** — teal "💎 Study Board Pearls (N)" button; includes c.one_thing (deck) + user_one_thing (vFix21 notes); vFix11 auto-shows pearl on each reveal; inserted after #cozyPinnedBtn529 | ✅ | 96ddb06 |
 
 ## Remaining Items
 
