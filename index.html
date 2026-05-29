@@ -17277,6 +17277,75 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix34: Per-system accuracy badge on Board Readiness Map rows -->
+<style id="vFix34-css">
+.v34-acc {
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-left: 4px;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  opacity: 0.88;
+  cursor: default;
+}
+</style>
+<script id="vFix34-accuracy-js">(function(){
+  'use strict';
+  if(window.__vFix34Acc) return;
+  window.__vFix34Acc = true;
+
+  function getSysAccuracy(){
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    if(!prog || !cards.length) return {};
+    var map = {};
+    cards.forEach(function(c){
+      var id = window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
+      var sys = ((c.system||c.sys)||'').trim();
+      if(!sys || !id) return;
+      if(!map[sys]) map[sys] = {correct:0, seen:0};
+      var p = prog[id];
+      if(p){
+        map[sys].correct += Number(p.correct_count||0);
+        map[sys].seen    += Number(p.seen_count||0);
+      }
+    });
+    return map;
+  }
+
+  function accColor(pct){
+    return pct >= 80 ? '#22c55e' : pct >= 60 ? '#f5c97a' : '#fb5876';
+  }
+
+  function injectAccBadges(){
+    var accMap = getSysAccuracy();
+    document.querySelectorAll('#cozySysMap529 .csm-row[data-sys]').forEach(function(row){
+      if(row.querySelector('.v34-acc')) return;
+      var sys = row.dataset.sys;
+      var d = accMap[sys];
+      if(!d || d.seen === 0) return;
+      var pct = Math.round(d.correct / d.seen * 100);
+      var badge = document.createElement('span');
+      badge.className = 'v34-acc';
+      badge.textContent = pct + '%';
+      badge.title = d.correct + '/' + d.seen + ' correct (' + pct + '% accuracy)';
+      badge.style.color = accColor(pct);
+      var cramPill = row.querySelector('.v32-cram');
+      cramPill ? row.insertBefore(badge, cramPill) : row.appendChild(badge);
+    });
+  }
+
+  var _prevKpis34 = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis34) _prevKpis34.apply(this, arguments);
+    try{ injectAccBadges(); }catch(e){}
+  };
+
+  setTimeout(injectAccBadges, 550);
+})();
+</script>
+
 <!-- vFix33: Keyword card search — filter all cards by text, launch drill -->
 <style id="vFix33-css">
 #cozySearch529 {
