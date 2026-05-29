@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix32 shipped*
+*Last updated: 2026-05-29 — vFix33 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -49,6 +49,7 @@
 | vFix30 | **Keyboard shortcuts in reveal** — 1=Again 2=Hard 3=Good 4=Easy; capture-phase keydown fires before question-phase handler; stopImmediatePropagation prevents conflict; hint row visible on pointer-fine devices only | ✅ | b16b4bf |
 | vFix31 | **Cram Mode** — purple "📚 Cram All (N)" home button; populates __cozyDrillSet529 with all card IDs; bypasses FSRS schedule; vFix13 size limit still applies; clears on home() | ✅ | 8ecf515 |
 | vFix32 | **Per-system Cram pill** — purple "Cram" pill on each Board Readiness Map row; populates __cozyDrillSet529 with all cards for that system; re-injected after each updateKpis render | ✅ | 51adecc |
+| vFix33 | **Keyword card search** — search input on home filters all cards across question/answer/system/tags/one_thing; shows match count + "▶ Study N" button; Enter launches; 280ms debounce | ✅ | b8c2745 |
 
 ## Remaining Items
 

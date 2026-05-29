@@ -53,6 +53,7 @@
 | Reveal: Keyboard shortcuts (1-4 to rate) | ✅ Added (vFix30 — 1=Again 2=Hard 3=Good 4=Easy; capture-phase guard; hint row on desktop) |
 | Home: Cram Mode (all cards, bypass FSRS) | ✅ Added (vFix31 — purple button; full deck drill; size limit still applies; FSRS data untouched) |
 | Board Readiness Map: per-system Cram pill | ✅ Added (vFix32 — purple 'Cram' pill on each system row; bypasses FSRS for that system only) |
+| Home: Keyword card search | ✅ Added (vFix33 — search across all card text; shows match count; Enter or button launches drill) |
 | Home: 🎯 Daily Goal celebration | ✅ Added (vFix26 — confetti sparks + toast on first goal completion each day) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
