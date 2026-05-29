@@ -14979,4 +14979,152 @@ setTimeout(scan,800);
   }
 })();
 </script>
+<style id="vFix5-css">
+/* vFix5: Quick study button + home button positioning */
+.cozy-quick-study-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  margin-top: 14px;
+  background: linear-gradient(135deg, rgba(245,201,122,.13), rgba(245,157,50,.09));
+  border: 1.5px solid rgba(245,201,122,.30);
+  color: #fff8ea;
+  font-weight: 950;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.cozy-quick-study-btn:hover {
+  border-color: rgba(245,201,122,.60);
+  box-shadow: 0 0 24px rgba(245,201,122,.11);
+}
+.cozy-quick-study-btn .cqs-count {
+  font-family: Orbitron, monospace;
+  color: #f5c97a;
+  font-size: 17px;
+  font-weight: 950;
+}
+</style>
+<script id="vFix5-hud-js">
+/* vFix5: Rescue home button from orphan hudGroup before hiding it */
+(function(){
+  'use strict';
+  function mobile(){ return window.innerWidth <= 900 || ('ontouchstart' in window); }
+  function sp(el, prop, val){ if(el) el.style.setProperty(prop, val, 'important'); }
+
+  function fixHud5(gameId){
+    if(!mobile()) return;
+    var game = document.getElementById(gameId); if(!game) return;
+    var hud = game.querySelector(':scope > .hud, :scope > .gameHud'); if(!hud) return;
+    var stats = hud.querySelector('.hudStats371');
+    var actions = hud.querySelector('.hudActions371');
+    if(!stats || !actions) return;
+
+    /* STEP 1: Rescue home buttons from any orphan group into stats FIRST */
+    [].forEach.call(hud.querySelectorAll('.hudHome1751511,.hudHome1751512'), function(btn){
+      if(!stats.contains(btn)) stats.insertBefore(btn, stats.firstChild);
+    });
+
+    /* STEP 2: Now safe to hide orphan groups — home buttons already rescued */
+    [].forEach.call(hud.children, function(ch){
+      if(ch.classList && ch.classList.contains('hudGroup') &&
+         !ch.classList.contains('hudStats371') &&
+         !ch.classList.contains('hudActions371')){
+        sp(ch, 'display', 'none');
+      }
+    });
+
+    /* Style rescued home button as small circle */
+    var homeBtn = stats.querySelector('.hudHome1751511,.hudHome1751512');
+    if(homeBtn){
+      sp(homeBtn,'display','inline-flex');
+      sp(homeBtn,'align-items','center'); sp(homeBtn,'justify-content','center');
+      sp(homeBtn,'flex-shrink','0'); sp(homeBtn,'width','28px');
+      sp(homeBtn,'min-width','28px'); sp(homeBtn,'height','28px');
+      sp(homeBtn,'padding','0'); sp(homeBtn,'border-radius','50%');
+      sp(homeBtn,'font-size','14px');
+    }
+  }
+
+  function run5(){ fixHud5('solo'); fixHud5('domain'); }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      [50, 350, 900, 2100].forEach(function(ms){ setTimeout(run5, ms); });
+    });
+  } else {
+    [50, 350, 900, 2100].forEach(function(ms){ setTimeout(run5, ms); });
+  }
+
+  document.addEventListener('click', function(e){
+    if(e.target.closest('#startSolo,#startDomain,#endRestart,#shadowStart351,#pauseResume')){
+      setTimeout(run5, 150); setTimeout(run5, 550);
+    }
+  }, true);
+})();
+</script>
+<script id="vFix5-kpis-js">
+/* vFix5: FSRS-accurate due/new counts + quick-study home button */
+(function(){
+  'use strict';
+
+  function getFSRSDueCounts(){
+    var prog = window.phase3State && window.phase3State.progress;
+    var cards = window.appCards ? window.appCards() : [];
+    if(!prog || !cards.length) return null;
+    var now = new Date();
+    var dueN = 0, newN = 0;
+    cards.forEach(function(c){
+      var id = c.id || c.qid || c.card_id;
+      var p = prog[id];
+      if(!p || !(p.reps > 0)){ newN++; return; }
+      var due = p.due;
+      if(due && new Date(due) <= now) dueN++;
+    });
+    return { dueN: dueN, newN: newN };
+  }
+
+  function updateQuickStudyBtn(dueN, newN){
+    var home = document.getElementById('home'); if(!home) return;
+    var btn = document.getElementById('cozyQuickStudy529');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.id = 'cozyQuickStudy529';
+      btn.className = 'cozy-quick-study-btn';
+      btn.type = 'button';
+      btn.onclick = function(){
+        try{ deckMode = 'due'; }catch(e){}
+        var sel = document.getElementById('deckMode');
+        if(sel) sel.value = 'due';
+        var s = document.getElementById('startSolo');
+        if(s) s.click();
+      };
+      var kpis = home.querySelector('.kpis');
+      if(kpis && kpis.parentNode) kpis.parentNode.insertBefore(btn, kpis.nextSibling);
+    }
+    var total = dueN + newN;
+    btn.style.display = total > 0 ? 'flex' : 'none';
+    var label = dueN > 0 ? (dueN + ' due') : (newN + ' new');
+    btn.innerHTML = '<span>⚔️ Study Now</span><span class="cqs-count">' + label + '</span>';
+  }
+
+  var _oldKpis = window.updateKpis;
+  window.updateKpis = function(){
+    if(_oldKpis) _oldKpis.apply(this, arguments);
+    var counts = getFSRSDueCounts();
+    if(!counts) return;
+    var dEl = document.getElementById('dueCount');
+    var nEl = document.getElementById('newCount');
+    if(dEl) dEl.textContent = counts.dueN;
+    if(nEl) nEl.textContent = counts.newN;
+    updateQuickStudyBtn(counts.dueN, counts.newN);
+  };
+
+  setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 950);
+  setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 2300);
+})();
+</script>
 </body></html>
