@@ -17277,6 +17277,77 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix30: Keyboard shortcuts in reveal (1=Again 2=Hard 3=Good 4=Easy) -->
+<style id="vFix30-css">
+.v30-kb-hint {
+  display: none;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(148,163,184,0.45);
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+  user-select: none;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .v30-kb-hint { display: block; }
+}
+</style>
+<script id="vFix30-keyboard-js">(function(){
+  'use strict';
+  if(window.__vFix30Keys) return;
+  window.__vFix30Keys = true;
+
+  var RATE_MAP = { '1': 'again', '2': 'hard', '3': 'good', '4': 'easy' };
+
+  function activeReveal(){
+    var ids = ['soloReveal', 'domainReveal'];
+    for(var i = 0; i < ids.length; i++){
+      var el = document.getElementById(ids[i]);
+      if(el && !el.classList.contains('hidden')) return el;
+    }
+    return null;
+  }
+
+  function inTextInput(){
+    var t = document.activeElement && document.activeElement.tagName;
+    return t === 'INPUT' || t === 'TEXTAREA';
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(inTextInput()) return;
+    var rating = RATE_MAP[e.key];
+    if(!rating) return;
+    var rev = activeReveal();
+    if(!rev) return;
+    var btn = rev.querySelector('[data-rate="' + rating + '"]');
+    if(!btn || btn.classList.contains('hidden') || btn.disabled) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    btn.click();
+  }, true); /* capture phase — fires before existing bubble-phase handlers */
+
+  /* Inject hint below each rating bar once DOM is ready */
+  function injectHints(){
+    ['soloRevealRatings','domainRevealRatings'].forEach(function(id){
+      var bar = document.getElementById(id);
+      if(!bar || bar.dataset.v30) return;
+      bar.dataset.v30 = '1';
+      var hint = document.createElement('div');
+      hint.className = 'v30-kb-hint';
+      hint.textContent = '1 Again  ·  2 Hard  ·  3 Good  ·  4 Easy';
+      bar.parentNode.insertBefore(hint, bar.nextSibling);
+    });
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', injectHints);
+  } else {
+    setTimeout(injectHints, 300);
+  }
+})();
+</script>
+
 <!-- vFix29: In-session elapsed timer -->
 <style id="vFix29-css">
 #cozySessionTimer529 {
