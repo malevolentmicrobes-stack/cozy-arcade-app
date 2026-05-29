@@ -1,5 +1,5 @@
 # Cozy Arcade Board Prep — Project Status
-*Updated: 2026-05-29 (autonomous session — vFix5 through vFix15 shipped)*
+*Updated: 2026-05-29 (autonomous session — vFix5 through vFix16 shipped)*
 
 ---
 
@@ -35,6 +35,8 @@
 | Home: Session size picker (10/25/50/All) | ✅ Added (vFix13 — persists in localStorage) |
 | Reveal: Explanation auto-shown on wrong answers | ✅ Added (vFix14 — <details> element, auto-opens) |
 | Reveal: Leech warning badge (Missed N times) | ✅ Added (vFix15 — amber/red badge, p.lapses ≥ 2) |
+| Reveal: Scroll-to-top on each card (bug fix) | ✅ Fixed (vFix16 — vFix14 regression resolved) |
+| In-game: Session card counter overlay | ✅ Added (vFix16 — "N cards" or "N/max" bottom-right) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |

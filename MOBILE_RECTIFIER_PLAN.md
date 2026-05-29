@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix15 shipped*
+*Last updated: 2026-05-29 — vFix16 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -32,6 +32,7 @@
 | vFix13 | **Session size limit** — "Cards: 10/25/50/All" picker; persists; cardPool wrapper slices after FSRS sort | ✅ | 46c330b |
 | vFix14 | **Explanation in reveal** — `<details>` collapsible, auto-opens on wrong answers; 150ms MutationObserver | ✅ | a1cdec7 |
 | vFix15 | **Leech warning badge** — amber/red "Missed N times" below diagnosis when p.lapses ≥ 2 | ✅ | b2f28a5 |
+| vFix16 | **Fix: reveal scroll-to-top** (regression from vFix14 auto-open) + **session card counter** bottom-right overlay ("N cards" or "N/max") | ✅ | 1847316 |
 
 ## Remaining Items
 
