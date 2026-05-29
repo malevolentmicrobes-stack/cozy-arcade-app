@@ -15952,4 +15952,84 @@ setTimeout(scan,800);
   setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 4000);
 })();
 </script>
+<style id="vFix11-css">
+/* vFix11: Board Pearl (one_thing) shown in Solo + KE reveal panel */
+#cozyPearl529 {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 12px 0 14px;
+  background: linear-gradient(135deg, rgba(245,201,122,.12), rgba(245,201,122,.05));
+  border: 1px solid rgba(245,201,122,.30);
+  border-radius: 14px;
+  padding: 11px 16px;
+}
+.cp-label {
+  font-family: Orbitron, monospace;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  font-size: 9px;
+  color: #f5c97a;
+  font-weight: 900;
+}
+.cp-text {
+  font-size: clamp(12px, 3.4vw, 15px);
+  font-weight: 700;
+  color: #fef5e0;
+  line-height: 1.42;
+}
+</style>
+<script id="vFix11-pearl-js">
+/* vFix11: Inject "Board Pearl" (one_thing) into Solo + KE reveal panels via MutationObserver */
+(function(){
+  'use strict';
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function injectPearl(revealEl){
+    var c = window.current;
+    var pearl = c && (String(c.one_thing||'').trim());
+    /* Remove any previous pearl first */
+    var old = document.getElementById('cozyPearl529');
+    if(old) old.remove();
+    if(!pearl) return;
+    /* Find rating bar — insert pearl before it */
+    var ratings = revealEl.querySelector('[id$="RevealRatings"],[id*="Ratings"]');
+    if(!ratings) return;
+    var div = document.createElement('div');
+    div.id = 'cozyPearl529';
+    div.innerHTML = '<span class="cp-label">📌 Board Pearl</span>' +
+                    '<span class="cp-text">' + esc(pearl) + '</span>';
+    ratings.parentNode.insertBefore(div, ratings);
+  }
+
+  function watchReveal(id){
+    var el = document.getElementById(id);
+    if(!el || el.dataset.v11obs) return;
+    el.dataset.v11obs = '1';
+    var obs = new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.type === 'attributes' && m.attributeName === 'class'){
+          if(!el.classList.contains('hidden')){
+            /* Give reveal() 80ms to populate dx/trigger text first */
+            setTimeout(function(){ try{ injectPearl(el); }catch(e){} }, 80);
+          }
+        }
+      });
+    });
+    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function init(){
+    watchReveal('soloReveal');
+    watchReveal('domainReveal');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 </body></html>
