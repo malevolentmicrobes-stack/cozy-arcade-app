@@ -19110,6 +19110,74 @@ setTimeout(scan,800);
 })();
 </script>
 
+<!-- vFix43a: Fix stuck-after-import — document capture fires before element-level stopImmediatePropagation kills bubble; home() resets game state so start buttons respond -->
+<script id="vFix43-import-home">(function(){
+  if(window.__vFix43ImportHome) return;
+  window.__vFix43ImportHome = true;
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.id === 'limitlessHomeDeckFile'){
+      setTimeout(function(){
+        try{ if(typeof window.home === 'function') window.home(); }catch(_){}
+      }, 900);
+    }
+  }, true);
+})();
+</script>
+
+<!-- vFix43b: Heatmap + calendar → bottom (order:8); kpis → very bottom (order:9); kpis redesign — atlas cyan theme, 2-col on mobile -->
+<style id="vFix43-layout-stats">
+/* Move 7-day heatmap + 30-day calendar to bottom of home screen */
+#cozyHeatmap529 { order: 8 !important; margin-top: 4px !important; }
+#cozyCalendar529 { order: 8 !important; }
+
+/* Push kpis below heatmap — very bottom */
+#home .homeWrap > .kpis { order: 9 !important; margin-top: 10px !important; }
+
+/* 2-col grid on all viewports (beats every prior 1fr override) */
+#home .homeWrap > .kpis {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  padding: 0 !important;
+}
+
+/* 5th tile (Pinned) — span full row so it doesn't sit orphaned half-width */
+#home .homeWrap > .kpis > .kpi:nth-child(5):last-child {
+  grid-column: 1 / -1 !important;
+  max-width: calc(50% - 5px) !important;
+  margin: 0 auto !important;
+}
+
+/* Tile redesign — match atlas/app color scheme */
+#home .kpi {
+  border: 1px solid rgba(103,232,249,.22) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(135deg,rgba(10,14,42,.92),rgba(5,8,24,.96)) !important;
+  padding: 16px 10px !important;
+  text-align: center !important;
+  box-shadow: 0 0 18px rgba(103,232,249,.05) !important;
+}
+#home .kpi b {
+  font-size: clamp(24px,5.5vw,38px) !important;
+  display: block !important;
+  background: linear-gradient(120deg,#9feaff,#38bdf8) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  font-weight: 950 !important;
+  line-height: 1.1 !important;
+}
+#home .kpi span {
+  font-family: Orbitron,monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: .14em !important;
+  color: #7ba3bd !important;
+  font-size: 10px !important;
+  display: block !important;
+  margin-top: 4px !important;
+}
+</style>
+
 <!-- vFix42a: Logo to very top — order:-1 beats prior order:1 on .hero -->
 <style id="vFix42-hero-order">
 #home .homeWrap > .hero { order: -1 !important; }
