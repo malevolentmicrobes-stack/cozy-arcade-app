@@ -17170,4 +17170,89 @@ setTimeout(scan,800);
   }
 })();
 </script>
+
+<!-- vFix22: ABIM countdown chip in hero section -->
+<style id="vFix22-css">
+#cozyAbimCdown529 {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 5px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  border: 1px solid rgba(245,201,122,0.35);
+  background: rgba(245,201,122,0.08);
+  color: #f5c97a;
+  cursor: default;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  text-align: center;
+}
+#cozyAbimCdown529.urgent {
+  border-color: rgba(251,88,118,0.45);
+  background: rgba(251,88,118,0.10);
+  color: #fb5876;
+}
+#cozyAbimCdown529.done {
+  border-color: rgba(34,197,94,0.35);
+  background: rgba(34,197,94,0.08);
+  color: #4ade80;
+}
+#cozyAbimCdown529.muted {
+  border-color: rgba(148,163,184,0.20);
+  background: rgba(148,163,184,0.05);
+  color: #94a3b8;
+}
+</style>
+<script id="vFix22-cdown-js">(function(){
+  'use strict';
+  if(window.__vFix22Cdown) return;
+  window.__vFix22Cdown = true;
+
+  /* ABIM boards: first week of August 2026 */
+  var ABIM_TARGET = new Date('2026-08-04T08:00:00');
+
+  function daysTo(){
+    return Math.ceil((ABIM_TARGET - new Date()) / 86400000);
+  }
+
+  function updateChip(){
+    var chip = document.getElementById('cozyAbimCdown529');
+    if(!chip) return;
+    var d = daysTo();
+    chip.className = '';
+    if(d > 90){
+      chip.className = 'muted';
+      chip.textContent = '📅 ' + d + ' days · ABIM';
+    } else if(d > 30){
+      chip.textContent = '📅 ' + d + ' days · ABIM Aug 2026';
+    } else if(d > 0){
+      chip.className = 'urgent';
+      chip.textContent = '🔥 ' + d + ' days · ABIM Aug 2026';
+    } else if(d === 0){
+      chip.className = 'urgent';
+      chip.textContent = '🏆 ABIM Today — You Got This';
+    } else {
+      chip.className = 'done';
+      chip.textContent = '🎓 Post-boards · Keep Studying';
+    }
+  }
+
+  function init22(){
+    var hero = document.querySelector('#home .hero');
+    if(!hero || document.getElementById('cozyAbimCdown529')) return;
+    var chip = document.createElement('div');
+    chip.id = 'cozyAbimCdown529';
+    hero.appendChild(chip);
+    updateChip();
+    setInterval(updateChip, 60000);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init22);
+  } else {
+    init22();
+  }
+})();
+</script>
 </body></html>
