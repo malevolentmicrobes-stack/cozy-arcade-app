@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix10 shipped*
+*Last updated: 2026-05-29 — vFix11 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -27,6 +27,7 @@
 | vFix8 | **Bug: vFix5 used p.reps (never set) → fixed to seen_count**; mastery stats panel (Mastered/Learning/Retention); streak; weak-system chips | ✅ | 3b6edbc |
 | vFix9 | **Bug: chips called showAtlasScreen → fixed to naLaunchSysReview**; "Drill N Missed Cards" button in end modal; drill cardPool filter + home() cleanup | ✅ | 019f554 |
 | vFix10 | **Board Readiness Map** — per-system mastery bars (color-coded red/amber/green), ABIM countdown in toggle header, each row launches naLaunchSysReview | ✅ | 209cd9d |
+| vFix11 | **Board Pearl in reveal** — `one_thing` shown as amber-gold "📌 Board Pearl" box in Solo + KE reveal panels via MutationObserver; re-injects per card | ✅ | 923121b |
 
 ## Remaining Items
 

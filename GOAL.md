@@ -95,6 +95,7 @@
 - ✅ `vFix8`: FSRS due/new KPI bug (p.reps→seen_count); mastery stats panel (Mastered/Learning/Retention); study streak; weak-system chips showing low-retention systems (commit 3b6edbc)
 - ✅ `vFix9`: Weak-system chip onclick → naLaunchSysReview (direct study launch, zero extra taps); "🔁 Drill N Missed Cards" button in end modal; cardPool drill filter via __cozyDrillSet529 Set; home() clears drill mode (commit 019f554)
 - ✅ `vFix10`: Board Readiness Map — full per-system mastery breakdown panel on home screen; color-coded progress bars (red/amber/green by mastery %); ABIM countdown in toggle header; each system row directly launches naLaunchSysReview (commit 209cd9d)
+- ✅ `vFix11`: Board Pearl in reveal — `one_thing` now shown automatically in Solo + KE reveal panels via MutationObserver; amber-gold "📌 Board Pearl" box between trigger text and FSRS rating buttons; re-injects per card; zero FSRS interference (commit 923121b)
 
 ### Atlas Tag Feature (2026-05-28) — all ✅
 - ✅ `003957c`: Tag filter + sortable columns + tag/sys constellation toggle (PHASE2 only)
