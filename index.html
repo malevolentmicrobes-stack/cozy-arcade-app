@@ -16432,4 +16432,116 @@ setTimeout(scan,800);
   }
 })();
 </script>
+<style id="vFix16-css">
+/* vFix16: session card counter overlay */
+#cozyCardCounter529 {
+  position: fixed;
+  bottom: 18px;
+  right: 16px;
+  z-index: 42;
+  padding: 5px 12px;
+  background: rgba(3,8,24,.82);
+  border: 1px solid rgba(103,232,249,.22);
+  border-radius: 999px;
+  color: #9aa0b8;
+  font-size: 11px;
+  font-weight: 950;
+  font-family: Orbitron, monospace;
+  letter-spacing: .08em;
+  pointer-events: none;
+  display: none;
+}
+#cozyCardCounter529.visible { display: block; }
+#cozyCardCounter529 .ccc-n { color: #67e8f9; }
+</style>
+<script id="vFix16-fixes-js">
+/* vFix16: (1) scroll-to-top on reveal open; (2) session card counter */
+(function(){
+  'use strict';
+
+  /* ── 1. Scroll-to-top: synchronous observer fires before all content injections ── */
+  function watchScrollReset(id){
+    var el = document.getElementById(id);
+    if(!el || el.dataset.v16scroll) return;
+    el.dataset.v16scroll = '1';
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(m.attributeName === 'class' && !el.classList.contains('hidden')){
+          el.scrollTop = 0; /* synchronous — happens before 40ms/80ms/150ms injections */
+        }
+      });
+    }).observe(el, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  /* ── 2. Session card counter ── */
+  var COUNT_KEY = '__cozyCardCount529';
+  window[COUNT_KEY] = 0;
+
+  function getCounter(){
+    var el = document.getElementById('cozyCardCounter529');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'cozyCardCounter529';
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+
+  function updateCounter(){
+    var el = getCounter();
+    var n = window[COUNT_KEY] || 0;
+    var max = window['__cozySessionMax529'];
+    /* Only show when inside a game screen */
+    var inGame = !!(document.querySelector('.game:not(.hidden)') ||
+                    !document.getElementById('solo').classList.contains('hidden') ||
+                    !document.getElementById('domain').classList.contains('hidden'));
+    if(!inGame || n === 0){ el.classList.remove('visible'); return; }
+    el.classList.add('visible');
+    el.innerHTML = max
+      ? '<span class="ccc-n">' + n + '</span>/' + max
+      : '<span class="ccc-n">' + n + '</span> cards';
+  }
+
+  /* Wrap advance() to count completions — minimal wrapper only */
+  (function installCardCount(){
+    if(window.advance && !window.advance.__v16Count){
+      var _adv = window.advance;
+      window.advance = advance = function(which){
+        window[COUNT_KEY] = (window[COUNT_KEY] || 0) + 1;
+        setTimeout(updateCounter, 60);
+        return _adv.apply(this, arguments);
+      };
+      window.advance.__v16Count = true;
+    }
+  })();
+
+  /* Clear count on home navigation */
+  (function patchHomeForCount(){
+    if(window.home && !window.home.__v16Home){
+      var _home = window.home;
+      window.home = home = function(){
+        window[COUNT_KEY] = 0;
+        var el = document.getElementById('cozyCardCounter529');
+        if(el) el.classList.remove('visible');
+        return _home.apply(this, arguments);
+      };
+      window.home.__v16Home = true;
+    }
+  })();
+
+  /* Periodically sync counter visibility (game start / end) */
+  setInterval(updateCounter, 2000);
+
+  function init16(){
+    watchScrollReset('soloReveal');
+    watchScrollReset('domainReveal');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init16);
+  } else {
+    init16();
+  }
+})();
+</script>
 </body></html>
