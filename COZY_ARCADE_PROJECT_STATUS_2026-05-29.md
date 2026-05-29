@@ -1,5 +1,5 @@
 # Cozy Arcade Board Prep — Project Status
-*Updated: 2026-05-29 (autonomous session — vFix5 through vFix8 shipped)*
+*Updated: 2026-05-29 (autonomous session — vFix5 through vFix9 shipped)*
 
 ---
 
@@ -27,7 +27,8 @@
 | Home: FSRS due/new counts (bug fixed) | ✅ Fixed (vFix8 — p.reps→seen_count) |
 | Home: Mastered/In Review/Retention stats | ✅ Added (vFix8) |
 | Home: Study streak counter | ✅ Added (vFix8) |
-| Home: Weak-system focus chips | ✅ Added (vFix8 — opens Atlas pre-filtered) |
+| Home: Weak-system focus chips (direct launch) | ✅ Fixed (vFix9 — naLaunchSysReview, zero extra taps) |
+| End-of-game: "Drill N Missed Cards" button | ✅ Added (vFix9 — targeted re-run of missed cards) |
 | Question card: readable font | ✅ Fixed (vFix3) |
 | 4 answer choices in a row (not 2×2) | ✅ Fixed (vFix3) |
 | Warm palette (home/settings) | ✅ Working (vPhaseD) |
@@ -36,7 +37,7 @@
 
 ## Architecture (unchanged)
 
-- **Single file:** `index.html` (~14,982 lines). All patches appended as `<style id="vXXX">` / `<script id="vXXX">` before `</body>`.
+- **Single file:** `index.html` (~15,740 lines). All patches appended as `<style id="vXXX">` / `<script id="vXXX">` before `</body>`.
 - **Live URL:** `malevolentmicrobes-stack.github.io/cozy-arcade-app`
 - **Repos:** `cozy-arcade-app.git` (this file); `cozy-arcade-app-PHASE2.git` (keep separate)
 - **Data:** 1249 ABIM cards in localStorage. FSRS progress in `cozy_arcade_progress_v1`.

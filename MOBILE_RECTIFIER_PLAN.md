@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix5 shipped*
+*Last updated: 2026-05-29 — vFix9 shipped*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -24,7 +24,8 @@
 | vFix5 | Home button rescue; FSRS-accurate due/new KPIs; ⚔️ Study Now quick-launch button | ✅ | 8d9a9fa |
 | vFix6 | **KE orb overlap fix** — 5-pass separation algorithm; starting radius raised to 68px so orbs spread at p=0 | ✅ | 16076b9 |
 | vFix7 | **Session missed-cards summary** — "Missed this session (N)" list in end modal; reads last/rating from progress | ✅ | 16076b9 |
-| vFix8 | **Bug: vFix5 used p.reps (never set) → fixed to seen_count**; mastery stats panel (Mastered/Learning/Retention); streak; weak-system chips → Atlas | ✅ | 3b6edbc |
+| vFix8 | **Bug: vFix5 used p.reps (never set) → fixed to seen_count**; mastery stats panel (Mastered/Learning/Retention); streak; weak-system chips | ✅ | 3b6edbc |
+| vFix9 | **Bug: chips called showAtlasScreen → fixed to naLaunchSysReview**; "Drill N Missed Cards" button in end modal; drill cardPool filter + home() cleanup | ✅ | 019f554 |
 
 ## Remaining Items
 
