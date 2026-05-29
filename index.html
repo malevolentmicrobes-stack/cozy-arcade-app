@@ -17277,6 +17277,92 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix35: Study Pinned Cards button + vFix34 accuracy clamp -->
+<style id="vFix35-css">
+#cozyPinnedBtn529 {
+  display: none;
+  width: 100%;
+  max-width: 360px;
+  margin: 6px auto 0;
+  padding: 9px 14px;
+  background: linear-gradient(135deg, rgba(234,179,8,0.15), rgba(245,201,122,0.15));
+  border: 1px solid rgba(234,179,8,0.38);
+  border-radius: 10px;
+  color: #fbbf24;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.02em;
+  box-sizing: border-box;
+}
+#cozyPinnedBtn529:hover { background: linear-gradient(135deg, rgba(234,179,8,0.26), rgba(245,201,122,0.26)); }
+#cozyPinnedBtn529.visible { display: block; }
+</style>
+<script id="vFix35-pinned-js">(function(){
+  'use strict';
+  if(window.__vFix35Pinned) return;
+  window.__vFix35Pinned = true;
+
+  /* Clamp vFix34 accuracy badges that exceeded 100% due to legacy data */
+  function clampAccBadges(){
+    document.querySelectorAll('.v34-acc').forEach(function(el){
+      var n = parseInt(el.textContent, 10);
+      if(n > 100){ el.textContent = '100%'; }
+    });
+  }
+
+  function getPinnedIds(){
+    var prog = window.phase3State && window.phase3State.progress;
+    if(!prog) return [];
+    return Object.keys(prog).filter(function(id){
+      return prog[id].pinned === true;
+    });
+  }
+
+  function renderPinned(){
+    var btn = document.getElementById('cozyPinnedBtn529');
+    if(!btn) return;
+    var ids = getPinnedIds();
+    if(!ids.length){ btn.classList.remove('visible'); return; }
+    btn.textContent = '📌 Study Pinned (' + ids.length + ' cards)';
+    btn.classList.add('visible');
+  }
+
+  function launchPinned(){
+    var ids = getPinnedIds();
+    if(!ids.length) return;
+    window.__cozyDrillSet529 = new Set(ids);
+    var s = document.getElementById('startSolo');
+    if(s) s.click();
+  }
+
+  function injectPinnedBtn(){
+    if(document.getElementById('cozyPinnedBtn529')) return;
+    var anchor = document.getElementById('cozyDrillWeakBtn529');
+    if(!anchor) return;
+    var btn = document.createElement('button');
+    btn.id = 'cozyPinnedBtn529';
+    btn.addEventListener('click', launchPinned);
+    anchor.parentNode.insertBefore(btn, anchor.nextSibling);
+    renderPinned();
+  }
+
+  var _prevKpis35 = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis35) _prevKpis35.apply(this, arguments);
+    try{ renderPinned(); }catch(e){}
+    try{ clampAccBadges(); }catch(e){}
+  };
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', injectPinnedBtn);
+  } else {
+    setTimeout(injectPinnedBtn, 460);
+  }
+})();
+</script>
+
 <!-- vFix34: Per-system accuracy badge on Board Readiness Map rows -->
 <style id="vFix34-css">
 .v34-acc {
