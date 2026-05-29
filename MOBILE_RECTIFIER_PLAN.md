@@ -37,6 +37,7 @@
 | vFix18 | **📌 Pin toggle in reveal** — Pin/Pinned button in controls row of Solo + KE reveal; toggles p.pinned, calls saveState(); refreshes per card via MutationObserver | ✅ | 3ec71c6 |
 | vFix19 | **🔁 Later flag in reveal + Study Flagged end modal** — queues cards mid-game into __cozyFlagQueue529; end modal shows "Study Flagged (N)" drill button if queue non-empty | ✅ | b80f21f |
 | vFix20 | **Daily Goal tracker** — compact progress bar on home (between mastery stats + weak chips); goal picker 10/20/30/50 (default 20, persists); bar turns green on completion | ✅ | a382b5b |
+| vFix21 | **✏️ Quick Note on Board Pearl** — ✏️ button on pearl fires at 110ms; inline textarea; saves to progress.user_one_thing + saveState(); user note overrides deck pearl text; creates pearl for user-note-only cards | ✅ | 772761f |
 
 ## Remaining Items
 
