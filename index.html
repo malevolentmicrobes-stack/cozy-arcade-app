@@ -17277,6 +17277,158 @@ setTimeout(scan,800);
 }
 </style>
 
+<!-- vFix40: 30-day study calendar (expandable below 7-day heatmap) -->
+<style id="vFix40-css">
+#cozyCalendar529 {
+  max-width: 360px;
+  margin: 4px auto 0;
+  box-sizing: border-box;
+}
+.v40-toggle {
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(148,163,184,0.45);
+  cursor: pointer;
+  padding: 2px 0 4px;
+  user-select: none;
+  letter-spacing: 0.04em;
+}
+.v40-toggle:hover { color: rgba(148,163,184,0.75); }
+.v40-body { display: none; }
+.v40-body.open { display: block; }
+.v40-dow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.v40-dow span {
+  text-align: center;
+  font-size: 9px;
+  color: rgba(148,163,184,0.4);
+  letter-spacing: 0.02em;
+}
+.v40-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.v40-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: rgba(148,163,184,0.1);
+  cursor: default;
+}
+.v40-cell.v40-empty { background: transparent; }
+.v40-cell.v40-today { outline: 1.5px solid #22d3ee; outline-offset: 1px; }
+</style>
+<script id="vFix40-calendar-js">(function(){
+  'use strict';
+  if(window.__vFix40Cal) return;
+  window.__vFix40Cal = true;
+
+  var CAL_KEY = 'cozy_cal30_v40';
+  var DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  function getGoal(){
+    return parseInt(localStorage.getItem('cozy_dailygoal_v20')||'20', 10) || 20;
+  }
+
+  function buildMap(){
+    var map = {}, now = Date.now(), today = new Date().toISOString().slice(0,10);
+    for(var i = 29; i >= 0; i--){
+      map[new Date(now - i*86400000).toISOString().slice(0,10)] = 0;
+    }
+    var prog = window.phase3State && window.phase3State.progress;
+    if(prog) Object.values(prog).forEach(function(p){
+      var ls = p.last_seen_at || p.last;
+      if(ls){ var d = ls.slice(0,10); if(d in map) map[d]++; }
+    });
+    return map;
+  }
+
+  function cellColor(count, goal){
+    if(!count) return 'rgba(148,163,184,0.1)';
+    if(count >= goal) return '#22c55e';
+    if(count >= Math.ceil(goal/2)) return '#22d3ee';
+    return '#f5c97a';
+  }
+
+  function render(){
+    var wrap = document.getElementById('cozyCalendar529');
+    if(!wrap) return;
+    var goal = getGoal();
+    var map  = buildMap();
+    var days = Object.keys(map).sort();
+    var today = new Date().toISOString().slice(0,10);
+
+    /* Determine padding: day-of-week of first day */
+    var firstDow = new Date(days[0] + 'T12:00:00').getDay();
+    var cells = '';
+    for(var p = 0; p < firstDow; p++) cells += '<div class="v40-cell v40-empty"></div>';
+    days.forEach(function(d){
+      var count = map[d];
+      var bg    = cellColor(count, goal);
+      var isToday = d === today ? ' v40-today' : '';
+      var label = d + ': ' + count + ' card' + (count===1?'':'s');
+      cells += '<div class="v40-cell' + isToday + '" style="background:' + bg + '" title="' + label + '"></div>';
+    });
+
+    var dowRow = DOW.map(function(d){ return '<span>' + d + '</span>'; }).join('');
+    var body = wrap.querySelector('.v40-body');
+    if(body) body.innerHTML = '<div class="v40-dow">' + dowRow + '</div><div class="v40-grid">' + cells + '</div>';
+  }
+
+  function inject(){
+    if(document.getElementById('cozyCalendar529')) return;
+    var anchor = document.getElementById('cozyHeatmap529');
+    if(!anchor) return;
+
+    var wrap = document.createElement('div');
+    wrap.id = 'cozyCalendar529';
+
+    var toggle = document.createElement('span');
+    toggle.className = 'v40-toggle';
+
+    var body = document.createElement('div');
+    body.className = 'v40-body';
+
+    var expanded = localStorage.getItem(CAL_KEY) === '1';
+    if(expanded){ body.classList.add('open'); toggle.textContent = '▲ hide 30-day'; }
+    else { toggle.textContent = '▼ 30-day view'; }
+
+    toggle.addEventListener('click', function(){
+      var isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      toggle.textContent = isOpen ? '▼ 30-day view' : '▲ hide 30-day';
+      localStorage.setItem(CAL_KEY, isOpen ? '0' : '1');
+      if(!isOpen) render();
+    });
+
+    wrap.appendChild(toggle);
+    wrap.appendChild(body);
+    anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
+    if(expanded) render();
+  }
+
+  var _prevKpis40 = window.updateKpis;
+  window.updateKpis = function(){
+    if(_prevKpis40) _prevKpis40.apply(this, arguments);
+    try{
+      var body = document.querySelector('#cozyCalendar529 .v40-body');
+      if(body && body.classList.contains('open')) render();
+    }catch(e){}
+  };
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', inject);
+  } else {
+    setTimeout(inject, 420);
+  }
+})();
+</script>
+
 <!-- vFix39: Progress backup reminder toast (once per day, after session) -->
 <style id="vFix39-css">
 #cozyBackupToast529 {
