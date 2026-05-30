@@ -13825,4 +13825,42 @@ setTimeout(boot160,900);
   }
 }
 </style>
+<style id="vHUD-single-row">
+/* Convert 2-row HUD grid → 1 flex row.
+   Frees ~40px of soloTrack height, which lowers the runner below the choices. */
+@media (max-width: 900px), (orientation: landscape) and (max-height: 560px) {
+  .gameHud {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 10px !important;
+    min-height: 48px !important;
+  }
+  .hudStats371 {
+    flex: 1 1 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+  .hudActions371 {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 5px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  /* Larger tap targets for pause/exit */
+  .hudActions371 .hudIconButton371 {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+}
+</style>
 </body></html>
