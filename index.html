@@ -15583,13 +15583,18 @@ setTimeout(scan,800);
   setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 2800);
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     RECTIFIER 2026-05-29 — 6 essential patches consolidated + no-deck UX
+     Patches: vFix9 vFix10 vFix11 vFix13 vFix22 vFix27
+     All prior afternoon patches (vFix12, vFix14–vFix41, vFix42, vFix43) removed.
+     ONE block. No more cascades.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- vFix9: fix weak-system chip onclick + Drill Missed Cards mode -->
 <style id="vFix9-css">
-/* vFix9: mobile layout for mastery stats + drill button */
 @media (max-width: 480px) {
-  #cozyMasteryStats529 {
-    gap: 5px;
-    padding: 10px 12px;
-  }
+  #cozyMasteryStats529 { gap: 5px; padding: 10px 12px; }
   .cms-stat-n { font-size: 15px; }
   .cms-stat-l { font-size: 8px; }
   .cms-divider { height: 22px; }
@@ -15611,11 +15616,9 @@ setTimeout(scan,800);
 #cozyDrillBtn529:hover { border-color: rgba(103,232,249,.60); }
 </style>
 <script id="vFix9-drill-js">
-/* vFix9: fix chip onclick → naLaunchSysReview; add Drill Missed button */
 (function(){
   'use strict';
 
-  /* ── 1. Patch weak-system chips to use naLaunchSysReview ── */
   function patchChips(){
     document.querySelectorAll('#cozyWeakSystems529 .cws-chip').forEach(function(btn){
       if(btn.dataset.vFix9) return;
@@ -15631,12 +15634,10 @@ setTimeout(scan,800);
           try{ window.naSelectedSys = sys; window.showAtlasScreen && window.showAtlasScreen(); }catch(err){}
         }
       };
-      /* Update title to clarify action */
       btn.title = 'Start Solo filtered to ' + sys + ' due/hard cards';
     });
   }
 
-  /* Run after each updateKpis renders chips */
   var _prevKpis9 = window.updateKpis;
   window.updateKpis = function(){
     if(_prevKpis9) _prevKpis9.apply(this, arguments);
@@ -15645,7 +15646,6 @@ setTimeout(scan,800);
   setTimeout(patchChips, 1200);
   setTimeout(patchChips, 3000);
 
-  /* ── 2. Drill Missed Cards mode ── */
   function getSessionMissed(){
     var sess = window['__cozySession529'];
     if(!sess || !sess.start) return [];
@@ -15665,7 +15665,6 @@ setTimeout(scan,800);
     return missed;
   }
 
-  /* Wrap cardPool once to support drill mode */
   (function installDrillFilter(){
     if(window.cardPool && !window.cardPool.__vFix9Drill){
       var _pool = window.cardPool;
@@ -15673,11 +15672,8 @@ setTimeout(scan,800);
         var arr = _pool.apply(this, arguments);
         var drillSet = window['__cozyDrillSet529'];
         if(drillSet && drillSet.size){
-          var filtered = arr.filter(function(c){
-            return drillSet.has(c.id || c.qid || c.card_id);
-          });
+          var filtered = arr.filter(function(c){ return drillSet.has(c.id || c.qid || c.card_id); });
           if(filtered.length) return filtered;
-          /* All drill cards exhausted — clear and return full pool */
           window['__cozyDrillSet529'] = null;
         }
         return arr;
@@ -15686,7 +15682,6 @@ setTimeout(scan,800);
     }
   })();
 
-  /* Clear drill mode on home navigation */
   (function patchHomeForDrill(){
     if(window.home && !window.home.__vFix9Clear){
       var _home = window.home;
@@ -15698,7 +15693,6 @@ setTimeout(scan,800);
     }
   })();
 
-  /* Inject Drill button into end modal */
   function injectDrillButton(){
     var missed = getSessionMissed();
     var box = document.getElementById('endBox') || document.querySelector('.endBox');
@@ -15714,17 +15708,13 @@ setTimeout(scan,800);
       window['__cozyDrillSet529'] = ids;
       var endEl = document.getElementById('end');
       if(endEl) endEl.classList.add('hidden');
-      setTimeout(function(){
-        try{ if(window.startSolo) window.startSolo(); }catch(e){}
-      }, 80);
+      setTimeout(function(){ try{ if(window.startSolo) window.startSolo(); }catch(e){} }, 80);
     };
-    /* Insert after missed summary, before controls */
     var controls = box.querySelector('.controls');
     if(controls) box.insertBefore(btn, controls);
     else box.appendChild(btn);
   }
 
-  /* Hook into endRun one more time */
   setTimeout(function(){
     if(window.endRun && !window.endRun.__vFix9){
       var _end = window.endRun;
@@ -15737,81 +15727,31 @@ setTimeout(scan,800);
   }, 1000);
 })();
 </script>
+
+<!-- vFix10: Board Readiness Map (per-system mastery bars + ABIM countdown in header) -->
 <style id="vFix10-css">
-/* vFix10: Board Readiness Map panel */
-#cozySysMap529 {
-  margin: 10px 0 0;
-  display: none;
-}
+#cozySysMap529 { margin: 10px 0 0; display: none; }
 .csm-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(103,232,249,.14);
-  border-radius: 12px;
-  padding: 10px 14px;
-  color: #9aa0b8;
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: .06em;
-  cursor: pointer;
-  text-transform: uppercase;
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; background: rgba(255,255,255,.04);
+  border: 1px solid rgba(103,232,249,.14); border-radius: 12px;
+  padding: 10px 14px; color: #9aa0b8; font-size: 12px; font-weight: 950;
+  letter-spacing: .06em; cursor: pointer; text-transform: uppercase;
 }
 .csm-toggle:hover { border-color: rgba(103,232,249,.3); color: #c8d0e7; }
-.csm-body {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 7px;
-}
+.csm-body { display: none; flex-direction: column; gap: 5px; margin-top: 7px; }
 .csm-body.open { display: flex; }
 .csm-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 10px;
-  padding: 7px 11px;
-  cursor: pointer;
-  transition: border-color .15s;
-  text-align: left;
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px; padding: 7px 11px; cursor: pointer;
+  transition: border-color .15s; text-align: left;
 }
 .csm-row:hover { border-color: rgba(103,232,249,.28); background: rgba(103,232,249,.04); }
-.csm-name {
-  flex: 1;
-  color: #c8d0e7;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-.csm-bar {
-  flex: 2;
-  height: 5px;
-  background: rgba(255,255,255,.08);
-  border-radius: 999px;
-  overflow: hidden;
-  min-width: 48px;
-}
-.csm-bar-fill {
-  height: 100%;
-  border-radius: 999px;
-}
-.csm-pct {
-  color: #9aa0b8;
-  font-size: 10px;
-  font-weight: 950;
-  font-family: Orbitron, monospace;
-  white-space: nowrap;
-  min-width: 34px;
-  text-align: right;
-}
+.csm-name { flex: 1; color: #c8d0e7; font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.csm-bar { flex: 2; height: 5px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden; min-width: 48px; }
+.csm-bar-fill { height: 100%; border-radius: 999px; }
+.csm-pct { color: #9aa0b8; font-size: 10px; font-weight: 950; font-family: Orbitron, monospace; white-space: nowrap; min-width: 34px; text-align: right; }
 @media (max-width: 480px) {
   .csm-toggle { font-size: 11px; padding: 9px 12px; }
   .csm-name { font-size: 11px; }
@@ -15819,28 +15759,13 @@ setTimeout(scan,800);
 }
 </style>
 <script id="vFix10-sysmap-js">
-/* vFix10: Board Readiness Map (per-system mastery) + ABIM countdown */
 (function(){
   'use strict';
-
   var ABIM_DATE = new Date('2026-08-01T00:00:00');
-
   function isSeen(p){ return !!(p && (Number(p.seen_count||0)>0 || Number(p.reviewed_count||0)>0 || p.seen)); }
-
-  function getAbimDays(){
-    var now = new Date(); now.setHours(0,0,0,0);
-    return Math.max(0, Math.ceil((ABIM_DATE - now) / 86400000));
-  }
-
-  function barColor(pct){
-    if(pct >= 70) return '#22c55e';
-    if(pct >= 35) return '#f5c97a';
-    return '#fb5876';
-  }
-
-  function escH(s){
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+  function getAbimDays(){ var now = new Date(); now.setHours(0,0,0,0); return Math.max(0, Math.ceil((ABIM_DATE - now) / 86400000)); }
+  function barColor(pct){ return pct >= 70 ? '#22c55e' : pct >= 35 ? '#f5c97a' : '#fb5876'; }
+  function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   function getSysMastery(){
     var prog = window.phase3State && window.phase3State.progress;
@@ -15854,66 +15779,42 @@ setTimeout(scan,800);
       if(!map[sys]) map[sys] = {total:0, mastered:0, seen:0};
       map[sys].total++;
       var p = prog[id];
-      if(isSeen(p)){
-        map[sys].seen++;
-        if(Number(p.interval_days||0) >= 21) map[sys].mastered++;
-      }
+      if(isSeen(p)){ map[sys].seen++; if(Number(p.interval_days||0) >= 21) map[sys].mastered++; }
     });
-    return Object.keys(map)
-      .filter(function(s){ return map[s].total >= 2; })
-      .map(function(s){
-        var d = map[s];
-        return {sys:s, total:d.total, mastered:d.mastered, seen:d.seen,
-                pct: d.total>0 ? Math.round(d.mastered/d.total*100) : 0};
-      })
+    return Object.keys(map).filter(function(s){ return map[s].total >= 2; })
+      .map(function(s){ var d = map[s]; return {sys:s, total:d.total, mastered:d.mastered, seen:d.seen, pct: d.total>0 ? Math.round(d.mastered/d.total*100) : 0}; })
       .sort(function(a,b){ return a.pct - b.pct; });
   }
 
   function renderSysMap(){
     var weakDiv = document.getElementById('cozyWeakSystems529');
     if(!weakDiv) return;
-
     var wrapper = document.getElementById('cozySysMap529');
-    if(!wrapper){
-      wrapper = document.createElement('div');
-      wrapper.id = 'cozySysMap529';
-      weakDiv.parentNode.insertBefore(wrapper, weakDiv.nextSibling);
-    }
-
+    if(!wrapper){ wrapper = document.createElement('div'); wrapper.id = 'cozySysMap529'; weakDiv.parentNode.insertBefore(wrapper, weakDiv.nextSibling); }
     var data = getSysMastery();
     if(!data || !data.length){ wrapper.style.display = 'none'; return; }
     wrapper.style.display = 'block';
-
     var expanded = localStorage.getItem('cozy_sysmap_v10') === '1';
     var totalMastered = data.reduce(function(a,d){ return a+d.mastered; }, 0);
-    var totalCards   = data.reduce(function(a,d){ return a+d.total; }, 0);
-    var overallPct   = totalCards > 0 ? Math.round(totalMastered/totalCards*100) : 0;
-    var abimDays     = getAbimDays();
-    var toggleArrow  = expanded ? '▲' : '▼';
-
+    var totalCards = data.reduce(function(a,d){ return a+d.total; }, 0);
+    var overallPct = totalCards > 0 ? Math.round(totalMastered/totalCards*100) : 0;
+    var abimDays = getAbimDays();
     wrapper.innerHTML =
       '<button class="csm-toggle" id="csmToggle529">' +
-        '<span>📊 Board Readiness &nbsp;' +
-          '<span style="color:'+barColor(overallPct)+';font-variant-numeric:tabular-nums">'+overallPct+'% mastered</span>' +
-          ' &nbsp;·&nbsp; ' +
-          '<span style="color:#f5c97a">'+abimDays+'d to ABIM</span>' +
-        '</span>' +
-        '<span class="csm-arrow" style="font-size:13px;color:#67e8f9">'+toggleArrow+'</span>' +
+        '<span>📊 Board Readiness &nbsp;<span style="color:'+barColor(overallPct)+';font-variant-numeric:tabular-nums">'+overallPct+'% mastered</span>' +
+        ' &nbsp;·&nbsp; <span style="color:#f5c97a">'+abimDays+'d to ABIM</span></span>' +
+        '<span class="csm-arrow" style="font-size:13px;color:#67e8f9">'+(expanded?'▲':'▼')+'</span>' +
       '</button>' +
       '<div class="csm-body'+(expanded?' open':'')+'" id="csmBody529">' +
-        data.map(function(d){
-          var col = barColor(d.pct);
+        data.map(function(d){ var col = barColor(d.pct);
           return '<button class="csm-row" data-sys="'+escH(d.sys)+'">' +
             '<span class="csm-name" title="'+escH(d.sys)+'">'+escH(d.sys)+'</span>' +
             '<span class="csm-bar"><span class="csm-bar-fill" style="width:'+d.pct+'%;background:'+col+'"></span></span>' +
             '<span class="csm-pct" style="color:'+col+'">'+d.pct+'%</span>' +
           '</button>';
-        }).join('') +
-      '</div>';
-
+        }).join('') + '</div>';
     var toggleBtn = document.getElementById('csmToggle529');
-    var body      = document.getElementById('csmBody529');
-
+    var body = document.getElementById('csmBody529');
     if(toggleBtn && body){
       toggleBtn.onclick = function(e){
         e.stopPropagation();
@@ -15924,85 +15825,51 @@ setTimeout(scan,800);
         localStorage.setItem('cozy_sysmap_v10', isOpen ? '0' : '1');
       };
     }
-
     wrapper.querySelectorAll('.csm-row[data-sys]').forEach(function(btn){
       btn.onclick = function(e){
         e.stopPropagation();
         var sys = btn.dataset.sys;
         if(!sys) return;
-        if(window.naLaunchSysReview){
-          window.naLaunchSysReview(sys);
-        } else {
-          document.documentElement.dataset.cozyLaunchSystem = sys;
-          document.documentElement.dataset.cozyLaunchScope  = 'due';
-          setTimeout(function(){ try{ window.startSolo && window.startSolo(); }catch(e2){} }, 80);
-        }
+        if(window.naLaunchSysReview){ window.naLaunchSysReview(sys); }
+        else { document.documentElement.dataset.cozyLaunchSystem = sys; document.documentElement.dataset.cozyLaunchScope = 'due'; setTimeout(function(){ try{ window.startSolo && window.startSolo(); }catch(e2){} }, 80); }
       };
     });
   }
 
-  /* Chain into updateKpis */
   var _prevKpis10 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis10) _prevKpis10.apply(this, arguments);
-    try{ renderSysMap(); }catch(e){}
-  };
-
+  window.updateKpis = function(){ if(_prevKpis10) _prevKpis10.apply(this, arguments); try{ renderSysMap(); }catch(e){} };
   setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 1800);
   setTimeout(function(){ try{ window.updateKpis && window.updateKpis(); }catch(e){} }, 4000);
 })();
 </script>
+
+<!-- vFix11: Board Pearl (one_thing) auto-shown in Solo + KE reveal panels -->
 <style id="vFix11-css">
-/* vFix11: Board Pearl (one_thing) shown in Solo + KE reveal panel */
 #cozyPearl529 {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  display: flex; flex-direction: column; gap: 5px;
   margin: 12px 0 14px;
   background: linear-gradient(135deg, rgba(245,201,122,.12), rgba(245,201,122,.05));
-  border: 1px solid rgba(245,201,122,.30);
-  border-radius: 14px;
-  padding: 11px 16px;
+  border: 1px solid rgba(245,201,122,.30); border-radius: 14px; padding: 11px 16px;
 }
-.cp-label {
-  font-family: Orbitron, monospace;
-  text-transform: uppercase;
-  letter-spacing: .13em;
-  font-size: 9px;
-  color: #f5c97a;
-  font-weight: 900;
-}
-.cp-text {
-  font-size: clamp(12px, 3.4vw, 15px);
-  font-weight: 700;
-  color: #fef5e0;
-  line-height: 1.42;
-}
+.cp-label { font-family: Orbitron, monospace; text-transform: uppercase; letter-spacing: .13em; font-size: 9px; color: #f5c97a; font-weight: 900; }
+.cp-text { font-size: clamp(12px, 3.4vw, 15px); font-weight: 700; color: #fef5e0; line-height: 1.42; }
 </style>
 <script id="vFix11-pearl-js">
-/* vFix11: Inject "Board Pearl" (one_thing) into Solo + KE reveal panels via MutationObserver */
 (function(){
   'use strict';
-
   function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
   function injectPearl(revealEl){
     var c = window.current;
     var pearl = c && (String(c.one_thing||'').trim());
-    /* Remove any previous pearl first */
-    var old = document.getElementById('cozyPearl529');
-    if(old) old.remove();
+    var old = document.getElementById('cozyPearl529'); if(old) old.remove();
     if(!pearl) return;
-    /* Find rating bar — insert pearl before it */
     var ratings = revealEl.querySelector('[id$="RevealRatings"],[id*="Ratings"]');
     if(!ratings) return;
     var div = document.createElement('div');
     div.id = 'cozyPearl529';
-    div.innerHTML = '<span class="cp-label">📌 Board Pearl</span>' +
-                    '<span class="cp-text">' + esc(pearl) + '</span>';
+    div.innerHTML = '<span class="cp-label">📌 Board Pearl</span><span class="cp-text">' + esc(pearl) + '</span>';
     ratings.parentNode.insertBefore(div, ratings);
   }
-
   function watchReveal(id){
     var el = document.getElementById(id);
     if(!el || el.dataset.v11obs) return;
@@ -16010,187 +15877,34 @@ setTimeout(scan,800);
     var obs = new MutationObserver(function(mutations){
       mutations.forEach(function(m){
         if(m.type === 'attributes' && m.attributeName === 'class'){
-          if(!el.classList.contains('hidden')){
-            /* Give reveal() 80ms to populate dx/trigger text first */
-            setTimeout(function(){ try{ injectPearl(el); }catch(e){} }, 80);
-          }
+          if(!el.classList.contains('hidden')) setTimeout(function(){ try{ injectPearl(el); }catch(e){} }, 80);
         }
       });
     });
     obs.observe(el, { attributes: true, attributeFilter: ['class'] });
   }
-
-  function init(){
-    watchReveal('soloReveal');
-    watchReveal('domainReveal');
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  function init(){ watchReveal('soloReveal'); watchReveal('domainReveal'); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
-<style id="vFix12-css">
-/* vFix12: Session stats row in end modal */
-#cozySessionStats529 {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 0 0 14px;
-  padding: 12px 16px;
-  background: rgba(103,232,249,.06);
-  border: 1px solid rgba(103,232,249,.16);
-  border-radius: 14px;
-}
-.css-summary {
-  font-size: 14px;
-  font-weight: 950;
-  color: #c8eeff;
-  letter-spacing: .04em;
-}
-.css-breakdown {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-}
-.css-again { color: #fb5876; }
-.css-hard  { color: #f5c97a; }
-.css-good  { color: #67e8f9; }
-.css-easy  { color: #22c55e; }
-@media (max-width: 480px) {
-  .css-summary { font-size: 12px; }
-  .css-breakdown { font-size: 11px; gap: 10px; }
-}
-</style>
-<script id="vFix12-stats-js">
-/* vFix12: Session accuracy stats injected into end modal */
-(function(){
-  'use strict';
 
-  function getSessionStats(){
-    var sess = window['__cozySession529'];
-    if(!sess || !sess.start) return null;
-    var startMs = sess.start;
-    var prog = window.phase3State && window.phase3State.progress;
-    var cards = window.appCards ? window.appCards() : [];
-    if(!prog || !cards.length) return null;
-    var counts = {again:0, hard:0, good:0, easy:0, total:0};
-    cards.forEach(function(c){
-      var id = c.id || c.qid || c.card_id;
-      var p = prog[id]; if(!p) return;
-      var raw = p.last || p.last_seen_at; if(!raw) return;
-      if(new Date(raw).getTime() < startMs) return;
-      counts.total++;
-      var r = String(p.rating || p.last_rating || '').toLowerCase();
-      if(r === 'again' || r === 'wrong') counts.again++;
-      else if(r === 'hard') counts.hard++;
-      else if(r === 'good') counts.good++;
-      else if(r === 'easy') counts.easy++;
-    });
-    return counts.total > 0 ? counts : null;
-  }
-
-  function injectSessionStats(){
-    var box = document.getElementById('endBox') || document.querySelector('.endBox');
-    if(!box) return;
-    var old = document.getElementById('cozySessionStats529'); if(old) old.remove();
-    var s = getSessionStats();
-    if(!s) return;
-    var correctN = s.good + s.easy;
-    var pct = Math.round(correctN / s.total * 100);
-    var pctColor = pct >= 75 ? '#22c55e' : pct >= 55 ? '#f5c97a' : '#fb5876';
-    var div = document.createElement('div');
-    div.id = 'cozySessionStats529';
-    div.innerHTML =
-      '<div class="css-summary">' +
-        s.total + ' cards studied &nbsp;·&nbsp; ' +
-        '<span style="color:' + pctColor + '">' + pct + '% correct</span>' +
-      '</div>' +
-      '<div class="css-breakdown">' +
-        (s.again > 0 ? '<span class="css-again">🔄 ' + s.again + ' again</span>' : '') +
-        (s.hard  > 0 ? '<span class="css-hard">⚡ '  + s.hard  + ' hard</span>'  : '') +
-        (s.good  > 0 ? '<span class="css-good">✓ '   + s.good  + ' good</span>'  : '') +
-        (s.easy  > 0 ? '<span class="css-easy">★ '   + s.easy  + ' easy</span>'  : '') +
-      '</div>';
-    /* Insert after #endBody (Score • Streak), before missed summary */
-    var endBody = document.getElementById('endBody');
-    var missedDiv = document.getElementById('cozyMissedSummary529');
-    if(missedDiv) box.insertBefore(div, missedDiv);
-    else if(endBody && endBody.nextSibling) box.insertBefore(div, endBody.nextSibling);
-    else box.insertBefore(div, box.firstChild);
-  }
-
-  /* Chain endRun */
-  setTimeout(function(){
-    if(window.endRun && !window.endRun.__vFix12){
-      var _prev = window.endRun;
-      window.endRun = endRun = function(t){
-        if(_prev) _prev.apply(this, arguments);
-        try{ injectSessionStats(); }catch(e){}
-      };
-      window.endRun.__vFix12 = true;
-    }
-  }, 1100);
-})();
-</script>
+<!-- vFix13: Session size picker (10 / 25 / 50 / All) -->
 <style id="vFix13-css">
-/* vFix13: Session size picker */
-#cozySessionPicker529 {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-.csp-label {
-  font-size: 11px;
-  font-weight: 900;
-  color: #6b7594;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  margin-right: 2px;
-}
-.csp-btn {
-  padding: 6px 13px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.11);
-  color: #9aa0b8;
-  font-size: 12px;
-  font-weight: 950;
-  cursor: pointer;
-  transition: border-color .15s, color .15s, background .15s;
-}
+#cozySessionPicker529 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.csp-label { font-size: 11px; font-weight: 900; color: #6b7594; letter-spacing: .06em; text-transform: uppercase; margin-right: 2px; }
+.csp-btn { padding: 6px 13px; border-radius: 999px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.11); color: #9aa0b8; font-size: 12px; font-weight: 950; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
 .csp-btn:hover { border-color: rgba(103,232,249,.3); color: #c8eeff; }
-.csp-btn.active {
-  background: rgba(103,232,249,.12);
-  border-color: rgba(103,232,249,.45);
-  color: #67e8f9;
-}
+.csp-btn.active { background: rgba(103,232,249,.12); border-color: rgba(103,232,249,.45); color: #67e8f9; }
 </style>
 <script id="vFix13-sesslimit-js">
-/* vFix13: Session size limit — caps cardPool at N due-weighted cards */
 (function(){
   'use strict';
-
   var LS_KEY = 'cozy_sessmax_v13';
-  var OPTIONS = [10, 25, 50, null]; /* null = All */
-
-  /* Load saved preference */
-  function loadMax(){
-    var raw = localStorage.getItem(LS_KEY);
-    if(raw === 'null' || raw === null || raw === '') return null;
-    var n = parseInt(raw, 10);
-    return isNaN(n) ? null : n;
-  }
+  var OPTIONS = [10, 25, 50, null];
+  function loadMax(){ var raw = localStorage.getItem(LS_KEY); if(raw === 'null' || raw === null || raw === '') return null; var n = parseInt(raw, 10); return isNaN(n) ? null : n; }
   window['__cozySessionMax529'] = loadMax();
 
-  /* Wrap cardPool to apply limit (runs after FSRS sort + drill filter) */
   (function installLimit(){
     if(window.cardPool && !window.cardPool.__vFix13Limit){
       var _pool = window.cardPool;
@@ -16204,2415 +15918,80 @@ setTimeout(scan,800);
     }
   })();
 
-  /* Render picker UI */
+  function updateActive(div){ var cur = window['__cozySessionMax529']; div.querySelectorAll('.csp-btn').forEach(function(btn){ var raw = btn.dataset.max; var n = raw === 'null' ? null : parseInt(raw, 10); btn.classList.toggle('active', n === cur); }); }
+
   function renderPicker(){
     var quickBtn = document.getElementById('cozyQuickStudy529');
     if(!quickBtn) return;
     var existing = document.getElementById('cozySessionPicker529');
-    if(existing) { updateActive(existing); return; }
-    var div = document.createElement('div');
-    div.id = 'cozySessionPicker529';
+    if(existing){ updateActive(existing); return; }
+    var div = document.createElement('div'); div.id = 'cozySessionPicker529';
     var html = '<span class="csp-label">Cards:</span>';
-    OPTIONS.forEach(function(n){
-      var label = n === null ? 'All' : String(n);
-      html += '<button class="csp-btn" data-max="' + (n===null?'null':n) + '">' + label + '</button>';
-    });
+    OPTIONS.forEach(function(n){ var label = n === null ? 'All' : String(n); html += '<button class="csp-btn" data-max="'+(n===null?'null':n)+'">'+label+'</button>'; });
     div.innerHTML = html;
     quickBtn.parentNode.insertBefore(div, quickBtn.nextSibling);
     updateActive(div);
-    div.addEventListener('click', function(e){
-      var btn = e.target.closest('.csp-btn');
-      if(!btn) return;
-      var raw = btn.dataset.max;
-      var max = raw === 'null' ? null : parseInt(raw, 10);
-      window['__cozySessionMax529'] = max;
-      localStorage.setItem(LS_KEY, String(max));
-      updateActive(div);
-    });
+    div.addEventListener('click', function(e){ var btn = e.target.closest('.csp-btn'); if(!btn) return; var raw = btn.dataset.max; var max = raw === 'null' ? null : parseInt(raw, 10); window['__cozySessionMax529'] = max; localStorage.setItem(LS_KEY, String(max)); updateActive(div); });
   }
 
-  function updateActive(div){
-    var cur = window['__cozySessionMax529'];
-    div.querySelectorAll('.csp-btn').forEach(function(btn){
-      var raw = btn.dataset.max;
-      var n = raw === 'null' ? null : parseInt(raw, 10);
-      btn.classList.toggle('active', n === cur);
-    });
-  }
-
-  /* Toast on game start */
   document.addEventListener('click', function(e){
     if(!e.target.closest('#startSolo,#startDomain,#cozyQuickStudy529')) return;
     var max = window['__cozySessionMax529'];
     if(!max) return;
-    setTimeout(function(){
-      try{ if(window.toast) window.toast('Studying first ' + max + ' cards'); }catch(ex){}
-    }, 180);
+    setTimeout(function(){ try{ if(window.toast) window.toast('Studying first ' + max + ' cards'); }catch(ex){} }, 180);
   }, true);
 
-  /* Init after kpis render */
+  var _prevKpis13 = window.updateKpis;
+  window.updateKpis = function(){ if(_prevKpis13) _prevKpis13.apply(this, arguments); setTimeout(renderPicker, 60); };
   setTimeout(renderPicker, 1300);
   setTimeout(renderPicker, 3000);
-
-  /* Re-render after each updateKpis (in case home re-renders) */
-  var _prevKpis13 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis13) _prevKpis13.apply(this, arguments);
-    setTimeout(renderPicker, 60);
-  };
-})();
-</script>
-<style id="vFix14-css">
-/* vFix14: Explanation <details> in reveal panel */
-#cozyExplanation529 {
-  margin: 10px 0 12px;
-  border: 1px solid rgba(160,160,210,.18);
-  border-radius: 12px;
-  overflow: hidden;
-}
-#cozyExplanation529 summary.ce-summary {
-  padding: 9px 14px;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: #9aa0b8;
-  cursor: pointer;
-  background: rgba(255,255,255,.04);
-  list-style: none;
-}
-#cozyExplanation529 summary.ce-summary::-webkit-details-marker { display: none; }
-#cozyExplanation529[open] summary.ce-summary { color: #c8d0e7; border-bottom: 1px solid rgba(160,160,210,.14); }
-#cozyExplanation529 .ce-text {
-  padding: 10px 14px 12px;
-  font-size: clamp(12px, 3.2vw, 14px);
-  line-height: 1.52;
-  color: #d0d8f0;
-  white-space: pre-wrap;
-}
-</style>
-<script id="vFix14-explain-js">
-/* vFix14: Show explanation in reveal panel — auto-opens on wrong answers */
-(function(){
-  'use strict';
-
-  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  function injectExplanation(revealEl){
-    var c = window.current;
-    var explanation = c && String(c.explanation || '').trim();
-    /* Remove previous */
-    var old = document.getElementById('cozyExplanation529');
-    if(old) old.remove();
-    if(!explanation) return;
-    /* Detect wrong answer by reveal title */
-    var titleEl = revealEl.querySelector('[id$="RevealTitle"]');
-    var isWrong = titleEl && /learning|wrong|incorrect/i.test(titleEl.textContent);
-    /* Build <details> element */
-    var det = document.createElement('details');
-    det.id = 'cozyExplanation529';
-    if(isWrong) det.open = true; /* auto-expand on wrong */
-    det.innerHTML = '<summary class="ce-summary">📖 Explanation</summary>' +
-                    '<div class="ce-text">' + esc(explanation) + '</div>';
-    /* Insert after #cozyPearl529, or before ratings if no pearl */
-    var pearlEl = document.getElementById('cozyPearl529');
-    var ratingsEl = revealEl.querySelector('[id$="RevealRatings"],[id*="Ratings"]');
-    if(!ratingsEl) return;
-    var anchor = (pearlEl && pearlEl.parentNode === ratingsEl.parentNode)
-                 ? pearlEl.nextSibling
-                 : ratingsEl;
-    ratingsEl.parentNode.insertBefore(det, anchor);
-  }
-
-  function watchReveal14(id){
-    var el = document.getElementById(id);
-    if(!el || el.dataset.v14obs) return;
-    el.dataset.v14obs = '1';
-    var obs = new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        if(m.type === 'attributes' && m.attributeName === 'class'){
-          if(!el.classList.contains('hidden')){
-            /* 150ms gives vFix11 pearl (80ms) time to run first */
-            setTimeout(function(){ try{ injectExplanation(el); }catch(e){} }, 150);
-          }
-        }
-      });
-    });
-    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  function init14(){
-    watchReveal14('soloReveal');
-    watchReveal14('domainReveal');
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init14);
-  } else {
-    init14();
-  }
-})();
-</script>
-<style id="vFix15-css">
-/* vFix15: Leech / struggle warning badge in reveal */
-#cozyLeechWarn529 {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin: 6px auto 0;
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .06em;
-  pointer-events: none;
-}
-#cozyLeechWarn529.warn-amber {
-  background: rgba(245,201,122,.14);
-  border: 1px solid rgba(245,201,122,.38);
-  color: #f5c97a;
-}
-#cozyLeechWarn529.warn-red {
-  background: rgba(251,88,118,.14);
-  border: 1px solid rgba(251,88,118,.38);
-  color: #fb7e9a;
-}
-</style>
-<script id="vFix15-leech-js">
-/* vFix15: Show struggle warning badge in reveal when card has lapses ≥ 2 */
-(function(){
-  'use strict';
-
-  function injectLeechWarn(revealEl){
-    var c = window.current;
-    var prog = window.phase3State && window.phase3State.progress;
-    var old = document.getElementById('cozyLeechWarn529');
-    if(old) old.remove();
-    if(!c || !prog) return;
-    var id = c.id || c.qid || c.card_id;
-    var p = prog[id];
-    var lapses = p ? Number(p.lapses || 0) : 0;
-    if(lapses < 2) return;
-    /* Find the diagnosis element to insert after */
-    var dxEl = revealEl.querySelector('[id$="RevealDx"],[id$="Dx"],[id$="dx"]');
-    if(!dxEl) return;
-    var badge = document.createElement('div');
-    badge.id = 'cozyLeechWarn529';
-    badge.className = lapses >= 4 ? 'warn-red' : 'warn-amber';
-    badge.textContent = (lapses >= 4 ? '💀' : '⚠️') + ' Missed ' + lapses + ' time' + (lapses !== 1 ? 's' : '') + ' — encode carefully';
-    dxEl.parentNode.insertBefore(badge, dxEl.nextSibling);
-  }
-
-  function watchReveal15(id){
-    var el = document.getElementById(id);
-    if(!el || el.dataset.v15obs) return;
-    el.dataset.v15obs = '1';
-    var obs = new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        if(m.type === 'attributes' && m.attributeName === 'class'){
-          if(!el.classList.contains('hidden')){
-            /* 40ms — fires before vFix11 (80ms) and vFix14 (150ms) */
-            setTimeout(function(){ try{ injectLeechWarn(el); }catch(e){} }, 40);
-          }
-        }
-      });
-    });
-    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  function init15(){
-    watchReveal15('soloReveal');
-    watchReveal15('domainReveal');
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init15);
-  } else {
-    init15();
-  }
-})();
-</script>
-<style id="vFix16-css">
-/* vFix16: session card counter overlay */
-#cozyCardCounter529 {
-  position: fixed;
-  bottom: 18px;
-  right: 16px;
-  z-index: 42;
-  padding: 5px 12px;
-  background: rgba(3,8,24,.82);
-  border: 1px solid rgba(103,232,249,.22);
-  border-radius: 999px;
-  color: #9aa0b8;
-  font-size: 11px;
-  font-weight: 950;
-  font-family: Orbitron, monospace;
-  letter-spacing: .08em;
-  pointer-events: none;
-  display: none;
-}
-#cozyCardCounter529.visible { display: block; }
-#cozyCardCounter529 .ccc-n { color: #67e8f9; }
-</style>
-<script id="vFix16-fixes-js">
-/* vFix16: (1) scroll-to-top on reveal open; (2) session card counter */
-(function(){
-  'use strict';
-
-  /* ── 1. Scroll-to-top: synchronous observer fires before all content injections ── */
-  function watchScrollReset(id){
-    var el = document.getElementById(id);
-    if(!el || el.dataset.v16scroll) return;
-    el.dataset.v16scroll = '1';
-    new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        if(m.attributeName === 'class' && !el.classList.contains('hidden')){
-          el.scrollTop = 0; /* synchronous — happens before 40ms/80ms/150ms injections */
-        }
-      });
-    }).observe(el, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  /* ── 2. Session card counter ── */
-  var COUNT_KEY = '__cozyCardCount529';
-  window[COUNT_KEY] = 0;
-
-  function getCounter(){
-    var el = document.getElementById('cozyCardCounter529');
-    if(!el){
-      el = document.createElement('div');
-      el.id = 'cozyCardCounter529';
-      document.body.appendChild(el);
-    }
-    return el;
-  }
-
-  function updateCounter(){
-    var el = getCounter();
-    var n = window[COUNT_KEY] || 0;
-    var max = window['__cozySessionMax529'];
-    /* Only show when inside a game screen */
-    var inGame = !!(document.querySelector('.game:not(.hidden)') ||
-                    !document.getElementById('solo').classList.contains('hidden') ||
-                    !document.getElementById('domain').classList.contains('hidden'));
-    if(!inGame || n === 0){ el.classList.remove('visible'); return; }
-    el.classList.add('visible');
-    el.innerHTML = max
-      ? '<span class="ccc-n">' + n + '</span>/' + max
-      : '<span class="ccc-n">' + n + '</span> cards';
-  }
-
-  /* Wrap advance() to count completions — minimal wrapper only */
-  (function installCardCount(){
-    if(window.advance && !window.advance.__v16Count){
-      var _adv = window.advance;
-      window.advance = advance = function(which){
-        window[COUNT_KEY] = (window[COUNT_KEY] || 0) + 1;
-        setTimeout(updateCounter, 60);
-        return _adv.apply(this, arguments);
-      };
-      window.advance.__v16Count = true;
-    }
-  })();
-
-  /* Clear count on home navigation */
-  (function patchHomeForCount(){
-    if(window.home && !window.home.__v16Home){
-      var _home = window.home;
-      window.home = home = function(){
-        window[COUNT_KEY] = 0;
-        var el = document.getElementById('cozyCardCounter529');
-        if(el) el.classList.remove('visible');
-        return _home.apply(this, arguments);
-      };
-      window.home.__v16Home = true;
-    }
-  })();
-
-  /* Periodically sync counter visibility (game start / end) */
-  setInterval(updateCounter, 2000);
-
-  function init16(){
-    watchScrollReset('soloReveal');
-    watchScrollReset('domainReveal');
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init16);
-  } else {
-    init16();
-  }
-})();
-</script>
-
-<!-- vFix17: "Today: N cards studied" stat in mastery panel -->
-<script id="vFix17-today-js">(function(){
-  'use strict';
-  if(window.cardPool && window.cardPool.__vFix17Today) return;
-
-  function todayStr(){
-    return new Date().toISOString().slice(0,10);
-  }
-
-  function countToday(){
-    var prog = window.phase3State && window.phase3State.progress;
-    if(!prog) return 0;
-    var today = todayStr();
-    var n = 0;
-    Object.keys(prog).forEach(function(id){
-      var p = prog[id];
-      var last = String(p.last_seen_at || p.last || '');
-      if(last.slice(0,10) === today) n++;
-    });
-    return n;
-  }
-
-  function injectTodayStat(){
-    var panel = document.getElementById('cozyMasteryStats529');
-    if(!panel) return;
-    var old = document.getElementById('cozyTodayStat529');
-    if(old) old.remove();
-    var n = countToday();
-    var div = document.createElement('div');
-    div.id = 'cozyTodayStat529';
-    div.className = 'cms-stat';
-    div.style.cssText = n > 0
-      ? 'border-color:#22c55e33'
-      : 'border-color:#ffffff11;opacity:0.55';
-    div.innerHTML =
-      '<span class="cms-stat-n" style="color:' + (n > 0 ? '#22c55e' : '#aaa') + '">' + n + '</span>' +
-      '<span class="cms-stat-l">Today</span>';
-    panel.appendChild(div);
-  }
-
-  var _prevKpis17 = window.updateKpis;
-  window.updateKpis = function(){
-    var r = _prevKpis17 && _prevKpis17.apply(this, arguments);
-    setTimeout(injectTodayStat, 0);
-    return r;
-  };
-  window.updateKpis.__vFix17Today = true;
-  window.cardPool = window.cardPool || function(){};
-  window.cardPool.__vFix17Today = true;
-
-  // Fire once on load
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(injectTodayStat, 600);
-    });
-  } else {
-    setTimeout(injectTodayStat, 600);
-  }
-})();
-</script>
-
-<!-- vFix18: Pin toggle button in reveal panel controls -->
-<style id="vFix18-css">
-.cpin-btn {
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #94a3b8;
-  border-radius: 20px;
-  padding: 6px 16px;
-  min-height: 38px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  flex-shrink: 0;
-}
-.cpin-btn.pinned {
-  background: rgba(120,53,15,0.28);
-  border-color: rgba(245,201,122,0.55);
-  color: #f5c97a;
-}
-.cpin-btn:active { transform: scale(0.94); }
-</style>
-<script id="vFix18-pin-js">(function(){
-  'use strict';
-  if(window.__vFix18Pin) return;
-  window.__vFix18Pin = true;
-
-  function getCardId(){
-    var c = window.current;
-    return c && (c.id || c.qid || c.card_id) || null;
-  }
-
-  function injectPinBtn(revealEl){
-    var btnId = 'cozyPinBtn529_' + revealEl.id;
-    var old = document.getElementById(btnId);
-    if(old) old.remove();
-
-    var id = getCardId();
-    if(!id) return;
-
-    var prog = window.phase3State && window.phase3State.progress;
-    var p = prog && prog[id];
-    var isPinned = !!(p && p.pinned);
-
-    var btn = document.createElement('button');
-    btn.id = btnId;
-    btn.className = 'cpin-btn' + (isPinned ? ' pinned' : '');
-    btn.textContent = isPinned ? '📌 Pinned' : '📌 Pin';
-
-    btn.onclick = function(e){
-      e.stopPropagation();
-      var cid = getCardId();
-      if(!cid) return;
-      var pr = window.phase3State && window.phase3State.progress;
-      if(!pr) return;
-      if(!pr[cid]) pr[cid] = {};
-      pr[cid].pinned = !pr[cid].pinned;
-      var now = pr[cid].pinned;
-      btn.className = 'cpin-btn' + (now ? ' pinned' : '');
-      btn.textContent = now ? '📌 Pinned' : '📌 Pin';
-      if(window.saveState) window.saveState();
-    };
-
-    var controls = revealEl.querySelector('.controls');
-    if(controls) {
-      controls.style.gap = '10px';
-      controls.appendChild(btn);
-    }
-  }
-
-  function attachObs18(id){
-    var el = document.getElementById(id);
-    if(!el || el.dataset.v18obs) return;
-    el.dataset.v18obs = '1';
-    new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        if(m.attributeName === 'class' && !el.classList.contains('hidden')){
-          setTimeout(function(){ injectPinBtn(el); }, 20);
-        }
-      });
-    }).observe(el, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  function init18(){
-    attachObs18('soloReveal');
-    attachObs18('domainReveal');
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init18);
-  } else {
-    init18();
-  }
-})();
-</script>
-
-<!-- vFix19: 🔁 Flag for later in reveal + Study Flagged button in end modal -->
-<style id="vFix19-css">
-.cflag-btn {
-  background: #0f1e2a;
-  border: 1px solid #1e3a4a;
-  color: #64748b;
-  border-radius: 20px;
-  padding: 6px 16px;
-  min-height: 38px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  flex-shrink: 0;
-}
-.cflag-btn.flagged {
-  background: rgba(14,116,144,0.22);
-  border-color: rgba(34,211,238,0.45);
-  color: #22d3ee;
-}
-.cflag-btn:active { transform: scale(0.94); }
-#cozyFlagDrillBtn529 {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  background: rgba(14,116,144,0.22);
-  border: 1px solid rgba(34,211,238,0.35);
-  color: #22d3ee;
-  font-size: 14px;
-  text-align: center;
-  cursor: pointer;
-}
-#cozyFlagDrillBtn529:active { opacity: 0.7; }
-</style>
-<script id="vFix19-flag-js">(function(){
-  'use strict';
-  if(window.__vFix19Flag) return;
-  window.__vFix19Flag = true;
-
-  window.__cozyFlagQueue529 = new Set();
-
-  function getCardId(){
-    var c = window.current;
-    return c && (c.id || c.qid || c.card_id) || null;
-  }
-
-  function injectFlagBtn(revealEl){
-    var btnId = 'cozyFlagBtn529_' + revealEl.id;
-    var old = document.getElementById(btnId);
-    if(old) old.remove();
-    var id = getCardId();
-    if(!id) return;
-    var isFlagged = window.__cozyFlagQueue529.has(id);
-    var btn = document.createElement('button');
-    btn.id = btnId;
-    btn.className = 'cflag-btn' + (isFlagged ? ' flagged' : '');
-    btn.textContent = isFlagged ? '🔁 Queued' : '🔁 Later';
-    btn.onclick = function(e){
-      e.stopPropagation();
-      var cid = getCardId();
-      if(!cid) return;
-      if(window.__cozyFlagQueue529.has(cid)){
-        window.__cozyFlagQueue529.delete(cid);
-        btn.className = 'cflag-btn';
-        btn.textContent = '🔁 Later';
-      } else {
-        window.__cozyFlagQueue529.add(cid);
-        btn.className = 'cflag-btn flagged';
-        btn.textContent = '🔁 Queued';
-      }
-    };
-    var controls = revealEl.querySelector('.controls');
-    if(controls) controls.appendChild(btn);
-  }
-
-  function attachObs19(id){
-    var el = document.getElementById(id);
-    if(!el || el.dataset.v19obs) return;
-    el.dataset.v19obs = '1';
-    new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        if(m.attributeName === 'class' && !el.classList.contains('hidden')){
-          setTimeout(function(){ injectFlagBtn(el); }, 30);
-        }
-      });
-    }).observe(el, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  /* Wrap endRun — outermost in chain (after vFix12) */
-  if(window.endRun && !window.endRun.__vFix19){
-    var _prevEnd19 = window.endRun;
-    window.endRun = endRun = function(t){
-      var r = _prevEnd19.apply(this, arguments);
-      var fq = window.__cozyFlagQueue529;
-      if(!fq || !fq.size) return r;
-      var old = document.getElementById('cozyFlagDrillBtn529');
-      if(old) old.remove();
-      var btn = document.createElement('button');
-      btn.id = 'cozyFlagDrillBtn529';
-      btn.textContent = '🔁 Study Flagged (' + fq.size + ')';
-      btn.onclick = function(){
-        window['__cozyDrillSet529'] = new Set(fq);
-        window.__cozyFlagQueue529 = new Set();
-        document.getElementById('end').classList.add('hidden');
-        setTimeout(function(){ window.startSolo && window.startSolo(); }, 80);
-      };
-      /* Insert after vFix9 drill button, or after endBody */
-      var anchor = document.getElementById('cozyDrillBtn529') ||
-                   document.getElementById('endBody');
-      if(anchor && anchor.parentNode){
-        anchor.parentNode.insertBefore(btn, anchor.nextSibling);
-      }
-      return r;
-    };
-    window.endRun.__vFix19 = true;
-  }
-
-  /* Clear flag queue on fresh game start (not drill launches) */
-  var _prevSS19 = window.startSolo;
-  if(_prevSS19 && !_prevSS19.__vFix19SS){
-    window.startSolo = function(){
-      if(!window['__cozyDrillSet529']) window.__cozyFlagQueue529 = new Set();
-      return _prevSS19.apply(this, arguments);
-    };
-    window.startSolo.__vFix19SS = true;
-  }
-
-  function init19(){
-    attachObs19('soloReveal');
-    attachObs19('domainReveal');
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init19);
-  } else {
-    init19();
-  }
-})();
-</script>
-
-<!-- vFix20: Daily Goal tracker on home screen -->
-<style id="vFix20-css">
-#cozyDailyGoal529 {
-  margin: 6px 0 4px;
-  padding: 9px 12px;
-  background: #0d1925;
-  border: 1px solid #1e2d3d;
-  border-radius: 10px;
-}
-.cdg-header {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: #64748b;
-  margin-bottom: 7px;
-  flex-wrap: wrap;
-}
-.cdg-header-label { margin-right: 2px; }
-.cdg-pill {
-  background: #1e293b;
-  border: 1px solid #2d3f52;
-  color: #64748b;
-  border-radius: 10px;
-  padding: 1px 8px;
-  font-size: 11px;
-  cursor: pointer;
-  min-height: 22px;
-  transition: background 0.12s, color 0.12s;
-}
-.cdg-pill.active {
-  background: rgba(29,78,216,0.22);
-  border-color: rgba(96,165,250,0.45);
-  color: #60a5fa;
-}
-.cdg-pill:active { transform: scale(0.93); }
-.cdg-bar-wrap {
-  width: 100%;
-  height: 5px;
-  background: #1e293b;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 5px;
-}
-.cdg-bar-fill {
-  height: 100%;
-  background: #3b82f6;
-  border-radius: 3px;
-  transition: width 0.5s;
-}
-.cdg-bar-fill.done { background: #22c55e; }
-.cdg-label {
-  font-size: 11px;
-  color: #64748b;
-  text-align: right;
-}
-.cdg-label.done { color: #22c55e; }
-</style>
-<script id="vFix20-goal-js">(function(){
-  'use strict';
-  if(window.__vFix20Goal) return;
-  window.__vFix20Goal = true;
-
-  var LS_KEY = 'cozy_dailygoal_v20';
-  var OPTS = [10, 20, 30, 50];
-  var DEFAULT = 20;
-
-  function loadGoal(){
-    var v = parseInt(localStorage.getItem(LS_KEY), 10);
-    return OPTS.indexOf(v) >= 0 ? v : DEFAULT;
-  }
-  function saveGoal(n){
-    localStorage.setItem(LS_KEY, String(n));
-    window.__cozyDailyGoalVal529 = n;
-  }
-  function getGoal(){
-    if(!window.__cozyDailyGoalVal529){
-      window.__cozyDailyGoalVal529 = loadGoal();
-    }
-    return window.__cozyDailyGoalVal529;
-  }
-  function countToday(){
-    var prog = window.phase3State && window.phase3State.progress;
-    if(!prog) return 0;
-    var today = new Date().toISOString().slice(0,10);
-    var n = 0;
-    Object.keys(prog).forEach(function(id){
-      var p = prog[id];
-      var last = String(p.last_seen_at || p.last || '');
-      if(last.slice(0,10) === today) n++;
-    });
-    return n;
-  }
-
-  function renderGoal(){
-    var mastPanel = document.getElementById('cozyMasteryStats529');
-    if(!mastPanel) return;
-
-    var div = document.getElementById('cozyDailyGoal529');
-    if(!div){
-      div = document.createElement('div');
-      div.id = 'cozyDailyGoal529';
-      mastPanel.parentNode.insertBefore(div, mastPanel.nextSibling);
-    }
-
-    var goal = getGoal();
-    var done = countToday();
-    var pct  = goal ? Math.min(100, Math.round(done / goal * 100)) : 0;
-    var won  = done >= goal;
-
-    div.innerHTML =
-      '<div class="cdg-header">' +
-        '<span class="cdg-header-label">Daily Goal</span>' +
-        OPTS.map(function(g){
-          return '<button class="cdg-pill' + (g === goal ? ' active' : '') +
-                 '" data-g="' + g + '">' + g + '</button>';
-        }).join('') +
-      '</div>' +
-      '<div class="cdg-bar-wrap">' +
-        '<div class="cdg-bar-fill' + (won ? ' done' : '') +
-             '" style="width:' + pct + '%"></div>' +
-      '</div>' +
-      '<div class="cdg-label' + (won ? ' done' : '') + '">' +
-        done + ' / ' + goal + ' today' + (won ? ' ✓' : '') +
-      '</div>';
-
-    div.querySelectorAll('.cdg-pill').forEach(function(btn){
-      btn.onclick = function(e){
-        e.stopPropagation();
-        saveGoal(parseInt(btn.dataset.g, 10));
-        renderGoal();
-      };
-    });
-  }
-
-  var _prevKpis20 = window.updateKpis;
-  window.updateKpis = function(){
-    var r = _prevKpis20 && _prevKpis20.apply(this, arguments);
-    setTimeout(renderGoal, 0);
-    return r;
-  };
-  window.updateKpis.__vFix20Goal = true;
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(renderGoal, 700);
-    });
-  } else {
-    setTimeout(renderGoal, 700);
-  }
-})();
-</script>
-
-<!-- vFix21: ✏️ Quick Note inline editor on Board Pearl in reveal -->
-<style id="vFix21-css">
-.cp-edit {
-  background: none;
-  border: none;
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0 3px;
-  opacity: 0.55;
-  vertical-align: middle;
-  line-height: 1;
-}
-.cp-edit:active { opacity: 1; transform: scale(0.9); }
-#cozyNoteInline529 {
-  margin-top: 7px;
-}
-.cni-ta {
-  width: 100%;
-  min-height: 62px;
-  background: #0b1c27;
-  border: 1px solid rgba(34,211,238,0.3);
-  border-radius: 8px;
-  color: #e2e8f0;
-  font-size: 13px;
-  line-height: 1.45;
-  padding: 8px 10px;
-  resize: vertical;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-.cni-ta:focus { outline: none; border-color: rgba(34,211,238,0.6); }
-.cni-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 5px;
-  justify-content: flex-end;
-}
-.cni-save {
-  background: rgba(34,211,238,0.18);
-  border: 1px solid rgba(34,211,238,0.35);
-  color: #22d3ee;
-  border-radius: 8px;
-  padding: 5px 14px;
-  min-height: 32px;
-  font-size: 12px;
-  cursor: pointer;
-}
-.cni-cancel {
-  background: none;
-  border: 1px solid #334155;
-  color: #64748b;
-  border-radius: 8px;
-  padding: 5px 12px;
-  min-height: 32px;
-  font-size: 12px;
-  cursor: pointer;
-}
-</style>
-<script id="vFix21-quicknote-js">(function(){
-  'use strict';
-  if(window.__vFix21Note) return;
-  window.__vFix21Note = true;
-
-  function getCardId(){
-    var c = window.current;
-    return c && (c.id || c.qid || c.card_id) || null;
-  }
-
-  function enhancePearl(revealEl){
-    var id = getCardId();
-    if(!id) return;
-
-    var prog = window.phase3State && window.phase3State.progress;
-    var p    = prog && prog[id];
-    var userNote  = p && String(p.user_one_thing || '').trim();
-    var deckPearl = window.current && String(window.current.one_thing || '').trim();
-
-    var pearlDiv = document.getElementById('cozyPearl529');
-
-    /* If no pearl injected by vFix11 but user has a note, create one */
-    if(!pearlDiv && userNote){
-      var ratings = revealEl.querySelector('[id$="RevealRatings"],[id*="Ratings"]');
-      if(!ratings) return;
-      pearlDiv = document.createElement('div');
-      pearlDiv.id = 'cozyPearl529';
-      pearlDiv.innerHTML =
-        '<span class="cp-label">📌 Board Pearl</span>' +
-        '<span class="cp-text">' + userNote + '</span>';
-      ratings.parentNode.insertBefore(pearlDiv, ratings);
-    }
-
-    if(!pearlDiv) return;
-    if(pearlDiv.dataset.v21) return; /* already enhanced this card */
-    pearlDiv.dataset.v21 = '1';
-
-    /* Override pearl text with user note if available */
-    var cpText = pearlDiv.querySelector('.cp-text');
-    if(cpText && userNote) cpText.textContent = userNote;
-
-    /* Add edit button */
-    var editBtn = document.createElement('button');
-    editBtn.className = 'cp-edit';
-    editBtn.textContent = '✏️';
-    editBtn.title = 'Edit note';
-    editBtn.onclick = function(e){
-      e.stopPropagation();
-      var existing = document.getElementById('cozyNoteInline529');
-      if(existing){ existing.remove(); return; }
-
-      var currentNote = (prog && prog[id] && String(prog[id].user_one_thing || '').trim()) || deckPearl || '';
-
-      var inlineDiv = document.createElement('div');
-      inlineDiv.id = 'cozyNoteInline529';
-      inlineDiv.innerHTML =
-        '<textarea class="cni-ta" rows="3" placeholder="Your mnemonic or pearl...">' +
-        currentNote +
-        '</textarea>' +
-        '<div class="cni-actions">' +
-          '<button class="cni-cancel">✕ Cancel</button>' +
-          '<button class="cni-save">✓ Save</button>' +
-        '</div>';
-
-      pearlDiv.parentNode.insertBefore(inlineDiv, pearlDiv.nextSibling);
-
-      var ta = inlineDiv.querySelector('.cni-ta');
-      ta.focus();
-      ta.setSelectionRange(ta.value.length, ta.value.length);
-      setTimeout(function(){ ta.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 60);
-
-      function doSave(){
-        var v = ta.value.trim();
-        if(!prog[id]) prog[id] = {};
-        prog[id].user_one_thing = v;
-        if(window.current) window.current.one_thing = v || deckPearl;
-        if(window.saveState) window.saveState();
-        if(cpText) cpText.textContent = v || deckPearl;
-        inlineDiv.remove();
-      }
-
-      inlineDiv.querySelector('.cni-save').onclick = function(e){ e.stopPropagation(); doSave(); };
-      inlineDiv.querySelector('.cni-cancel').onclick = function(e){ e.stopPropagation(); inlineDiv.remove(); };
-      ta.addEventListener('keydown', function(e){
-        if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ e.preventDefault(); doSave(); }
-        if(e.key === 'Escape'){ inlineDiv.remove(); }
-      });
-    };
-
-    pearlDiv.appendChild(editBtn);
-  }
-
-  function attachObs21(id){
-    var el = document.getElementById(id);
-    if(!el || el.dataset.v21obs) return;
-    el.dataset.v21obs = '1';
-    new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        if(m.attributeName === 'class' && !el.classList.contains('hidden')){
-          setTimeout(function(){ enhancePearl(el); }, 110);
-        }
-      });
-    }).observe(el, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  function init21(){
-    attachObs21('soloReveal');
-    attachObs21('domainReveal');
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init21);
-  } else {
-    init21();
-  }
 })();
 </script>
 
 <!-- vFix22: ABIM countdown chip in hero section -->
 <style id="vFix22-css">
 #cozyAbimCdown529 {
-  display: inline-block;
-  margin-top: 14px;
-  padding: 5px 16px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  border: 1px solid rgba(245,201,122,0.35);
-  background: rgba(245,201,122,0.08);
-  color: #f5c97a;
-  cursor: default;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-  text-align: center;
+  display: inline-block; margin-top: 14px; padding: 5px 16px;
+  border-radius: 999px; font-size: 13px; font-weight: 900; letter-spacing: 0.06em;
+  border: 1px solid rgba(245,201,122,0.35); background: rgba(245,201,122,0.08);
+  color: #f5c97a; cursor: default; transition: background 0.2s, color 0.2s, border-color 0.2s; text-align: center;
 }
-#cozyAbimCdown529.urgent {
-  border-color: rgba(251,88,118,0.45);
-  background: rgba(251,88,118,0.10);
-  color: #fb5876;
-}
-#cozyAbimCdown529.done {
-  border-color: rgba(34,197,94,0.35);
-  background: rgba(34,197,94,0.08);
-  color: #4ade80;
-}
-#cozyAbimCdown529.muted {
-  border-color: rgba(148,163,184,0.20);
-  background: rgba(148,163,184,0.05);
-  color: #94a3b8;
-}
+#cozyAbimCdown529.urgent { border-color: rgba(251,88,118,0.45); background: rgba(251,88,118,0.10); color: #fb5876; }
+#cozyAbimCdown529.done  { border-color: rgba(34,197,94,0.35);  background: rgba(34,197,94,0.08);  color: #4ade80; }
+#cozyAbimCdown529.muted { border-color: rgba(148,163,184,0.20); background: rgba(148,163,184,0.05); color: #94a3b8; }
 </style>
 <script id="vFix22-cdown-js">(function(){
   'use strict';
   if(window.__vFix22Cdown) return;
   window.__vFix22Cdown = true;
-
-  /* ABIM boards: first week of August 2026 */
   var ABIM_TARGET = new Date('2026-08-04T08:00:00');
-
-  function daysTo(){
-    return Math.ceil((ABIM_TARGET - new Date()) / 86400000);
-  }
-
+  function daysTo(){ return Math.ceil((ABIM_TARGET - new Date()) / 86400000); }
   function updateChip(){
-    var chip = document.getElementById('cozyAbimCdown529');
-    if(!chip) return;
-    var d = daysTo();
-    chip.className = '';
-    if(d > 90){
-      chip.className = 'muted';
-      chip.textContent = '📅 ' + d + ' days · ABIM';
-    } else if(d > 30){
-      chip.textContent = '📅 ' + d + ' days · ABIM Aug 2026';
-    } else if(d > 0){
-      chip.className = 'urgent';
-      chip.textContent = '🔥 ' + d + ' days · ABIM Aug 2026';
-    } else if(d === 0){
-      chip.className = 'urgent';
-      chip.textContent = '🏆 ABIM Today — You Got This';
-    } else {
-      chip.className = 'done';
-      chip.textContent = '🎓 Post-boards · Keep Studying';
-    }
+    var chip = document.getElementById('cozyAbimCdown529'); if(!chip) return;
+    var d = daysTo(); chip.className = '';
+    if(d > 90){ chip.className = 'muted'; chip.textContent = '📅 ' + d + ' days · ABIM'; }
+    else if(d > 30){ chip.textContent = '📅 ' + d + ' days · ABIM Aug 2026'; }
+    else if(d > 0){ chip.className = 'urgent'; chip.textContent = '🔥 ' + d + ' days · ABIM Aug 2026'; }
+    else if(d === 0){ chip.className = 'urgent'; chip.textContent = '🏆 ABIM Today — You Got This'; }
+    else { chip.className = 'done'; chip.textContent = '🎓 Post-boards · Keep Studying'; }
   }
-
   function init22(){
     var hero = document.querySelector('#home .hero');
     if(!hero || document.getElementById('cozyAbimCdown529')) return;
-    var chip = document.createElement('div');
-    chip.id = 'cozyAbimCdown529';
-    hero.appendChild(chip);
-    updateChip();
-    setInterval(updateChip, 60000);
+    var chip = document.createElement('div'); chip.id = 'cozyAbimCdown529';
+    hero.appendChild(chip); updateChip(); setInterval(updateChip, 60000);
   }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init22);
-  } else {
-    init22();
-  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init22);
+  else init22();
 })();
 </script>
 
-<!-- vFix23 / C3: KE prompt card proportions — fix orb/prompt overlap on mobile -->
-<style id="vFix23-ke-mobile-css">
-/*
-  Root cause: .orbArena last set to inset:225px (class selector). promptBox
-  top:70px + max-height 29vh (244px on 844px) = bottom at 314px.
-  Orbs start at 225px → 89px hidden behind the card. Fix: #orbArena (ID
-  selector, beats all class rules at any specificity) pushed to 338px.
-  max-height capped to 25vh to reduce overlap on very tall phones.
-*/
-@media(max-width:760px){
-  .domain .promptBox,
-  .game.domain .promptBox {
-    max-height: 25vh !important;
-    overflow-y: auto !important;
-  }
-  #orbArena {
-    inset: 338px 0 0 !important;
-  }
-}
-</style>
-
-<!-- vFix40: 30-day study calendar (expandable below 7-day heatmap) -->
-<style id="vFix40-css">
-#cozyCalendar529 {
-  max-width: 360px;
-  margin: 4px auto 0;
-  box-sizing: border-box;
-}
-.v40-toggle {
-  display: block;
-  text-align: center;
-  font-size: 11px;
-  color: rgba(148,163,184,0.45);
-  cursor: pointer;
-  padding: 2px 0 4px;
-  user-select: none;
-  letter-spacing: 0.04em;
-}
-.v40-toggle:hover { color: rgba(148,163,184,0.75); }
-.v40-body { display: none; }
-.v40-body.open { display: block; }
-.v40-dow {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-  margin-bottom: 2px;
-}
-.v40-dow span {
-  text-align: center;
-  font-size: 9px;
-  color: rgba(148,163,184,0.4);
-  letter-spacing: 0.02em;
-}
-.v40-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
-.v40-cell {
-  aspect-ratio: 1;
-  border-radius: 3px;
-  background: rgba(148,163,184,0.1);
-  cursor: default;
-}
-.v40-cell.v40-empty { background: transparent; }
-.v40-cell.v40-today { outline: 1.5px solid #22d3ee; outline-offset: 1px; }
-</style>
-<script id="vFix40-calendar-js">(function(){
-  'use strict';
-  if(window.__vFix40Cal) return;
-  window.__vFix40Cal = true;
-
-  var CAL_KEY = 'cozy_cal30_v40';
-  var DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-
-  function getGoal(){
-    return parseInt(localStorage.getItem('cozy_dailygoal_v20')||'20', 10) || 20;
-  }
-
-  function buildMap(){
-    var map = {}, now = Date.now(), today = new Date().toISOString().slice(0,10);
-    for(var i = 29; i >= 0; i--){
-      map[new Date(now - i*86400000).toISOString().slice(0,10)] = 0;
-    }
-    var prog = window.phase3State && window.phase3State.progress;
-    if(prog) Object.values(prog).forEach(function(p){
-      var ls = p.last_seen_at || p.last;
-      if(ls){ var d = ls.slice(0,10); if(d in map) map[d]++; }
-    });
-    return map;
-  }
-
-  function cellColor(count, goal){
-    if(!count) return 'rgba(148,163,184,0.1)';
-    if(count >= goal) return '#22c55e';
-    if(count >= Math.ceil(goal/2)) return '#22d3ee';
-    return '#f5c97a';
-  }
-
-  function render(){
-    var wrap = document.getElementById('cozyCalendar529');
-    if(!wrap) return;
-    var goal = getGoal();
-    var map  = buildMap();
-    var days = Object.keys(map).sort();
-    var today = new Date().toISOString().slice(0,10);
-
-    /* Determine padding: day-of-week of first day */
-    var firstDow = new Date(days[0] + 'T12:00:00').getDay();
-    var cells = '';
-    for(var p = 0; p < firstDow; p++) cells += '<div class="v40-cell v40-empty"></div>';
-    days.forEach(function(d){
-      var count = map[d];
-      var bg    = cellColor(count, goal);
-      var isToday = d === today ? ' v40-today' : '';
-      var label = d + ': ' + count + ' card' + (count===1?'':'s');
-      cells += '<div class="v40-cell' + isToday + '" style="background:' + bg + '" title="' + label + '"></div>';
-    });
-
-    var dowRow = DOW.map(function(d){ return '<span>' + d + '</span>'; }).join('');
-    var body = wrap.querySelector('.v40-body');
-    if(body) body.innerHTML = '<div class="v40-dow">' + dowRow + '</div><div class="v40-grid">' + cells + '</div>';
-  }
-
-  function inject(){
-    if(document.getElementById('cozyCalendar529')) return;
-    var anchor = document.getElementById('cozyHeatmap529');
-    if(!anchor) return;
-
-    var wrap = document.createElement('div');
-    wrap.id = 'cozyCalendar529';
-
-    var toggle = document.createElement('span');
-    toggle.className = 'v40-toggle';
-
-    var body = document.createElement('div');
-    body.className = 'v40-body';
-
-    var expanded = localStorage.getItem(CAL_KEY) === '1';
-    if(expanded){ body.classList.add('open'); toggle.textContent = '▲ hide 30-day'; }
-    else { toggle.textContent = '▼ 30-day view'; }
-
-    toggle.addEventListener('click', function(){
-      var isOpen = body.classList.contains('open');
-      body.classList.toggle('open', !isOpen);
-      toggle.textContent = isOpen ? '▼ 30-day view' : '▲ hide 30-day';
-      localStorage.setItem(CAL_KEY, isOpen ? '0' : '1');
-      if(!isOpen) render();
-    });
-
-    wrap.appendChild(toggle);
-    wrap.appendChild(body);
-    anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
-    if(expanded) render();
-  }
-
-  var _prevKpis40 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis40) _prevKpis40.apply(this, arguments);
-    try{
-      var body = document.querySelector('#cozyCalendar529 .v40-body');
-      if(body && body.classList.contains('open')) render();
-    }catch(e){}
-  };
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', inject);
-  } else {
-    setTimeout(inject, 420);
-  }
-})();
-</script>
-
-<!-- vFix39: Progress backup reminder toast (once per day, after session) -->
-<style id="vFix39-css">
-#cozyBackupToast529 {
-  display: none;
-  position: fixed;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 200;
-  max-width: 340px;
-  width: calc(100% - 32px);
-  background: rgba(30,20,5,0.97);
-  border: 1px solid rgba(245,179,60,0.55);
-  border-radius: 12px;
-  padding: 11px 14px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-  display: none;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  color: #fde68a;
-}
-#cozyBackupToast529.show {
-  display: flex;
-  animation: v39FadeIn 0.25s ease;
-}
-@keyframes v39FadeIn { from{opacity:0;transform:translateX(-50%) translateY(-8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
-.v39-msg  { flex: 1; line-height: 1.35; }
-.v39-export {
-  padding: 5px 11px;
-  background: rgba(245,179,60,0.2);
-  border: 1px solid rgba(245,179,60,0.5);
-  border-radius: 7px;
-  color: #fbbf24;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.v39-export:hover { background: rgba(245,179,60,0.35); }
-.v39-dismiss {
-  font-size: 16px;
-  color: rgba(253,230,138,0.5);
-  cursor: pointer;
-  line-height: 1;
-  flex-shrink: 0;
-  padding: 0 2px;
-}
-.v39-dismiss:hover { color: #fde68a; }
-</style>
-<script id="vFix39-backup-js">(function(){
-  'use strict';
-  if(window.__vFix39Backup) return;
-  window.__vFix39Backup = true;
-
-  var BACKUP_KEY = 'cozy_backup_v39';
-  var autoTimer  = null;
-  var wasInGame  = false;
-
-  function todayStr(){ return new Date().toISOString().slice(0,10); }
-  function alreadyReminded(){ return localStorage.getItem(BACKUP_KEY) === todayStr(); }
-  function markReminded(){ localStorage.setItem(BACKUP_KEY, todayStr()); }
-
-  function getTodayCount(){
-    var prog  = window.phase3State && window.phase3State.progress;
-    if(!prog) return 0;
-    var today = todayStr();
-    return Object.values(prog).filter(function(p){
-      var ls = p.last_seen_at || p.last;
-      return ls && ls.slice(0,10) === today;
-    }).length;
-  }
-
-  function doExport(){
-    try{
-      if(typeof window.exportProgress351 === 'function') window.exportProgress351();
-      else if(typeof window.exportProgress17526 === 'function') window.exportProgress17526();
-    }catch(e){}
-    hideToast();
-    markReminded();
-  }
-
-  function hideToast(){
-    var t = document.getElementById('cozyBackupToast529');
-    if(t){ t.classList.remove('show'); }
-    clearTimeout(autoTimer);
-  }
-
-  function showToast(){
-    if(alreadyReminded()) return;
-    if(getTodayCount() < 5) return;
-    var t = document.getElementById('cozyBackupToast529');
-    if(!t) return;
-    markReminded();
-    t.classList.add('show');
-    autoTimer = setTimeout(hideToast, 10000);
-  }
-
-  function injectToast(){
-    if(document.getElementById('cozyBackupToast529')) return;
-    var el = document.createElement('div');
-    el.id = 'cozyBackupToast529';
-    el.innerHTML =
-      '<span class="v39-msg">💾 Back up your progress before closing</span>' +
-      '<button class="v39-export">Export</button>' +
-      '<span class="v39-dismiss" title="Dismiss">✕</span>';
-    el.querySelector('.v39-export').addEventListener('click', doExport);
-    el.querySelector('.v39-dismiss').addEventListener('click', function(){ hideToast(); markReminded(); });
-    document.body.appendChild(el);
-  }
-
-  function watchHome(){
-    var home = document.getElementById('home');
-    if(!home) return;
-    new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        if(m.attributeName !== 'class') return;
-        var hidden = home.classList.contains('hidden');
-        if(!hidden && wasInGame){
-          wasInGame = false;
-          setTimeout(showToast, 800);
-        }
-      });
-    }).observe(home, { attributes: true, attributeFilter: ['class'] });
-
-    ['solo','domain'].forEach(function(id){
-      var el = document.getElementById(id);
-      if(!el) return;
-      new MutationObserver(function(mutations){
-        mutations.forEach(function(m){
-          if(m.attributeName === 'class' && !el.classList.contains('hidden')){
-            wasInGame = true;
-          }
-        });
-      }).observe(el, { attributes: true, attributeFilter: ['class'] });
-    });
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ injectToast(); watchHome(); });
-  } else {
-    setTimeout(function(){ injectToast(); watchHome(); }, 300);
-  }
-})();
-</script>
-
-<!-- vFix38: Study Board Pearls — drill all cards with one_thing data -->
-<style id="vFix38-css">
-#cozyPearlsBtn529 {
-  display: none;
-  width: 100%;
-  max-width: 360px;
-  margin: 6px auto 0;
-  padding: 9px 14px;
-  background: linear-gradient(135deg, rgba(34,211,238,0.13), rgba(6,182,212,0.13));
-  border: 1px solid rgba(34,211,238,0.32);
-  border-radius: 10px;
-  color: #22d3ee;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-  letter-spacing: 0.02em;
-  box-sizing: border-box;
-}
-#cozyPearlsBtn529:hover { background: linear-gradient(135deg, rgba(34,211,238,0.24), rgba(6,182,212,0.24)); }
-#cozyPearlsBtn529.visible { display: block; }
-</style>
-<script id="vFix38-pearls-js">(function(){
-  'use strict';
-  if(window.__vFix38Pearls) return;
-  window.__vFix38Pearls = true;
-
-  function getPearlIds(){
-    var prog  = window.phase3State && window.phase3State.progress;
-    var cards = window.appCards ? window.appCards() : [];
-    return cards.filter(function(c){
-      var deckPearl  = (c.one_thing || '').trim();
-      var id         = window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
-      var userPearl  = (prog && prog[id] && prog[id].user_one_thing || '').trim();
-      return deckPearl || userPearl;
-    }).map(function(c){
-      return window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
-    }).filter(Boolean);
-  }
-
-  function renderPearls(){
-    var btn = document.getElementById('cozyPearlsBtn529');
-    if(!btn) return;
-    var ids = getPearlIds();
-    if(!ids.length){ btn.classList.remove('visible'); return; }
-    btn.textContent = '💎 Study Board Pearls (' + ids.length + ')';
-    btn.classList.add('visible');
-  }
-
-  function launchPearls(){
-    var ids = getPearlIds();
-    if(!ids.length) return;
-    window.__cozyDrillSet529 = new Set(ids);
-    var s = document.getElementById('startSolo');
-    if(s) s.click();
-  }
-
-  function injectPearlsBtn(){
-    if(document.getElementById('cozyPearlsBtn529')) return;
-    var anchor = document.getElementById('cozyPinnedBtn529');
-    if(!anchor){ anchor = document.getElementById('cozyDrillWeakBtn529'); }
-    if(!anchor) return;
-    var btn = document.createElement('button');
-    btn.id = 'cozyPearlsBtn529';
-    btn.addEventListener('click', launchPearls);
-    anchor.parentNode.insertBefore(btn, anchor.nextSibling);
-    renderPearls();
-  }
-
-  var _prevKpis38 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis38) _prevKpis38.apply(this, arguments);
-    try{ renderPearls(); }catch(e){}
-  };
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', injectPearlsBtn);
-  } else {
-    setTimeout(injectPearlsBtn, 470);
-  }
-})();
-</script>
-
-<!-- vFix37: Audio feedback on correct/incorrect ratings (opt-in) -->
-<style id="vFix37-css">
-#cozyAudioToggle529 {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  max-width: 360px;
-  margin: 8px auto 0;
-  cursor: pointer;
-  user-select: none;
-  font-size: 12px;
-  color: rgba(148,163,184,0.55);
-  letter-spacing: 0.03em;
-}
-#cozyAudioToggle529:hover { color: rgba(148,163,184,0.85); }
-#cozyAudioToggle529 .v37-icon { font-size: 14px; }
-</style>
-<script id="vFix37-audio-js">(function(){
-  'use strict';
-  if(window.__vFix37Audio) return;
-  window.__vFix37Audio = true;
-
-  var AUDIO_KEY = 'cozy_audio_v37';
-  var audioCtx  = null;
-  var enabled   = localStorage.getItem(AUDIO_KEY) === '1';
-
-  function getCtx(){
-    if(!audioCtx){
-      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
-    }
-    return audioCtx;
-  }
-
-  /* Prime AudioContext on first user gesture (browser autoplay policy) */
-  document.addEventListener('click', function prime(){
-    getCtx();
-    document.removeEventListener('click', prime);
-  }, { once: true });
-
-  function playTone(correct){
-    if(!enabled) return;
-    try{
-      var ctx = getCtx();
-      if(!ctx) return;
-      if(ctx.state === 'suspended') ctx.resume();
-      var freqs  = correct ? [440, 660] : [300];
-      var delays = correct ? [0, 0.055] : [0];
-      freqs.forEach(function(freq, i){
-        var osc  = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        var t = ctx.currentTime + delays[i];
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(correct ? 0.07 : 0.05, t + 0.012);
-        gain.gain.linearRampToValueAtTime(0, t + (correct ? 0.06 : 0.09));
-        osc.start(t);
-        osc.stop(t + (correct ? 0.07 : 0.10));
-      });
-    }catch(e){}
-  }
-
-  /* Wrap window.rate */
-  function wrapRate(){
-    var _orig = window.rate;
-    if(!_orig || _orig.__v37) return;
-    window.rate = function(card, rating){
-      try{
-        var r = (typeof card === 'string' ? card : rating || '').toLowerCase();
-        if(r === 'good' || r === 'easy') playTone(true);
-        else if(r === 'again' || r === 'hard') playTone(false);
-      }catch(e){}
-      return _orig.apply(this, arguments);
-    };
-    window.rate.__v37 = true;
-  }
-
-  function updateToggleUI(){
-    var el = document.getElementById('cozyAudioToggle529');
-    if(!el) return;
-    el.querySelector('.v37-icon').textContent = enabled ? '🔔' : '🔕';
-    el.querySelector('.v37-label').textContent = enabled ? 'Sound: On' : 'Sound: Off';
-  }
-
-  function injectToggle(){
-    if(document.getElementById('cozyAudioToggle529')) return;
-    var anchor = document.getElementById('cozySessionPicker529');
-    if(!anchor) return;
-    var wrap = document.createElement('div');
-    wrap.id = 'cozyAudioToggle529';
-    wrap.innerHTML = '<span class="v37-icon">' + (enabled?'🔔':'🔕') + '</span>' +
-                     '<span class="v37-label">' + (enabled?'Sound: On':'Sound: Off') + '</span>';
-    wrap.addEventListener('click', function(){
-      enabled = !enabled;
-      localStorage.setItem(AUDIO_KEY, enabled ? '1' : '0');
-      updateToggleUI();
-      if(enabled) playTone(true); /* preview tone on enable */
-    });
-    anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(wrapRate, 100);
-      setTimeout(injectToggle, 480);
-    });
-  } else {
-    setTimeout(wrapRate, 100);
-    setTimeout(injectToggle, 480);
-  }
-})();
-</script>
-
-<!-- vFix36: Dynamic browser tab title with due count -->
-<script id="vFix36-tabtitle-js">(function(){
-  'use strict';
-  if(window.__vFix36TabTitle) return;
-  window.__vFix36TabTitle = true;
-
-  var BASE_TITLE = 'Cozy Arcade';
-  var inGame = false;
-
-  function getDueCount(){
-    var prog = window.phase3State && window.phase3State.progress;
-    if(!prog) return 0;
-    var now = new Date().toISOString();
-    var due = 0;
-    Object.values(prog).forEach(function(p){
-      var seen = Number(p.seen_count||0) > 0 || Number(p.reviewed_count||0) > 0;
-      var dueDate = p.next_due_at || p.due;
-      if(seen && dueDate && dueDate <= now) due++;
-    });
-    return due;
-  }
-
-  function getNewCount(){
-    var prog = window.phase3State && window.phase3State.progress;
-    var cards = window.appCards ? window.appCards() : [];
-    if(!prog || !cards.length) return 0;
-    return cards.filter(function(c){
-      var id = window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
-      var p = prog[id];
-      return !p || (Number(p.seen_count||0) === 0 && Number(p.reviewed_count||0) === 0);
-    }).length;
-  }
-
-  function updateTitle(){
-    if(inGame){ document.title = '📚 Studying | ' + BASE_TITLE; return; }
-    var due = getDueCount();
-    var newCards = getNewCount();
-    if(due > 0){
-      document.title = '⚔️ ' + due + ' due | ' + BASE_TITLE;
-    } else if(newCards > 0){
-      document.title = '✨ ' + newCards + ' new | ' + BASE_TITLE;
-    } else {
-      document.title = '✅ All caught up | ' + BASE_TITLE;
-    }
-  }
-
-  function watchScreen(id, onShow, onHide){
-    var el = document.getElementById(id);
-    if(!el) return;
-    new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        if(m.attributeName !== 'class') return;
-        var hidden = el.classList.contains('hidden');
-        if(!hidden && onShow) onShow();
-        else if(hidden && onHide) onHide();
-      });
-    }).observe(el, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  var _prevKpis36 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis36) _prevKpis36.apply(this, arguments);
-    try{ if(!inGame) updateTitle(); }catch(e){}
-  };
-
-  function init36(){
-    watchScreen('solo',   function(){ inGame=true;  updateTitle(); },
-                          function(){ inGame=false; updateTitle(); });
-    watchScreen('domain', function(){ inGame=true;  updateTitle(); },
-                          function(){ inGame=false; updateTitle(); });
-    updateTitle();
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init36);
-  } else {
-    setTimeout(init36, 250);
-  }
-})();
-</script>
-
-<!-- vFix35: Study Pinned Cards button + vFix34 accuracy clamp -->
-<style id="vFix35-css">
-#cozyPinnedBtn529 {
-  display: none;
-  width: 100%;
-  max-width: 360px;
-  margin: 6px auto 0;
-  padding: 9px 14px;
-  background: linear-gradient(135deg, rgba(234,179,8,0.15), rgba(245,201,122,0.15));
-  border: 1px solid rgba(234,179,8,0.38);
-  border-radius: 10px;
-  color: #fbbf24;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-  letter-spacing: 0.02em;
-  box-sizing: border-box;
-}
-#cozyPinnedBtn529:hover { background: linear-gradient(135deg, rgba(234,179,8,0.26), rgba(245,201,122,0.26)); }
-#cozyPinnedBtn529.visible { display: block; }
-</style>
-<script id="vFix35-pinned-js">(function(){
-  'use strict';
-  if(window.__vFix35Pinned) return;
-  window.__vFix35Pinned = true;
-
-  /* Clamp vFix34 accuracy badges that exceeded 100% due to legacy data */
-  function clampAccBadges(){
-    document.querySelectorAll('.v34-acc').forEach(function(el){
-      var n = parseInt(el.textContent, 10);
-      if(n > 100){ el.textContent = '100%'; }
-    });
-  }
-
-  function getPinnedIds(){
-    var prog = window.phase3State && window.phase3State.progress;
-    if(!prog) return [];
-    return Object.keys(prog).filter(function(id){
-      return prog[id].pinned === true;
-    });
-  }
-
-  function renderPinned(){
-    var btn = document.getElementById('cozyPinnedBtn529');
-    if(!btn) return;
-    var ids = getPinnedIds();
-    if(!ids.length){ btn.classList.remove('visible'); return; }
-    btn.textContent = '📌 Study Pinned (' + ids.length + ' cards)';
-    btn.classList.add('visible');
-  }
-
-  function launchPinned(){
-    var ids = getPinnedIds();
-    if(!ids.length) return;
-    window.__cozyDrillSet529 = new Set(ids);
-    var s = document.getElementById('startSolo');
-    if(s) s.click();
-  }
-
-  function injectPinnedBtn(){
-    if(document.getElementById('cozyPinnedBtn529')) return;
-    var anchor = document.getElementById('cozyDrillWeakBtn529');
-    if(!anchor) return;
-    var btn = document.createElement('button');
-    btn.id = 'cozyPinnedBtn529';
-    btn.addEventListener('click', launchPinned);
-    anchor.parentNode.insertBefore(btn, anchor.nextSibling);
-    renderPinned();
-  }
-
-  var _prevKpis35 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis35) _prevKpis35.apply(this, arguments);
-    try{ renderPinned(); }catch(e){}
-    try{ clampAccBadges(); }catch(e){}
-  };
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', injectPinnedBtn);
-  } else {
-    setTimeout(injectPinnedBtn, 460);
-  }
-})();
-</script>
-
-<!-- vFix34: Per-system accuracy badge on Board Readiness Map rows -->
-<style id="vFix34-css">
-.v34-acc {
-  font-size: 10px;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-left: 4px;
-  white-space: nowrap;
-  letter-spacing: 0.03em;
-  opacity: 0.88;
-  cursor: default;
-}
-</style>
-<script id="vFix34-accuracy-js">(function(){
-  'use strict';
-  if(window.__vFix34Acc) return;
-  window.__vFix34Acc = true;
-
-  function getSysAccuracy(){
-    var prog = window.phase3State && window.phase3State.progress;
-    var cards = window.appCards ? window.appCards() : [];
-    if(!prog || !cards.length) return {};
-    var map = {};
-    cards.forEach(function(c){
-      var id = window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
-      var sys = ((c.system||c.sys)||'').trim();
-      if(!sys || !id) return;
-      if(!map[sys]) map[sys] = {correct:0, seen:0};
-      var p = prog[id];
-      if(p){
-        map[sys].correct += Number(p.correct_count||0);
-        map[sys].seen    += Number(p.seen_count||0);
-      }
-    });
-    return map;
-  }
-
-  function accColor(pct){
-    return pct >= 80 ? '#22c55e' : pct >= 60 ? '#f5c97a' : '#fb5876';
-  }
-
-  function injectAccBadges(){
-    var accMap = getSysAccuracy();
-    document.querySelectorAll('#cozySysMap529 .csm-row[data-sys]').forEach(function(row){
-      if(row.querySelector('.v34-acc')) return;
-      var sys = row.dataset.sys;
-      var d = accMap[sys];
-      if(!d || d.seen === 0) return;
-      var pct = Math.round(d.correct / d.seen * 100);
-      var badge = document.createElement('span');
-      badge.className = 'v34-acc';
-      badge.textContent = pct + '%';
-      badge.title = d.correct + '/' + d.seen + ' correct (' + pct + '% accuracy)';
-      badge.style.color = accColor(pct);
-      var cramPill = row.querySelector('.v32-cram');
-      cramPill ? row.insertBefore(badge, cramPill) : row.appendChild(badge);
-    });
-  }
-
-  var _prevKpis34 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis34) _prevKpis34.apply(this, arguments);
-    try{ injectAccBadges(); }catch(e){}
-  };
-
-  setTimeout(injectAccBadges, 550);
-})();
-</script>
-
-<!-- vFix33: Keyword card search — filter all cards by text, launch drill -->
-<style id="vFix33-css">
-#cozySearch529 {
-  display: none;
-  max-width: 360px;
-  margin: 8px auto 0;
-  box-sizing: border-box;
-}
-#cozySearch529.visible { display: block; }
-.v33-input {
-  width: 100%;
-  padding: 9px 12px 9px 32px;
-  background: rgba(15,23,42,0.75);
-  border: 1px solid rgba(99,102,241,0.28);
-  border-radius: 10px;
-  color: #e2e8f0;
-  font-size: 13px;
-  outline: none;
-  box-sizing: border-box;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: 10px center;
-}
-.v33-input:focus { border-color: rgba(99,102,241,0.65); }
-.v33-result {
-  display: none;
-  margin-top: 5px;
-  text-align: center;
-  padding: 2px 0;
-}
-.v33-result.visible { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.v33-launch {
-  padding: 5px 14px;
-  background: rgba(99,102,241,0.2);
-  border: 1px solid rgba(99,102,241,0.42);
-  border-radius: 8px;
-  color: #a5b4fc;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.v33-launch:hover { background: rgba(99,102,241,0.34); }
-.v33-count { font-size: 12px; color: rgba(148,163,184,0.7); }
-.v33-none  { font-size: 12px; color: rgba(148,163,184,0.5); padding: 4px 0; text-align: center; }
-</style>
-<script id="vFix33-search-js">(function(){
-  'use strict';
-  if(window.__vFix33Search) return;
-  window.__vFix33Search = true;
-
-  var debTimer = null;
-  var lastIds  = [];
-
-  function cardText(c){
-    return [
-      c.prompt||c.presentation||c.front||c.clinical_vignette_summary||c.question||'',
-      c.answer||c.correct_answer||'',
-      c.system||c.sys||'',
-      Array.isArray(c.tags) ? c.tags.join(' ') : (c.tags||''),
-      c.one_thing||''
-    ].join(' ').toLowerCase();
-  }
-
-  function searchCards(q){
-    var cards = window.appCards ? window.appCards() : [];
-    return cards.filter(function(c){ return cardText(c).indexOf(q) !== -1; });
-  }
-
-  function getId(c){
-    return window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
-  }
-
-  function onInput(input, resultDiv){
-    var q = input.value.trim().toLowerCase();
-    resultDiv.innerHTML = '';
-    resultDiv.classList.remove('visible');
-    lastIds = [];
-    if(!q){ return; }
-    var matches = searchCards(q);
-    lastIds = matches.map(getId).filter(Boolean);
-    if(!lastIds.length){
-      resultDiv.innerHTML = '<span class="v33-none">No cards match</span>';
-      resultDiv.classList.add('visible');
-      return;
-    }
-    var countSpan = document.createElement('span');
-    countSpan.className = 'v33-count';
-    countSpan.textContent = lastIds.length + ' match' + (lastIds.length===1?'':'es');
-    var btn = document.createElement('button');
-    btn.className = 'v33-launch';
-    btn.textContent = '▶ Study ' + lastIds.length;
-    btn.addEventListener('click', function(){
-      if(!lastIds.length) return;
-      window.__cozyDrillSet529 = new Set(lastIds);
-      var s = document.getElementById('startSolo');
-      if(s) s.click();
-    });
-    resultDiv.appendChild(countSpan);
-    resultDiv.appendChild(btn);
-    resultDiv.classList.add('visible');
-  }
-
-  function injectSearch(){
-    if(document.getElementById('cozySearch529')) return;
-    var anchor = document.getElementById('cozyCramBtn529');
-    if(!anchor) return;
-    var wrap = document.createElement('div');
-    wrap.id = 'cozySearch529';
-    var input = document.createElement('input');
-    input.type = 'search';
-    input.className = 'v33-input';
-    input.placeholder = 'Search cards… topic, keyword, system';
-    input.autocomplete = 'off';
-    input.spellcheck = false;
-    var resultDiv = document.createElement('div');
-    resultDiv.className = 'v33-result';
-    input.addEventListener('input', function(){
-      clearTimeout(debTimer);
-      debTimer = setTimeout(function(){ onInput(input, resultDiv); }, 280);
-    });
-    input.addEventListener('keydown', function(e){
-      if(e.key === 'Enter' && lastIds.length){
-        window.__cozyDrillSet529 = new Set(lastIds);
-        var s = document.getElementById('startSolo');
-        if(s) s.click();
-      }
-    });
-    wrap.appendChild(input);
-    wrap.appendChild(resultDiv);
-    anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
-    var cards = window.appCards ? window.appCards() : [];
-    if(cards.length) wrap.classList.add('visible');
-  }
-
-  /* Show once cards are available */
-  var _prevKpis33 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis33) _prevKpis33.apply(this, arguments);
-    var wrap = document.getElementById('cozySearch529');
-    if(wrap){
-      var cards = window.appCards ? window.appCards() : [];
-      if(cards.length) wrap.classList.add('visible');
-    }
-  };
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', injectSearch);
-  } else {
-    setTimeout(injectSearch, 450);
-  }
-})();
-</script>
-
-<!-- vFix32: Per-system Cram pill on Board Readiness Map rows -->
-<style id="vFix32-css">
-.v32-cram {
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: rgba(139,92,246,0.18);
-  border: 1px solid rgba(139,92,246,0.38);
-  color: #a78bfa;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  margin-left: 5px;
-  line-height: 1.5;
-  user-select: none;
-}
-.v32-cram:hover { background: rgba(139,92,246,0.32); }
-</style>
-<script id="vFix32-syscram-js">(function(){
-  'use strict';
-  if(window.__vFix32SysCram) return;
-  window.__vFix32SysCram = true;
-
-  function getSysIds(sys){
-    var cards = window.appCards ? window.appCards() : [];
-    return cards
-      .filter(function(c){ return ((c.system||c.sys)||'').trim() === sys; })
-      .map(function(c){
-        return window.canonicalCardId ? window.canonicalCardId(c) : (c.id||c.qid||c.card_id);
-      })
-      .filter(Boolean);
-  }
-
-  function launchSysCram(sys){
-    var ids = getSysIds(sys);
-    if(!ids.length) return;
-    window.__cozyDrillSet529 = new Set(ids);
-    var btn = document.getElementById('startSolo');
-    if(btn) btn.click();
-  }
-
-  function injectCramPills(){
-    var rows = document.querySelectorAll('#cozySysMap529 .csm-row[data-sys]');
-    rows.forEach(function(row){
-      if(row.querySelector('.v32-cram')) return;
-      var sys = row.dataset.sys;
-      if(!sys) return;
-      var pill = document.createElement('span');
-      pill.className = 'v32-cram';
-      pill.textContent = 'Cram';
-      pill.title = 'Study all ' + sys + ' cards (ignore schedule)';
-      pill.addEventListener('click', function(e){
-        e.stopPropagation();
-        launchSysCram(sys);
-      });
-      row.appendChild(pill);
-    });
-  }
-
-  var _prevKpis32 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis32) _prevKpis32.apply(this, arguments);
-    try{ injectCramPills(); }catch(e){}
-  };
-
-  setTimeout(injectCramPills, 500);
-})();
-</script>
-
-<!-- vFix31: Cram Mode — study all cards ignoring FSRS schedule -->
-<style id="vFix31-css">
-#cozyCramBtn529 {
-  display: none;
-  width: 100%;
-  max-width: 360px;
-  margin: 6px auto 0;
-  padding: 9px 14px;
-  background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.18));
-  border: 1px solid rgba(139,92,246,0.35);
-  border-radius: 10px;
-  color: #a78bfa;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-  letter-spacing: 0.02em;
-  box-sizing: border-box;
-}
-#cozyCramBtn529:hover { background: linear-gradient(135deg, rgba(99,102,241,0.28), rgba(139,92,246,0.28)); }
-#cozyCramBtn529.visible { display: block; }
-</style>
-<script id="vFix31-cram-js">(function(){
-  'use strict';
-  if(window.__vFix31Cram) return;
-  window.__vFix31Cram = true;
-
-  function getAllCardIds(){
-    var cards = window.appCards ? window.appCards() : [];
-    return cards.map(function(c){
-      return window.canonicalCardId ? window.canonicalCardId(c) : (c.id || c.qid || c.card_id);
-    }).filter(Boolean);
-  }
-
-  function renderCram(){
-    var btn = document.getElementById('cozyCramBtn529');
-    if(!btn) return;
-    var ids = getAllCardIds();
-    if(!ids.length){ btn.classList.remove('visible'); return; }
-    btn.textContent = '📚 Cram All (' + ids.length + ' cards)';
-    btn.classList.add('visible');
-  }
-
-  function launchCram(){
-    var ids = getAllCardIds();
-    if(!ids.length) return;
-    window.__cozyDrillSet529 = new Set(ids);
-    var startBtn = document.getElementById('startSolo');
-    if(startBtn) startBtn.click();
-  }
-
-  function injectCramBtn(){
-    if(document.getElementById('cozyCramBtn529')) return;
-    var anchor = document.getElementById('cozyDrillWeakBtn529');
-    if(!anchor) return;
-    var btn = document.createElement('button');
-    btn.id = 'cozyCramBtn529';
-    btn.addEventListener('click', launchCram);
-    anchor.parentNode.insertBefore(btn, anchor.nextSibling);
-    renderCram();
-  }
-
-  /* Wrap updateKpis to keep card count current */
-  var _prevKpis31 = window.updateKpis;
-  window.updateKpis = function(){
-    if(_prevKpis31) _prevKpis31.apply(this, arguments);
-    renderCram();
-  };
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', injectCramBtn);
-  } else {
-    setTimeout(injectCramBtn, 400);
-  }
-})();
-</script>
-
-<!-- vFix30: Keyboard shortcuts in reveal (1=Again 2=Hard 3=Good 4=Easy) -->
-<style id="vFix30-css">
-.v30-kb-hint {
-  display: none;
-  text-align: center;
-  font-size: 11px;
-  color: rgba(148,163,184,0.45);
-  letter-spacing: 0.06em;
-  margin-top: 6px;
-  user-select: none;
-  pointer-events: none;
-}
-@media (hover: hover) and (pointer: fine) {
-  .v30-kb-hint { display: block; }
-}
-</style>
-<script id="vFix30-keyboard-js">(function(){
-  'use strict';
-  if(window.__vFix30Keys) return;
-  window.__vFix30Keys = true;
-
-  var RATE_MAP = { '1': 'again', '2': 'hard', '3': 'good', '4': 'easy' };
-
-  function activeReveal(){
-    var ids = ['soloReveal', 'domainReveal'];
-    for(var i = 0; i < ids.length; i++){
-      var el = document.getElementById(ids[i]);
-      if(el && !el.classList.contains('hidden')) return el;
-    }
-    return null;
-  }
-
-  function inTextInput(){
-    var t = document.activeElement && document.activeElement.tagName;
-    return t === 'INPUT' || t === 'TEXTAREA';
-  }
-
-  document.addEventListener('keydown', function(e){
-    if(inTextInput()) return;
-    var rating = RATE_MAP[e.key];
-    if(!rating) return;
-    var rev = activeReveal();
-    if(!rev) return;
-    var btn = rev.querySelector('[data-rate="' + rating + '"]');
-    if(!btn || btn.classList.contains('hidden') || btn.disabled) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    btn.click();
-  }, true); /* capture phase — fires before existing bubble-phase handlers */
-
-  /* Inject hint below each rating bar once DOM is ready */
-  function injectHints(){
-    ['soloRevealRatings','domainRevealRatings'].forEach(function(id){
-      var bar = document.getElementById(id);
-      if(!bar || bar.dataset.v30) return;
-      bar.dataset.v30 = '1';
-      var hint = document.createElement('div');
-      hint.className = 'v30-kb-hint';
-      hint.textContent = '1 Again  ·  2 Hard  ·  3 Good  ·  4 Easy';
-      bar.parentNode.insertBefore(hint, bar.nextSibling);
-    });
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', injectHints);
-  } else {
-    setTimeout(injectHints, 300);
-  }
-})();
-</script>
-
-<!-- vFix29: In-session elapsed timer -->
-<style id="vFix29-css">
-#cozySessionTimer529 {
-  position: fixed;
-  bottom: 14px;
-  left: 14px;
-  z-index: 55;
-  font-family: 'Orbitron', monospace;
-  font-size: 11px;
-  color: rgba(148,163,184,0.55);
-  letter-spacing: 0.04em;
-  pointer-events: none;
-  user-select: none;
-  transition: opacity 0.3s;
-}
-#cozySessionTimer529.hidden { opacity: 0; }
-</style>
-<script id="vFix29-timer-js">(function(){
-  'use strict';
-  if(window.__vFix29Timer) return;
-  window.__vFix29Timer = true;
-
-  var timerEl = null;
-  var startTs = 0;
-  var tickId = null;
-
-  function getOrCreateEl(){
-    if(timerEl) return timerEl;
-    timerEl = document.createElement('div');
-    timerEl.id = 'cozySessionTimer529';
-    timerEl.classList.add('hidden');
-    document.body.appendChild(timerEl);
-    return timerEl;
-  }
-
-  function fmt(ms){
-    var s = Math.floor(ms / 1000);
-    var m = Math.floor(s / 60);
-    s = s % 60;
-    return '⏱ ' + m + ':' + (s < 10 ? '0' : '') + s;
-  }
-
-  function tick(){
-    var el = getOrCreateEl();
-    el.textContent = fmt(Date.now() - startTs);
-  }
-
-  function startTimer(){
-    if(tickId) return;
-    startTs = Date.now();
-    var el = getOrCreateEl();
-    el.classList.remove('hidden');
-    tick();
-    tickId = setInterval(tick, 1000);
-  }
-
-  function stopTimer(){
-    if(tickId){ clearInterval(tickId); tickId = null; }
-    var el = getOrCreateEl();
-    el.classList.add('hidden');
-  }
-
-  function watchScreen(id, onShow){
-    var el = document.getElementById(id);
-    if(!el) return;
-    new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        if(m.attributeName !== 'class') return;
-        var hidden = el.classList.contains('hidden');
-        if(!hidden && onShow) onShow();
-        else if(hidden) stopTimer();
-      });
-    }).observe(el, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  function init29(){
-    watchScreen('solo', startTimer);
-    watchScreen('domain', startTimer);
-    watchScreen('home', stopTimer);
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init29);
-  } else {
-    setTimeout(init29, 200);
-  }
-})();
-</script>
-
-<!-- vFix28: 7-day study heatmap on home screen -->
-<style id="vFix28-css">
-#cozyHeatmap529 {
-  max-width: 360px;
-  margin: 8px auto 0;
-}
-.chm-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-}
-.chm-day {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-.chm-dot {
-  width: 100%;
-  aspect-ratio: 1;
-  max-width: 40px;
-  border-radius: 8px;
-  transition: background 0.3s ease;
-}
-.chm-day.chm-today .chm-dot {
-  outline: 2px solid rgba(103,232,249,0.60);
-  outline-offset: 2px;
-}
-.chm-label {
-  font-size: 9px;
-  font-family: Orbitron, monospace;
-  letter-spacing: 0.04em;
-  color: #9aa0b8;
-  text-transform: uppercase;
-}
-.chm-count {
-  font-size: 10px;
-  font-weight: 700;
-  color: #cbd5e1;
-  line-height: 1;
-}
-</style>
-<script id="vFix28-heatmap-js">(function(){
-  'use strict';
-  if(window.__vFix28Heatmap) return;
-  window.__vFix28Heatmap = true;
-
-  var DAY_NAMES = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-
-  function buildDailyMap(){
-    var prog = window.phase3State && window.phase3State.progress;
-    var map = {};
-    var now = Date.now();
-    for(var i = 6; i >= 0; i--){
-      map[new Date(now - i * 86400000).toISOString().slice(0,10)] = 0;
-    }
-    if(!prog) return map;
-    Object.values(prog).forEach(function(p){
-      var ls = p.last_seen_at || p.last;
-      if(ls){ var d = ls.slice(0,10); if(d in map) map[d]++; }
-    });
-    return map;
-  }
-
-  function renderHeatmap(){
-    var wrap = document.getElementById('cozyHeatmap529');
-    if(!wrap) return;
-
-    var goal = window.__cozyDailyGoalVal529 || 20;
-    var map  = buildDailyMap();
-    var today = new Date().toISOString().slice(0,10);
-    var days  = Object.keys(map).sort();
-
-    var html = '<div class="chm-row">';
-    days.forEach(function(d){
-      var n   = map[d];
-      var pct = goal ? n / goal : 0;
-      var bg;
-      if(n === 0)       bg = 'rgba(148,163,184,0.12)';
-      else if(pct >= 1) bg = 'rgba(34,197,94,0.65)';
-      else if(pct >= 0.5) bg = 'rgba(103,232,249,0.50)';
-      else              bg = 'rgba(245,201,122,0.40)';
-
-      var dow  = DAY_NAMES[new Date(d + 'T12:00:00').getDay()];
-      var cls  = d === today ? ' chm-today' : '';
-      html += '<div class="chm-day' + cls + '" title="' + dow + ' ' + d + ': ' + n + ' cards">' +
-        '<div class="chm-dot" style="background:' + bg + '"></div>' +
-        '<div class="chm-label">' + dow + '</div>' +
-        (n > 0 ? '<div class="chm-count">' + n + '</div>' : '') +
-      '</div>';
-    });
-    html += '</div>';
-    wrap.innerHTML = html;
-  }
-
-  function injectHeatmap(){
-    var goalDiv = document.getElementById('cozyDailyGoal529');
-    if(!goalDiv) return;
-    var wrap = document.getElementById('cozyHeatmap529');
-    if(!wrap){
-      wrap = document.createElement('div');
-      wrap.id = 'cozyHeatmap529';
-      goalDiv.parentNode.insertBefore(wrap, goalDiv.nextSibling);
-    }
-    renderHeatmap();
-  }
-
-  /* Refresh with each KPI update */
-  var _prevKpis28 = window.updateKpis;
-  window.updateKpis = function(){
-    var r = _prevKpis28 && _prevKpis28.apply(this, arguments);
-    setTimeout(injectHeatmap, 80);
-    return r;
-  };
-  window.updateKpis.__vFix28Heatmap = true;
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(injectHeatmap, 1600);
-    });
-  } else {
-    setTimeout(injectHeatmap, 1600);
-  }
-})();
-</script>
-
-<!-- vFix27: Swipe-to-rate in reveal panel + haptic feedback -->
+<!-- vFix27: Swipe-to-rate in reveal panels (left=hard, right=good) + haptic -->
 <style id="vFix27-css">
-/* Default: hint hidden; shown only on touch devices */
 .v27-swipe-hint { display: none; user-select: none; pointer-events: none; }
 @media (hover: none) {
-  .v27-swipe-hint {
-    display: block;
-    text-align: center;
-    font-size: 11px;
-    color: rgba(148,163,184,0.50);
-    letter-spacing: 0.05em;
-    margin-top: 10px;
-  }
+  .v27-swipe-hint { display: block; text-align: center; font-size: 11px; color: rgba(148,163,184,0.50); letter-spacing: 0.05em; margin-top: 10px; }
 }
-/* Flash ring on swipe — fades out via CSS transition */
 .v27-flash-ok  { outline: 2px solid rgba(34,197,94,0.60)  !important; }
 .v27-flash-bad { outline: 2px solid rgba(251,88,118,0.60) !important; }
 </style>
@@ -18620,493 +15999,108 @@ setTimeout(scan,800);
   'use strict';
   if(window.__vFix27Swipe) return;
   window.__vFix27Swipe = true;
-
   function vibrate(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
-
-  function flashReveal(el, ok){
-    var cls = ok ? 'v27-flash-ok' : 'v27-flash-bad';
-    el.classList.add(cls);
-    setTimeout(function(){ el.classList.remove(cls); }, 260);
-  }
-
+  function flashReveal(el, ok){ var cls = ok ? 'v27-flash-ok' : 'v27-flash-bad'; el.classList.add(cls); setTimeout(function(){ el.classList.remove(cls); }, 260); }
   function setupSwipe(revealId){
     var el = document.getElementById(revealId);
     if(!el || el.dataset.v27) return;
     el.dataset.v27 = '1';
-
-    /* Inject swipe hint below ratings (touch devices only via CSS) */
-    if(!el.querySelector('.v27-swipe-hint')){
-      var hint = document.createElement('div');
-      hint.className = 'v27-swipe-hint';
-      hint.textContent = '← Hard · Good →';
-      el.appendChild(hint);
-    }
-
+    if(!el.querySelector('.v27-swipe-hint')){ var hint = document.createElement('div'); hint.className = 'v27-swipe-hint'; hint.textContent = '← Hard · Good →'; el.appendChild(hint); }
     var sx = 0, sy = 0, st = 0;
-
-    el.addEventListener('touchstart', function(e){
-      var t = e.touches[0];
-      sx = t.clientX; sy = t.clientY; st = Date.now();
-    }, { passive: true });
-
+    el.addEventListener('touchstart', function(e){ var t = e.touches[0]; sx = t.clientX; sy = t.clientY; st = Date.now(); }, { passive: true });
     el.addEventListener('touchend', function(e){
       if(el.classList.contains('hidden')) return;
-      var t = e.changedTouches[0];
-      var dx = t.clientX - sx;
-      var dy = t.clientY - sy;
-      var dt = Date.now() - st;
-
-      /* Reject: too slow, too short, or dominantly vertical (scroll) */
+      var t = e.changedTouches[0]; var dx = t.clientX - sx; var dy = t.clientY - sy; var dt = Date.now() - st;
       if(dt > 500 || Math.abs(dx) < 52 || Math.abs(dy) > Math.abs(dx) * 0.75) return;
-
       var rating = dx > 110 ? 'easy' : dx > 52 ? 'good' : dx < -110 ? 'again' : 'hard';
-
       var btn = el.querySelector('[data-rate="' + rating + '"]');
       if(!btn || btn.classList.contains('hidden') || btn.disabled) return;
-
-      e.preventDefault();
-      flashReveal(el, dx > 0);
-      vibrate(dx > 0 ? 18 : [14, 8, 14]);
-      btn.click();
+      e.preventDefault(); flashReveal(el, dx > 0); vibrate(dx > 0 ? 18 : [14, 8, 14]); btn.click();
     }, { passive: false });
   }
-
-  function init27(){
-    setupSwipe('soloReveal');
-    setupSwipe('domainReveal');
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init27);
-  } else {
-    init27();
-  }
+  function init27(){ setupSwipe('soloReveal'); setupSwipe('domainReveal'); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init27);
+  else init27();
 })();
 </script>
 
-<!-- vFix26: Mobile optimization + daily goal celebration -->
-<style id="vFix26-css">
-/* Disable bgMove grid animation on mobile — saves compositor layer & battery */
-@media(max-width:760px){
-  .game::before { animation: none !important; }
-}
-</style>
-<script id="vFix26-celebrate-js">(function(){
-  'use strict';
-  if(window.__vFix26Celebrate) return;
-  window.__vFix26Celebrate = true;
-
-  var CELE_KEY = 'cozy_goal_celeb_v26';
-
-  function todayStr(){ return new Date().toISOString().slice(0, 10); }
-
-  function alreadyCelebrated(){
-    try{ return localStorage.getItem(CELE_KEY) === todayStr(); }catch(e){ return false; }
-  }
-
-  function markCelebrated(){
-    try{ localStorage.setItem(CELE_KEY, todayStr()); }catch(e){}
-  }
-
-  function fireCelebration(){
-    if(alreadyCelebrated()) return;
-    markCelebrated();
-
-    /* Spark burst from daily goal bar position */
-    var barEl = document.querySelector('#cozyDailyGoal529 .cdg-bar-fill');
-    var fx = document.getElementById('fx');
-    if(!barEl || !fx) return;
-
-    var rect = barEl.getBoundingClientRect();
-    var cx = rect.left + rect.width / 2;
-    var cy = rect.top + rect.height / 2;
-    var colors = ['#f5c97a','#4ade80','#67e8f9','#fb5876','#c084fc','#fb923c','#f472b6'];
-    var N = 32;
-
-    for(var i = 0; i < N; i++){
-      var s = document.createElement('div');
-      var col = colors[i % colors.length];
-      var angle = (Math.PI * 2 * i / N) + (Math.random() - 0.5) * 0.5;
-      var dist = 70 + Math.random() * 130;
-      var dx = Math.cos(angle) * dist;
-      var dy = Math.sin(angle) * dist - 80;
-      var sz = 5 + Math.random() * 5;
-      s.className = 'spark';
-      s.style.cssText = 'left:' + cx + 'px;top:' + cy + 'px' +
-        ';--dx:' + dx.toFixed(1) + 'px;--dy:' + dy.toFixed(1) + 'px' +
-        ';background:' + col + ';box-shadow:0 0 14px ' + col +
-        ';width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px' +
-        ';border-radius:' + (Math.random() < 0.5 ? '50%' : '3px');
-      fx.appendChild(s);
-      (function(el){ setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 900); })(s);
-    }
-
-    /* Toast */
-    var toast = document.getElementById('toast');
-    if(toast){
-      toast.textContent = '🎯 Daily Goal Complete!';
-      toast.classList.remove('hidden');
-      clearTimeout(window.__v26ToastT);
-      window.__v26ToastT = setTimeout(function(){ toast.classList.add('hidden'); }, 2600);
-    }
-  }
-
-  /* Hook into updateKpis — fires once per day on first completion */
-  var _prevKpis26 = window.updateKpis;
-  window.updateKpis = function(){
-    var r = _prevKpis26 && _prevKpis26.apply(this, arguments);
-    setTimeout(function(){
-      if(!alreadyCelebrated()){
-        var done = document.querySelector('#cozyDailyGoal529 .cdg-bar-fill.done');
-        if(done) fireCelebration();
-      }
-    }, 120);
-    return r;
-  };
-  window.updateKpis.__vFix26Celebrate = true;
-})();
-</script>
-
-<!-- vFix25: "Drill Weak" home screen button — targets cards with lapses ≥ 2 -->
-<style id="vFix25-css">
-#cozyDrillWeakBtn529 {
+<!-- NO-DECK UX FIX: disable game buttons visually when no deck loaded -->
+<style id="vFix-nodeck-css">
+#cozyNoDeckMsg529 {
   display: none;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 360px;
-  margin: 6px auto 0;
-  padding: 11px 20px;
-  border-radius: 12px;
-  border: 1px solid rgba(251,88,118,0.35);
-  background: rgba(251,88,118,0.07);
-  color: #fb5876;
-  font-family: Orbitron, monospace;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: background 0.18s, border-color 0.18s;
-}
-#cozyDrillWeakBtn529:hover,
-#cozyDrillWeakBtn529:active {
-  background: rgba(251,88,118,0.15);
-  border-color: rgba(251,88,118,0.55);
-}
-#cozyDrillWeakBtn529 .dwb-count {
-  background: rgba(251,88,118,0.18);
-  border-radius: 8px;
-  padding: 2px 8px;
-  font-size: 11px;
-}
-</style>
-<script id="vFix25-drillweak-js">(function(){
-  'use strict';
-  if(window.__vFix25DrillWeak) return;
-  window.__vFix25DrillWeak = true;
-
-  function getLapseIds(){
-    var prog = window.phase3State && window.phase3State.progress;
-    if(!prog) return [];
-    return Object.keys(prog).filter(function(id){
-      return Number(prog[id].lapses || 0) >= 2;
-    });
-  }
-
-  function refreshDrillWeakBtn(){
-    var lapseIds = getLapseIds();
-    var btn = document.getElementById('cozyDrillWeakBtn529');
-
-    if(!btn){
-      btn = document.createElement('button');
-      btn.id = 'cozyDrillWeakBtn529';
-      btn.type = 'button';
-      /* Insert between Study Now and Session Picker */
-      var qBtn = document.getElementById('cozyQuickStudy529');
-      if(!qBtn) return;
-      qBtn.parentNode.insertBefore(btn, qBtn.nextSibling);
-    }
-
-    if(lapseIds.length === 0){
-      btn.style.display = 'none';
-      return;
-    }
-
-    btn.style.display = 'flex';
-    btn.innerHTML = '🔁 Drill Weak <span class="dwb-count">' + lapseIds.length + '</span>';
-    btn.onclick = function(){
-      var ids = getLapseIds();
-      if(!ids.length) return;
-      window.__cozyDrillSet529 = new Set(ids);
-      var s = document.getElementById('startSolo');
-      if(s) s.click();
-    };
-  }
-
-  /* Refresh with each KPI update */
-  var _prevKpis25 = window.updateKpis;
-  window.updateKpis = function(){
-    var r = _prevKpis25 && _prevKpis25.apply(this, arguments);
-    setTimeout(refreshDrillWeakBtn, 80);
-    return r;
-  };
-  window.updateKpis.__vFix25DrillWeak = true;
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(refreshDrillWeakBtn, 1400);
-    });
-  } else {
-    setTimeout(refreshDrillWeakBtn, 1400);
-  }
-})();
-</script>
-
-<!-- vFix24: Study pacing projection in hero — unseen cards / days until ABIM -->
-<style id="vFix24-css">
-#cozyPacing529 {
-  display: inline-block;
-  margin-top: 6px;
-  padding: 4px 14px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  border: 1px solid rgba(148,163,184,0.20);
-  background: rgba(148,163,184,0.05);
-  color: #94a3b8;
   text-align: center;
-  cursor: default;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  font-size: 13px;
+  color: #6b7594;
+  margin: 8px 0 0;
+  letter-spacing: 0.04em;
 }
-#cozyPacing529.pace-ok {
-  border-color: rgba(34,197,94,0.30);
-  background: rgba(34,197,94,0.07);
-  color: #4ade80;
-}
-#cozyPacing529.pace-behind {
-  border-color: rgba(245,201,122,0.30);
-  background: rgba(245,201,122,0.07);
-  color: #f5c97a;
-}
-#cozyPacing529.pace-urgent {
-  border-color: rgba(251,88,118,0.35);
-  background: rgba(251,88,118,0.08);
-  color: #fb5876;
+.nodeck-btns-dimmed #startSolo,
+.nodeck-btns-dimmed #startDomain {
+  opacity: 0.42 !important;
+  pointer-events: none !important;
+  cursor: not-allowed !important;
 }
 </style>
-<script id="vFix24-pacing-js">(function(){
+<script id="vFix-nodeck-js">(function(){
   'use strict';
-  if(window.__vFix24Pacing) return;
-  window.__vFix24Pacing = true;
+  if(window.__vFixNoDeck) return;
+  window.__vFixNoDeck = true;
 
-  var ABIM_TARGET = new Date('2026-08-04T08:00:00');
-  var WIN_DAYS = 7;
-
-  function calcPacing(){
-    var prog = window.phase3State && window.phase3State.progress;
-    var cards = window.appCards ? window.appCards() : [];
-    var totalCards = cards.length;
-    if(!prog || !totalCards) return null;
-
-    var daysLeft = Math.max(1, Math.ceil((ABIM_TARGET - new Date()) / 86400000));
-    var winStart = Date.now() - WIN_DAYS * 86400000;
-
-    var studiedCount = 0;
-    var recentCount = 0;
-    var entries = Object.values(prog);
-
-    for(var i = 0; i < entries.length; i++){
-      var p = entries[i];
-      if(p.seen_count && p.seen_count > 0) studiedCount++;
-      var ls = p.last_seen_at || p.last;
-      if(ls && new Date(ls).getTime() > winStart) recentCount++;
-    }
-
-    var unseenCount = Math.max(0, totalCards - studiedCount);
-    var avgPerDay = Math.round(recentCount / WIN_DAYS * 10) / 10;
-    var dailyNeeded = unseenCount > 0 ? Math.ceil(unseenCount / daysLeft) : 0;
-
-    return { unseenCount: unseenCount, totalCards: totalCards, avgPerDay: avgPerDay, dailyNeeded: dailyNeeded };
+  function hasDeck(){
+    var cards = window.appCards ? window.appCards() : (window.cards || []);
+    return Array.isArray(cards) && cards.length > 0;
   }
 
-  function renderPacing(){
-    var chip = document.getElementById('cozyPacing529');
-    if(!chip) return;
-
-    var info = calcPacing();
-    if(!info){ chip.style.display = 'none'; return; }
-    chip.style.display = '';
-
-    if(info.unseenCount === 0){
-      chip.className = 'pace-ok';
-      chip.textContent = '✓ All ' + info.totalCards + ' cards seen';
-      return;
+  function refreshNoDeckState(){
+    var ok = hasDeck();
+    var gameSection = document.querySelector('.homeWrap') || document.getElementById('home');
+    if(gameSection){
+      if(ok) gameSection.classList.remove('nodeck-btns-dimmed');
+      else    gameSection.classList.add('nodeck-btns-dimmed');
     }
-
-    chip.textContent = '📊 ' + info.unseenCount + ' unseen · ' + info.dailyNeeded + '/day needed · avg ' + info.avgPerDay + '/day';
-    if(info.avgPerDay >= info.dailyNeeded){
-      chip.className = 'pace-ok';
-    } else if(info.avgPerDay >= info.dailyNeeded * 0.6){
-      chip.className = 'pace-behind';
-    } else {
-      chip.className = 'pace-urgent';
-    }
+    var msg = document.getElementById('cozyNoDeckMsg529');
+    if(msg) msg.style.display = ok ? 'none' : 'block';
   }
 
-  function init24(){
-    var hero = document.querySelector('#home .hero');
-    if(!hero || document.getElementById('cozyPacing529')) return;
-    var div = document.createElement('div');
-    div.id = 'cozyPacing529';
-    hero.appendChild(div);
-    renderPacing();
+  function injectMsg(){
+    if(document.getElementById('cozyNoDeckMsg529')) return;
+    var solo = document.getElementById('startSolo');
+    if(!solo) return;
+    var msg = document.createElement('p');
+    msg.id = 'cozyNoDeckMsg529';
+    msg.textContent = '↑ Upload a deck to start studying';
+    solo.parentNode.insertBefore(msg, solo.nextSibling);
   }
 
-  /* Refresh pacing each time KPIs update */
-  var _prevKpis24 = window.updateKpis;
+  /* Hook updateKpis to re-check on every home refresh */
+  var _prevKpisND = window.updateKpis;
   window.updateKpis = function(){
-    var r = _prevKpis24 && _prevKpis24.apply(this, arguments);
-    setTimeout(renderPacing, 50);
-    return r;
+    if(_prevKpisND) _prevKpisND.apply(this, arguments);
+    setTimeout(refreshNoDeckState, 120);
   };
-  window.updateKpis.__vFix24Pacing = true;
 
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init24);
-  } else {
-    init24();
+  /* Also hook importDeck to re-enable immediately after import */
+  setTimeout(function(){
+    if(window.importDeck && !window.importDeck.__vFixNoDeck){
+      var _imp = window.importDeck;
+      window.importDeck = importDeck = function(){
+        var r = _imp.apply(this, arguments);
+        setTimeout(refreshNoDeckState, 400);
+        return r;
+      };
+      window.importDeck.__vFixNoDeck = true;
+    }
+  }, 1200);
+
+  function init(){
+    injectMsg();
+    refreshNoDeckState();
   }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+  setTimeout(refreshNoDeckState, 1500);
 })();
 </script>
 
-<!-- vFix41: ABIM Predicted Score — blueprint-weighted mastery estimate -->
-<style id="vFix41-css">
-#cozyAbimScore529 {
-  cursor: default;
-}
-#cozyAbimScore529 .cms-stat-l {
-  letter-spacing: 0.01em;
-}
-</style>
-<script id="vFix41-abim-js">(function(){
-  'use strict';
-  if(window.__vFix41Abim) return;
-  window.__vFix41Abim = true;
-
-  /* ABIM IM blueprint weights (approximate, 2025) */
-  var ABIM_MAP = [
-    { w: 0.14, keys: ['cardio','cardiac','heart','coronar','vascular','cv'] },
-    { w: 0.09, keys: ['gastro','hepat','liver','colon','bowel','biliar'] },
-    { w: 0.09, keys: ['pulm','lung','respir','airway','thorac','pleural'] },
-    { w: 0.09, keys: ['rheum','arthrit','musculo','orthop','spondyl','lupus'] },
-    { w: 0.09, keys: ['infect','infectious','hiv','antimicro','sepsis'] },
-    { w: 0.08, keys: ['hemat','oncol','lymphom','leukemia','myelom','coagul','blood cancer'] },
-    { w: 0.08, keys: ['endocrin','diabet','thyroid','adrenal','metabol','pituitar','parathyroid'] },
-    { w: 0.06, keys: ['nephro','renal','kidney','electrolyte','acid-base','glomerul'] },
-    { w: 0.06, keys: ['neurol','brain','stroke','spinal','seizure','headache','dementia'] },
-    { w: 0.03, keys: ['geriat','elder','aging','falls'] },
-    { w: 0.03, keys: ['allerg','immunol','mast cell','anaphylax'] },
-    { w: 0.03, keys: ['dermat','skin','rash','cutane','dermatol'] },
-    { w: 0.03, keys: ['psychiat','mental','behav','substance','anxiety','depress','bipolar'] },
-    { w: 0.03, keys: ['women','ob/gyn','pregnan','obstet','gynec','reproduct','menopaus'] },
-    { w: 0.03, keys: ['pharmacol','toxicol','poison','medication overdo'] },
-    { w: 0.04, keys: ['statistic','epidem','biostats','preventive','evidence','screen','public health'] }
-  ];
-
-  function getAbimWeight(sys){
-    var s = sys.toLowerCase();
-    /* exact short-code match first */
-    if(s === 'id' || s === 'i.d.') return 0.09;
-    for(var i = 0; i < ABIM_MAP.length; i++){
-      var entry = ABIM_MAP[i];
-      for(var j = 0; j < entry.keys.length; j++){
-        if(s.indexOf(entry.keys[j]) !== -1) return entry.w;
-      }
-    }
-    return 0;
-  }
-
-  function getAbimScore(){
-    var prog = window.phase3State && window.phase3State.progress;
-    var cards = window.appCards ? window.appCards() : [];
-    if(!prog || !cards.length) return null;
-
-    var map = {};
-    cards.forEach(function(c){
-      var id = window.canonicalCardId ? window.canonicalCardId(c) : (c.id || c.qid || c.card_id);
-      var sys = ((c.system || c.sys) || '').trim();
-      if(!sys || !id) return;
-      if(!map[sys]) map[sys] = { total: 0, mastered: 0 };
-      map[sys].total++;
-      var p = prog[id];
-      if(p && Number(p.interval_days || 0) >= 21) map[sys].mastered++;
-    });
-
-    var weightedSum = 0, totalWeight = 0;
-    Object.keys(map).forEach(function(sys){
-      var w = getAbimWeight(sys);
-      if(!w) return;
-      var d = map[sys];
-      var masteryFrac = d.total > 0 ? d.mastered / d.total : 0;
-      weightedSum += masteryFrac * w;
-      totalWeight += w;
-    });
-
-    if(totalWeight === 0) return null;
-    /* Normalize: score out of the covered blueprint weight */
-    var score = Math.round((weightedSum / totalWeight) * 100);
-    var coverage = Math.round(totalWeight * 100);
-    return { score: score, coverage: coverage };
-  }
-
-  function injectAbimTile(){
-    var panel = document.getElementById('cozyMasteryStats529');
-    if(!panel) return;
-    var oldDiv   = document.getElementById('cozyAbimDivider529');
-    var oldTile  = document.getElementById('cozyAbimScore529');
-    if(oldDiv)  oldDiv.remove();
-    if(oldTile) oldTile.remove();
-
-    var result = getAbimScore();
-    if(!result) return;
-
-    var score = result.score;
-    var color = score >= 65 ? '#22c55e' : score >= 50 ? '#f5c97a' : '#fb5876';
-    var tip   = 'Blueprint-weighted mastery (' + result.coverage + '% ABIM coverage)';
-
-    var divEl = document.createElement('div');
-    divEl.id        = 'cozyAbimDivider529';
-    divEl.className = 'cms-divider';
-    panel.appendChild(divEl);
-
-    var tileEl = document.createElement('div');
-    tileEl.id        = 'cozyAbimScore529';
-    tileEl.className = 'cms-stat';
-    tileEl.title     = tip;
-    tileEl.style.cssText = 'border-color:' + color + '33';
-    tileEl.innerHTML =
-      '<span class="cms-stat-n" style="color:' + color + '">' + score + '%</span>' +
-      '<span class="cms-stat-l">Board Est.</span>';
-    panel.appendChild(tileEl);
-  }
-
-  var _prevKpis41 = window.updateKpis;
-  window.updateKpis = function(){
-    var r = _prevKpis41 && _prevKpis41.apply(this, arguments);
-    setTimeout(injectAbimTile, 0);
-    return r;
-  };
-  window.updateKpis.__vFix41Abim = true;
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(injectAbimTile, 800);
-    });
-  } else {
-    setTimeout(injectAbimTile, 800);
-  }
-})();
-</script>
 </body></html>
