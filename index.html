@@ -19111,23 +19111,47 @@ setTimeout(scan,800);
 </script>
 
 <script id="vC6-kill">
-/* vC6 (line 14096) wraps window.toastSafe to show a full-screen overlay on
-   /import.*deck/i. patchButtons() resets startSolo.onclick on every home()
-   call, so hasCardsOrWarn fires and vC6 triggers on every game tap with no
-   deck. This kills that loop: drop the message silently, no-op the overlay. */
 (function(){
-  function dropImport(fn){
-    return function(msg){
-      if(typeof msg==='string' && /import.*deck|import.*json.*csv/i.test(msg)) return;
-      return fn && fn.apply(this,arguments);
-    };
+  /* 1. Kill the vC6 overlay at DOM level — MutationObserver strips .visible the instant it's added */
+  function suppressOverlay(ov){
+    ov.classList.remove('visible');
+    ov.style.setProperty('display','none','important');
+    new MutationObserver(function(){
+      ov.classList.remove('visible');
+      ov.style.setProperty('display','none','important');
+    }).observe(ov,{attributes:true,attributeFilter:['class','style']});
   }
-  window.toastSafe = dropImport(window.toastSafe);
-  window.toast     = dropImport(window.toast);
-  window.showImportNeededOverlay351 = function(){};
-  function hide(){ var o=document.getElementById('importNeededOverlay351'); if(o){o.classList.remove('visible');o.style.cssText+='display:none!important';} }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',hide); else hide();
-  setTimeout(hide,200);
+  function initOverlayKill(){
+    var ov=document.getElementById('importNeededOverlay351');
+    if(ov){ suppressOverlay(ov); }
+    else {
+      new MutationObserver(function(muts,obs){
+        muts.forEach(function(m){ m.addedNodes.forEach(function(n){
+          if(n.nodeType===1 && n.id==='importNeededOverlay351'){ suppressOverlay(n); obs.disconnect(); }
+        });});
+      }).observe(document.body,{childList:true});
+    }
+  }
+  window.showImportNeededOverlay351=function(){};
+  window.toast=function(msg){
+    if(typeof msg==='string' && /import.*deck|import.*json/i.test(msg)) return;
+    var el=document.getElementById('toast');
+    if(el){el.textContent=msg;el.classList.remove('hidden');setTimeout(function(){el.classList.add('hidden');},1600);}
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initOverlayKill); else initOverlayKill();
+
+  /* 2. Game button tap with no deck → open file picker immediately (capture phase, before all other handlers) */
+  document.addEventListener('click',function(e){
+    var btn=e.target && e.target.closest && e.target.closest('#startSolo,#startDomain');
+    if(!btn) return;
+    var cardArr=window.appCards ? window.appCards() : (window.cards||[]);
+    if(!Array.isArray(cardArr) || cardArr.length===0){
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      var fi=document.getElementById('limitlessHomeDeckFile');
+      if(fi) fi.click();
+    }
+  },true);
 })();
 </script>
 </body></html>
