@@ -14159,4 +14159,128 @@ setTimeout(boot160,900);
   },100);
 })();
 </script>
+
+<style id="vStreakRow">
+.streakWrap371 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+.streakDot371 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.streakDot371 .sDot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.09);
+  border: 1.5px solid rgba(255,255,255,.13);
+  transition: background .2s, box-shadow .2s;
+}
+.streakDot371 .sDot.on {
+  background: #f5c97a;
+  border-color: #f5c97a;
+  box-shadow: 0 0 8px rgba(245,201,122,.55), 0 0 3px rgba(245,201,122,.8);
+}
+.streakDot371 .sDot.ring {
+  border-color: rgba(245,201,122,.45);
+}
+.streakDot371 .sLabel {
+  font-family: Orbitron, monospace;
+  font-size: 9px;
+  letter-spacing: .06em;
+  color: rgba(245,230,200,.30);
+  text-transform: uppercase;
+}
+.streakDot371.isToday .sLabel {
+  color: rgba(245,201,122,.65);
+}
+.streakCount371 {
+  font-size: 11px;
+  font-weight: 900;
+  font-family: Orbitron, monospace;
+  letter-spacing: .10em;
+  color: rgba(245,201,122,.65);
+  margin-left: 6px;
+  align-self: center;
+}
+</style>
+
+<script id="vStreakRowJS">
+(function(){
+  var DAY = ['S','M','T','W','T','F','S'];
+
+  function getStudiedDates(){
+    var set = new Set();
+    try{
+      var prog = window.phase3State && window.phase3State.progress;
+      if(!prog) return set;
+      Object.values(prog).forEach(function(p){
+        if(!p || !p.last_seen_at) return;
+        var d = new Date(p.last_seen_at);
+        d.setHours(0,0,0,0);
+        set.add(d.getTime());
+      });
+    }catch(e){}
+    return set;
+  }
+
+  function calcStreak(days, active){
+    var streak = 0;
+    for(var i = days.length - 1; i >= 0; i--){
+      if(active.has(days[i].getTime())) streak++;
+      else break;
+    }
+    return streak;
+  }
+
+  function renderStreak(){
+    var wrap = document.getElementById('streakWrap371');
+    if(!wrap) return;
+    var today = new Date(); today.setHours(0,0,0,0);
+    var days = [];
+    for(var i = 6; i >= 0; i--) days.push(new Date(today.getTime() - i * 86400000));
+    var active = getStudiedDates();
+    var streak = calcStreak(days, active);
+    wrap.innerHTML = days.map(function(d){
+      var isToday = d.getTime() === today.getTime();
+      var on = active.has(d.getTime());
+      return '<div class="streakDot371' + (isToday ? ' isToday' : '') + '">' +
+        '<div class="sDot' + (on ? ' on' : isToday ? ' ring' : '') + '"></div>' +
+        '<div class="sLabel">' + DAY[d.getDay()] + '</div>' +
+        '</div>';
+    }).join('') +
+    (streak > 1 ? '<span class="streakCount371">' + streak + ' 🔥</span>' : '');
+  }
+
+  function injectStreak(){
+    if(document.getElementById('streakWrap371')){ renderStreak(); return; }
+    var hero = document.querySelector('#home .hero');
+    if(!hero) return;
+    var div = document.createElement('div');
+    div.id = 'streakWrap371';
+    div.className = 'streakWrap371';
+    hero.appendChild(div);
+    renderStreak();
+  }
+
+  if(document.readyState !== 'loading') injectStreak();
+  else document.addEventListener('DOMContentLoaded', injectStreak);
+
+  var obs = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      if(m.target && m.target.id === 'home' && !m.target.classList.contains('hidden'))
+        setTimeout(injectStreak, 30);
+    });
+  });
+  var home = document.getElementById('home');
+  if(home) obs.observe(home, {attributes:true, attributeFilter:['class']});
+  window._renderStreak = renderStreak;
+})();
+</script>
 </body></html>
