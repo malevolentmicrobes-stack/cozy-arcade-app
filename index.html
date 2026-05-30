@@ -14408,4 +14408,59 @@ setTimeout(boot160,900);
   }, 100);
 })();
 </script>
+
+<style id="vDomainOrbFix-css">
+/* Hide the domainTitle flex spacer so promptBox sits flush below the HUD */
+#domain.game-shell .gameMain371 > .domainTitle {
+  display: none !important;
+}
+/* Promptbox flush-top border radius to match HUD edge */
+#domain.game-shell .gameMain371 > .promptBox {
+  margin-top: 0 !important;
+  border-radius: 0 0 18px 18px !important;
+  border-top-color: transparent !important;
+}
+</style>
+
+<script id="vDomainOrbFixJS">
+(function(){
+  /* Replace positionOrbs with an arena-aware version that starts orbs
+     near the TOP of the orbArena (adjacent to promptBox) rather than
+     the center. Falls back to prior viewport-based version when not in
+     game-shell layout. */
+  var _prior = window.positionOrbs;
+  if(typeof _prior !== 'function') return;
+  window.positionOrbs = positionOrbs = function(p){
+    var arena = document.getElementById('orbArena');
+    if(!arena || !arena.closest('.gameMain371')){
+      return _prior.apply(this, arguments);
+    }
+    var rect = arena.getBoundingClientRect();
+    if(!rect.width || !rect.height) return _prior.apply(this, arguments);
+    var cx = rect.width / 2;
+    /* Start cluster at ~22% from arena top — adjacent to promptBox */
+    var cy = Math.max(44, rect.height * 0.22);
+    var maxR = Math.max(32, Math.min(
+      (rect.width - 200) / 2,
+      rect.height * 0.38,
+      110
+    ));
+    if(typeof orbData === 'undefined' || !orbData.length) return;
+    orbData.forEach(function(o, i){
+      var r = 44 + p * maxR;
+      var wob = Math.sin(Date.now() / 650 + i) * 5;
+      var rawX = cx + (r + wob) * Math.cos(o.ang);
+      var rawY = cy + (r + wob) * Math.sin(o.ang);
+      var halfW = Math.max(52, (o.el.offsetWidth  || 128) / 2);
+      var halfH = Math.max(26, (o.el.offsetHeight ||  56) / 2);
+      o.x = Math.max(halfW + 10, Math.min(rect.width  - halfW - 10, rawX));
+      o.y = Math.max(halfH +  8, Math.min(rect.height - halfH -  8, rawY));
+      o.el.style.left      = o.x + 'px';
+      o.el.style.top       = o.y + 'px';
+      o.el.style.transform = 'translate(-50%,-50%) scale(' + (1 + p * 0.04) + ')';
+    });
+  };
+  window.positionOrbs.__domainOrbFix = true;
+})();
+</script>
 </body></html>
