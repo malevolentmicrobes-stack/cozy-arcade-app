@@ -143,3 +143,26 @@ The architecture does NOT need a rewrite — it needs Capacitor + better CSS org
 - All patches appended before `</body></html>` — never edit inline
 - Never cross-push between `cozy-arcade-app.git` and `cozy-arcade-app-PHASE2.git`
 - `runFSRSValidation()` must stay 17/17 after any change
+
+---
+
+## Addendum — 2026-05-29 (end of session)
+
+### Resolution: App restored and confirmed working
+
+After the rectifier rollback to the 2:45 PM state (`d53dbeb`, 13,689 lines), the live site was still serving the broken build because the service worker was caching the old HTML under `cozy-arcade-v3`.
+
+**Fix:** Bumped SW cache to `cozy-arcade-v4` (`b2f1a9f`). On next tab open, the SW evicts all v3 entries and serves the restored HTML fresh.
+
+**Confirmed working state includes:**
+- Solo Runner + Knowledge Expansion games launch correctly
+- FSRS 17/17 validated
+- Neural Atlas inline
+- Board Readiness Map, session size picker, swipe-to-rate, Board Pearls, ABIM countdown
+- No-deck state: game tap opens file picker directly (overlay loop eliminated)
+
+**Root cause of the day's cascade (for future reference):**
+Every push of broken HTML requires a SW cache name bump — the stale-while-revalidate strategy serves cached HTML instantly even after a fix is pushed. Rule: **any commit that fixes a broken app must also bump `CACHE` in `sw.js`.**
+
+**Features cut in rectifier** (can be re-added one at a time, one per session):
+vFix12 session stats · vFix14 auto-explain · vFix15 leech badge · vFix16 scroll fix · vFix17 today stat · vFix18 pin toggle · vFix19 later flag · vFix20 daily goal · vFix21 quick note · vFix23 orb CSS · vFix24 pacing · vFix25 drill weak · vFix26 confetti · vFix28 heatmap · vFix29 timer · vFix30 keyboard shortcuts · vFix31 cram · vFix32 per-sys cram · vFix33 search · vFix34 accuracy badges · vFix35 pinned · vFix36 tab title · vFix37 audio · vFix38 pearls · vFix39 backup toast · vFix40 calendar · vFix41 ABIM score
