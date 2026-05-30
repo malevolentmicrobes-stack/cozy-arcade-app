@@ -13767,4 +13767,43 @@ setTimeout(boot160,900);
   .game .hudPill:has(#domainRound)::before    { content: '🌀'; font-size: 13px; margin-right: 2px; }
 }
 </style>
+<style id="vMobile-game-polish">
+/* HUD 3-col fix + promptBox closer/smaller for mobile */
+
+/* Ensure all 3 stat pills fit in one row on small phones */
+@media (max-width: 480px) {
+  .hudStats371 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+  }
+  .hudActions371 {
+    grid-template-columns: auto 36px 36px !important;
+    max-width: none !important;
+  }
+  /* HP bar (34×6px) too tiny to read — hide, keep ❤️ emoji */
+  .game .hudPill > .hpWrap {
+    display: none !important;
+  }
+}
+
+/* PromptBox: closer to HUD, smaller font for long board questions */
+/* #solo ID specificity beats all prior .solo class rules */
+@media (max-width: 480px) {
+  #solo .promptBox {
+    top: 36px !important;
+    min-height: 110px !important;
+    padding: 10px 14px 14px !important;
+  }
+  #solo .promptText {
+    font-size: clamp(14px, 4.2vw, 19px) !important;
+    line-height: 1.24 !important;
+    margin-top: 0 !important;
+  }
+  #solo .systemBadge {
+    font-size: 11px !important;
+    padding: 4px 10px !important;
+    margin-bottom: 6px !important;
+  }
+}
+</style>
 </body></html>
