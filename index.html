@@ -13686,4 +13686,48 @@ else boot160();
 setTimeout(boot160,900);
 })();
 </script>
+<style id="vPhaseD-warm">
+/* Phase D — Warm home + settings palette. Game screens and Atlas unchanged. */
+#home {
+  background:
+    radial-gradient(circle at 50% -8%, rgba(255,180,60,.12), transparent 38%),
+    linear-gradient(180deg, #130c08 0%, #0e0905 62%, #0a0703 100%) !important;
+}
+#home .hero {
+  border-color: rgba(245,201,122,.22) !important;
+  background: linear-gradient(135deg, rgba(40,25,10,.80), rgba(20,12,5,.88)) !important;
+}
+#home .modeCard {
+  border-color: rgba(245,201,122,.18) !important;
+  background: linear-gradient(145deg, rgba(30,18,8,.78), rgba(15,9,4,.90)) !important;
+}
+#home .modeCard:hover {
+  border-color: rgba(245,201,122,.42) !important;
+  background: linear-gradient(145deg, rgba(40,24,10,.82), rgba(20,12,5,.92)) !important;
+}
+#home .kpi {
+  border-color: rgba(245,201,122,.15) !important;
+  background: rgba(245,201,122,.03) !important;
+}
+#home .kpiValue {
+  color: #f5c97a !important;
+}
+#home .heroTitle {
+  background: linear-gradient(90deg, #f5f0e8, #f5c97a 55%, #ffd166) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+#settings {
+  background:
+    radial-gradient(circle at 50% -8%, rgba(255,180,60,.08), transparent 38%),
+    linear-gradient(180deg, #130c08 0%, #0e0905 62%, #0a0703 100%) !important;
+}
+#settings .box {
+  background: rgba(20,12,5,.90) !important;
+  border-color: rgba(245,201,122,.15) !important;
+}
+/* .game class screens (#solo, #domain) keep their own cold #020611 background */
+/* #atlas keeps its own na-* scoped CSS unchanged */
+</style>
 </body></html>
