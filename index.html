@@ -14011,4 +14011,16 @@ setTimeout(boot160,900);
   }
 }
 </style>
+
+<style id="vRunner-bottom">
+/* Pull runner out of gameMain371 grid row so it anchors to true screen bottom.
+   moveHunter() uses left:pct% which is viewport-% identical to #solo (full-screen). */
+@media (max-width: 820px) {
+  #runner.hunter {
+    position: fixed !important;
+    bottom: 72px !important;
+    top: auto !important;
+  }
+}
+</style>
 </body></html>
