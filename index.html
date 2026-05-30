@@ -13730,4 +13730,41 @@ setTimeout(boot160,900);
 /* .game class screens (#solo, #domain) keep their own cold #020611 background */
 /* #atlas keeps its own na-* scoped CSS unchanged */
 </style>
+<style id="vHUD-simplify">
+/* HUD simplification — emoji labels replace verbose text, slightly lighter borders */
+
+/* Base: cleaner glow/border (all browsers) */
+.game .hud .hudPill,
+.game .gameHud .hudPill {
+  box-shadow: 0 2px 5px rgba(0,0,0,.25) !important;
+  border-color: rgba(103,232,249,.10) !important;
+}
+
+/* Emoji labels — progressive enhancement via :has() */
+/* Supported: Safari 15.4+, Chrome 105+, Firefox 121+ */
+@supports selector(:has(*)) {
+
+  /* Hide verbose text nodes in stat pills and phase pill */
+  .game .hudStats371 .hudPill,
+  .game .hudActions371 .hudPill:not(.hudIconButton371) {
+    font-size: 0 !important;
+  }
+
+  /* Restore value spans and HP bar to readable size */
+  .game .hudStats371 .hudPill > span,
+  .game .hudStats371 .hudPill > .hpWrap,
+  .game .hudActions371 .hudPill:not(.hudIconButton371) > span {
+    font-size: 11px !important;
+  }
+
+  /* Emoji prefix per pill */
+  .game .hudPill:has(#hpFill)::before         { content: '❤️'; font-size: 13px; margin-right: 2px; }
+  .game .hudPill:has(#soloScore)::before,
+  .game .hudPill:has(#domainScore)::before    { content: '⚔️'; font-size: 13px; margin-right: 2px; }
+  .game .hudPill:has(#soloStreak)::before,
+  .game .hudPill:has(#domainStreak)::before   { content: '🔥'; font-size: 13px; margin-right: 2px; }
+  .game .hudPill:has(#soloGate)::before       { content: '🏁'; font-size: 13px; margin-right: 2px; }
+  .game .hudPill:has(#domainRound)::before    { content: '🌀'; font-size: 13px; margin-right: 2px; }
+}
+</style>
 </body></html>
