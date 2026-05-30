@@ -14023,4 +14023,140 @@ setTimeout(boot160,900);
   }
 }
 </style>
+
+<style id="vRunnerFixCSS">
+/* Runner reparented to #solo direct child on mobile (see vRunnerFixJS).
+   #solo is position:fixed;inset:0 so absolute+bottom works correctly. */
+#solo > #runner.hunter {
+  position: absolute !important;
+  bottom: 72px !important;
+  top: auto !important;
+  z-index: 18 !important;
+  width: 52px !important;
+  height: 70px !important;
+}
+@media (max-width: 820px) {
+  #groundGlow { display: none !important; }
+}
+</style>
+
+<script id="vRunnerFixJS">
+(function(){
+  function reparentRunner(){
+    if(window.innerWidth > 820) return;
+    var r = document.getElementById('runner');
+    var solo = document.getElementById('solo');
+    if(!r || !solo || r.parentElement === solo) return;
+    solo.appendChild(r);
+  }
+  if(document.readyState !== 'loading') reparentRunner();
+  else document.addEventListener('DOMContentLoaded', reparentRunner);
+  var obs = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      if(m.target && m.target.id === 'solo' && !m.target.classList.contains('hidden'))
+        reparentRunner();
+    });
+  });
+  var s = document.getElementById('solo');
+  if(s) obs.observe(s, {attributes:true, attributeFilter:['class']});
+  window.addEventListener('resize', reparentRunner);
+})();
+</script>
+
+<script id="vUndoReview">
+(function(){
+  var _snap = null;
+
+  function cardIdFrom(card){
+    if(typeof card === 'string') return card;
+    return card && (card.qid || card.card_id || card.id || card.qid_unique || card.original_qid) || null;
+  }
+
+  function takeSnap(card){
+    try{
+      var id = cardIdFrom(card);
+      if(!id || !window.getProgress) return;
+      var hasProg = !!(window.phase3State && window.phase3State.progress && window.phase3State.progress[id]);
+      _snap = { id:id, progress: JSON.parse(JSON.stringify(window.getProgress(id))), hadProgress: hasProg };
+    }catch(e){}
+  }
+
+  function undoLastRate(){
+    if(!_snap) return;
+    try{
+      if(!window.phase3State) return;
+      window.phase3State.progress = window.phase3State.progress || {};
+      if(_snap.hadProgress){
+        window.phase3State.progress[_snap.id] = JSON.parse(JSON.stringify(_snap.progress));
+      } else {
+        delete window.phase3State.progress[_snap.id];
+      }
+      window.saveState && window.saveState();
+      window.updateKpis && window.updateKpis();
+    }catch(e){ return; }
+    var id = _snap.id; _snap = null;
+    showUndoChip();
+  }
+  window._undoLastRate = undoLastRate;
+
+  function showUndoChip(){
+    document.querySelectorAll('.energyChip_v').forEach(function(e){ e.remove(); });
+    var el = document.createElement('div');
+    el.className = 'energyChip_v';
+    el.innerHTML = '<span class="energyChipStar_v" style="animation:none">↩</span><span class="energyChipText_v">Rating undone</span>';
+    document.body.appendChild(el);
+    setTimeout(function(){ el.classList.add('energyChip_v--out'); setTimeout(function(){ try{el.remove();}catch(e){} },420); },2500);
+  }
+
+  function wrapRate(){
+    var orig = window.rate;
+    if(!orig || orig._undoWrapped) return;
+    window.rate = function(card, rating){
+      if(rating && rating !== 'pin' && rating !== 'bury' && rating !== 'continue') takeSnap(card);
+      return orig.apply(this, arguments);
+    };
+    window.rate._undoWrapped = true;
+  }
+
+  /* CMD+Z / Ctrl+Z */
+  document.addEventListener('keydown', function(e){
+    if((e.metaKey||e.ctrlKey) && e.key === 'z'){ e.preventDefault(); undoLastRate(); }
+  });
+
+  /* Shake — DeviceMotionEvent with iOS 13+ permission gate */
+  var _lastShake=0, _prevAcc={x:0,y:0,z:0};
+  function handleMotion(e){
+    var a = e.accelerationIncludingGravity;
+    if(!a) return;
+    var now = Date.now();
+    if(now - _lastShake < 1200) return;
+    var d = Math.abs((a.x||0)-_prevAcc.x)+Math.abs((a.y||0)-_prevAcc.y)+Math.abs((a.z||0)-_prevAcc.z);
+    _prevAcc = {x:a.x||0,y:a.y||0,z:a.z||0};
+    if(d > 35){ _lastShake = now; undoLastRate(); }
+  }
+  function initMotion(){
+    if(typeof DeviceMotionEvent==='undefined') return;
+    if(typeof DeviceMotionEvent.requestPermission==='function'){
+      DeviceMotionEvent.requestPermission().then(function(s){ if(s==='granted') window.addEventListener('devicemotion',handleMotion); }).catch(function(){});
+    } else {
+      window.addEventListener('devicemotion', handleMotion);
+    }
+  }
+  var _motionInit=false;
+  document.addEventListener('click', function(){
+    if(_motionInit) return;
+    var solo=document.getElementById('solo'), dom=document.getElementById('domain');
+    if((solo&&!solo.classList.contains('hidden'))||(dom&&!dom.classList.contains('hidden'))){
+      _motionInit=true; initMotion();
+    }
+  }, true);
+
+  /* Poll until window.rate is available then wrap it */
+  if(window.rate) wrapRate();
+  var _tries=0, _poll=setInterval(function(){
+    if(window.rate){ wrapRate(); clearInterval(_poll); }
+    if(++_tries>200) clearInterval(_poll);
+  },100);
+})();
+</script>
 </body></html>
