@@ -13806,4 +13806,23 @@ setTimeout(boot160,900);
   }
 }
 </style>
+<style id="vHUD-home-btn-fix">
+/* ROOT CAUSE FIX: v1751511 injects ⌂ button into .hudStats371 (first position),
+   making 4 items in a 3-col grid — streak wraps to row 2.
+   Hiding these; Pause → Exit to Home is the navigation path in-game. */
+.gameHud .hudHome1751511,
+.gameHud .hudHome1751512 {
+  display: none !important;
+}
+
+/* PromptBox flush with HUD bottom — top border, no dead gap above card */
+@media (max-width: 900px) {
+  #solo .promptBox {
+    top: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-top-color: transparent !important;
+  }
+}
+</style>
 </body></html>
