@@ -16024,6 +16024,37 @@ setTimeout(scan,800);
 })();
 </script>
 
+<!-- vC6-NEUTRALIZER: kill overlay trigger — hasCardsOrWarn toast drops silently, visual dim handles UX -->
+<script id="vFix-vc6-neutralizer-js">(function(){
+  /* vC6 wrapped window.toast + window.toastSafe to show full-screen overlay on /import.*deck/i.
+     patchButtons() resets #startSolo.onclick on every home() call, so hasCardsOrWarn() fires and
+     triggers the overlay on every game tap when no deck. Neutralize it completely. */
+
+  function killImportMsg(fn){
+    return function(msg){
+      if(typeof msg === 'string' && (/import.*deck/i.test(msg) || /import.*json.*csv/i.test(msg))) return;
+      return fn && fn.apply(this, arguments);
+    };
+  }
+
+  /* Wrap after vC6 — drops the 'import deck' message before it reaches vC6 */
+  window.toastSafe = killImportMsg(window.toastSafe);
+  window.toast     = killImportMsg(window.toast);
+
+  /* No-op the overlay show function directly */
+  window.showImportNeededOverlay351 = function(){};
+
+  /* Hide overlay if somehow already visible */
+  function hideOverlay(){
+    var ov = document.getElementById('importNeededOverlay351');
+    if(ov){ ov.classList.remove('visible'); ov.style.setProperty('display','none','important'); }
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideOverlay);
+  else hideOverlay();
+  setTimeout(hideOverlay, 300);
+})();
+</script>
+
 <!-- NO-DECK UX FIX: disable game buttons visually when no deck loaded -->
 <style id="vFix-nodeck-css">
 #cozyNoDeckMsg529 {
