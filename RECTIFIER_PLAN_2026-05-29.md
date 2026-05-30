@@ -4,6 +4,26 @@
 
 ---
 
+## ⛔ READ FIRST — Confirmed Failures (do not re-derive)
+
+> Full detail in `FAILED_ATTEMPTS_2026-05-29.md`. This is the quick-reference preface.
+> Each item below was attempted, failed, and reverted. Exact commits cited.
+
+| Entry | What failed | Commit(s) | Cost |
+|-------|------------|-----------|------|
+| 1 | vFix41: another `updateKpis` wrapper for ABIM score tile | `5daef88` → 5 revert commits | ~2 hours, zero net change |
+| 2 | vFix42: 3 features in one prompt (logo OK; overlay-close + HUD settings broken) | `f540bcf` → `81ae55e` | 1 hour revert |
+| 3 | vFix43a: `home()` at 900ms post-import to "unstick" games | `dfd488b` → `6d7e70b` | scroll-freeze on mobile |
+| 4 | vC6: toast interception (`window.toast` wrap) triggering full-screen overlay | earlier → `b4364b3` | game buttons appeared broken |
+| 5 | `window.normalizeHud` wrap of a local IIFE closure (never on window) | `f540bcf` → `81ae55e` | silent dead wrapper, R18 |
+| 6 | Diagnosing Solo-click freeze without checking onclick handler count | multiple sessions | wrong root cause, wasted patches |
+| 7 | Pushing fixes without bumping `CACHE` in sw.js | `d53dbeb` (no bump) | app appeared still broken after fix |
+| 8 | In-game settings button without setting `settingsReturnMode` | `f540bcf` → reverted | landed on home instead of game, R20 |
+| 9 | Hiding `.hudStats371` on mobile to simplify HUD | `f540bcf` → reverted | HUD collapse + tap target shift, R19 |
+| 10 | Assuming `importObject()` doesn't refresh state | `dfd488b` → reverted | redundant call + freeze |
+
+---
+
 ## The Pattern That Keeps Breaking Everything
 
 Every session follows the same loop:

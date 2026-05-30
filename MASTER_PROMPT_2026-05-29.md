@@ -193,6 +193,27 @@ These are confirmed issues from `REDUNDANT_CODE_AUDIT.md`. Do not "fix" them by 
 
 ---
 
+## PART 9b — ⛔ FAILED ATTEMPTS REFERENCE
+
+Before writing any code, read `FAILED_ATTEMPTS_2026-05-29.md`.
+It contains 10 confirmed failures from the 2026-05-29 session, each with exact root cause and lesson.
+
+Quick reference — things that caused complete failure and must never be repeated:
+
+| ⛔ Do not | Why |
+|-----------|-----|
+| Add another `updateKpis` wrapper for a home stat | Chain is 9 deep; silent failures compound |
+| Bundle 3 features in one prompt | One revert breaks all three; 2+ hours lost per incident |
+| Call `home()` on a timer after import | `importObject()` already refreshes state; timer causes scroll-freeze on mobile |
+| Intercept `window.toast` to trigger UI state | Toast is fire-and-forget; interception breaks game buttons |
+| `window.X = wrap(window.X)` without verifying `typeof window.X === 'function'` | Local IIFE vars are not on window; wrapper wraps undefined |
+| Open settings from game without setting `settingsReturnMode` | User lands on home instead of back in game |
+| Hide a HUD flex child to simplify layout | Collapses row, shifts all sibling tap targets |
+| Push a fix without bumping `CACHE` in sw.js | Fix is invisible until manual cache clear |
+| Diagnose "button doesn't work" without counting onclick handlers first | 7 handlers compete on #startSolo; `patchButtons()` resets on every `home()` call |
+
+---
+
 ## PART 10 — NON-NEGOTIABLES (master subsection)
 
 *Compiled from ULTIMATE_GOALS.md, MOBILE_RECTIFIER_PLAN.md, RECTIFIER_PLAN_2026-05-29.md. These override any feature request.*
