@@ -13863,4 +13863,120 @@ setTimeout(boot160,900);
   }
 }
 </style>
+
+<style id="vHUD-home-btn-show">
+/* Un-hide ⌂ from vHUD-home-btn-fix and style as compact icon in the single flex row */
+.gameHud .hudHome1751511,
+.gameHud .hudHome1751512 {
+  display: inline-flex !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  font-size: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+.gameHud .hudHome1751511::before,
+.gameHud .hudHome1751512::before {
+  content: '⌂';
+  font-size: 17px;
+  line-height: 1;
+}
+</style>
+
+<style id="vEnergyPulse-css">
+.energyChip_v {
+  position: fixed;
+  z-index: 29999;
+  top: 62px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(3,8,24,.90);
+  border: 1px solid rgba(103,232,249,.30);
+  border-radius: 999px;
+  padding: 7px 13px 7px 9px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 12px;
+  color: #bffbff;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 18px rgba(0,0,0,.35);
+  pointer-events: none;
+  user-select: none;
+  animation: energyChipIn_v .28s cubic-bezier(.2,.8,.2,1) both;
+}
+.energyChip_v--red  { border-color: rgba(251,130,118,.45); color: #ffd0cb; }
+.energyChip_v--gold { border-color: rgba(255,209,102,.45); color: #ffe8a0; }
+.energyChip_v--out  { animation: energyChipOut_v .4s ease-in forwards; }
+.energyChipStar_v   { font-size: 14px; display: inline-block; animation: energyStarSpin_v 1.4s linear infinite; }
+@keyframes energyChipIn_v  { from { transform: translateX(22px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes energyChipOut_v { to   { transform: translateX(22px); opacity: 0; } }
+@keyframes energyStarSpin_v {
+  0%   { transform: rotate(0deg)   scale(1);    }
+  50%  { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1);    }
+}
+</style>
+
+<script id="vEnergyPulse">
+(function(){
+  var UP = [
+    '↑ Energy · Cooking 🔥',
+    '↑ Energy · Levitating ✨',
+    '↑ Energy · We\'re so back ⚡',
+    '↑ Energy · No cap 💯',
+    '↑ Energy · Slay 👑',
+    '↑ Energy · Locked in 🎯',
+    '↑ Energy · It\'s giving ABIM 💫',
+    '↑ Energy · Grinding 🔥'
+  ];
+  var DOWN = [
+    '↓ Energy · Review the trigger 📋',
+    '↓ Energy · Low key grind time 💀',
+    '↓ Energy · Board trigger incoming 👀',
+    '↓ Energy · Stabilize the signal 🔄',
+    '↓ Energy · Not it rn · check trigger 😤'
+  ];
+  var MILE = {
+    'SYSTEM SURGE':           ['✳ Cooking · System Surge 🔥','✳ Levitating · 5 signals 💫','✳ Let\'s go · Keep grinding ⚡'],
+    'BOARD TRIGGER UNLOCKED': ['✳ Crushing it · Board trigger 🏆','✳ 10 deep · No cap 💯'],
+    'WEAK SYSTEM DETECTED':   ['✳ Weak system spotted · Grind time 🎯'],
+    'SIGIL ECHO':             ['✳ 50 DEEP · Absolute unit 👑','✳ Grinding. Cooking. Levitating. 🔥']
+  };
+  function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  window.showPulseToast = function(title, body, color){
+    document.querySelectorAll('.energyChip_v').forEach(function(e){ e.remove(); });
+
+    var text, cls;
+    if (!title || color === 'red'){
+      text = rand(DOWN);
+      cls  = 'energyChip_v--red';
+    } else if (MILE[title]){
+      text = rand(MILE[title]);
+      cls  = color === 'gold' ? 'energyChip_v--gold' : '';
+    } else {
+      text = rand(UP);
+      cls  = color === 'gold' ? 'energyChip_v--gold' : '';
+    }
+
+    var el = document.createElement('div');
+    el.className = 'energyChip_v ' + cls;
+    el.innerHTML = '<span class="energyChipStar_v">✳</span><span class="energyChipText_v">' + esc(text) + '</span>';
+    document.body.appendChild(el);
+
+    setTimeout(function(){
+      el.classList.add('energyChip_v--out');
+      setTimeout(function(){ try{ el.remove(); }catch(e){} }, 420);
+    }, 3500);
+  };
+})();
+</script>
 </body></html>
