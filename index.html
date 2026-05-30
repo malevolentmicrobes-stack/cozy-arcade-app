@@ -19109,4 +19109,25 @@ setTimeout(scan,800);
   }
 })();
 </script>
+
+<script id="vC6-kill">
+/* vC6 (line 14096) wraps window.toastSafe to show a full-screen overlay on
+   /import.*deck/i. patchButtons() resets startSolo.onclick on every home()
+   call, so hasCardsOrWarn fires and vC6 triggers on every game tap with no
+   deck. This kills that loop: drop the message silently, no-op the overlay. */
+(function(){
+  function dropImport(fn){
+    return function(msg){
+      if(typeof msg==='string' && /import.*deck|import.*json.*csv/i.test(msg)) return;
+      return fn && fn.apply(this,arguments);
+    };
+  }
+  window.toastSafe = dropImport(window.toastSafe);
+  window.toast     = dropImport(window.toast);
+  window.showImportNeededOverlay351 = function(){};
+  function hide(){ var o=document.getElementById('importNeededOverlay351'); if(o){o.classList.remove('visible');o.style.cssText+='display:none!important';} }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',hide); else hide();
+  setTimeout(hide,200);
+})();
+</script>
 </body></html>
