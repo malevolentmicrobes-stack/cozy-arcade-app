@@ -217,3 +217,55 @@ After `d53dbeb` was pushed, the live site still served the broken build. Root ca
 - One feature per prompt. Write spec before any code.
 - Pre-mortem every `onclick` handler change.
 - Any fix to a live broken app → bump SW cache in the same commit.
+
+---
+
+### Deferred: Knowledge Expansion card/orb position (2026-05-30)
+
+**Symptom:** Orbs/question card not correctly positioned relative to top HUD bar. Suspected root cause: new `game-shell` grid layout + `patchDomainGeometry` position-detection interacting badly — 6 competing `positionOrbs` overrides in the file.
+
+**Before fixing:** Open DevTools on device, confirm (1) `#domain.classList` contains `game-shell`, (2) `window.positionOrbs.__mobileShell371` is true, (3) `arena.getBoundingClientRect()` returns correct dimensions during gameplay. Screenshot the exact visual to confirm whether it is the `.promptBox` or orbs that are misplaced. See FAILED_ATTEMPTS Entry 11 for full diagnostic checklist.
+
+---
+
+## Addendum — 2026-05-30 (PHASE2 project status)
+
+### PHASE2 (`cozy-arcade-app-PHASE2`) — Current State
+
+PHASE2 is the active development branch. It targets full FSRS v5 with in-place edits only (no script blocks appended). All work stays in PHASE2 — never cross-push to PHASE1.
+
+**GitHub Pages:** Serves from `public` branch. Every push requires: commit to `main` → merge `main` → `public` → push `public`.
+
+**Baseline:** `d53dbeb` carry-over from PHASE1 rectifier (13,689 lines). PHASE2 has no `sw.js`.
+
+### PHASE2 Commits This Session (2026-05-30)
+
+| Commit | Description | Status |
+|--------|-------------|--------|
+| `188c976` | FSRS core: E1 exportProgressMap stability/difficulty, E2 bindRatings rateCard wiring, E5 Shadow Dungeon queue, E6 dueScoreHot next_due_at, E8 sourceFull LEVEL 1/2 removal | ✅ landed |
+| `3d04e9c` | Field normalizer: reveal chain, one_thing fallback, edu_obj key, wire() guard, newer normalizer edu_obj | ✅ landed |
+| Earlier | CSS specificity fix (#solo .gameMain371 > .promptBox ID+class beats ID-only) | ✅ landed |
+| `f26e862` | **Today:** reveal chain order (output field: one_thing→educational_obj) + canonicalizeCard level alias deletion | ✅ landed |
+
+### PHASE2 Validation Status
+
+`window.runFSRSValidation()` last returned **9/15** before today's two edits. The two remaining failures were:
+- **Reveal chain order ❌** — `output` field had `c.one_thing` before `c.educational_objective` → now fixed (L8359)
+- **canonicalizeCard level aliases ❌** — `c.level_1_presentation = presentation` and `c.level_2_three_second_exposure = educational_objective` were overwriting clean display-mode data → now deleted (L11496-11497)
+
+**Expected after `f26e862`:** 17/17. Must be confirmed in browser before Phase 4 (`rateCard()` swap) work can proceed.
+
+### PHASE2 Remaining Work (Ordered)
+
+1. **Confirm 17/17** — load live site, run `window.runFSRSValidation()` in console
+2. **Phase 6 console repair script** — ghost cards, SM2-era cards, ease_factor normalization (in COZY_ARCADE_MASTER_FIX_PROMPT.md Phase 6)
+3. **Phase 7 full verification checklist** — end-to-end test per master prompt
+4. **Knowledge Expansion orb/card position** — DEFERRED, requires DevTools diagnosis first (Entry 11 in FAILED_ATTEMPTS)
+
+### Iron Rules (PHASE2)
+
+- Never cross-push between repos
+- All edits in-place — no new `<script>` blocks
+- Protected functions (never rename): `rateCard`, `rate`, `advance`, `fullCard`, `saveState`, `updateKpis`, `canonicalCardId`, `importDeck`, `startCard`, `nextCard`
+- Every broken-live-app fix must also push `public` in the same session
+- One feature per prompt; pre-mortem every `onclick` change
