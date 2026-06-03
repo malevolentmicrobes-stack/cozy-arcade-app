@@ -1,16 +1,15 @@
 /* Cozy Arcade Service Worker — offline-first for ABIM study anywhere */
-const CACHE = 'cozy-arcade-v31';
+const CACHE = 'cozy-arcade-v32';
+const APP_SHELL = ['./', './index.html', './manifest.json'];
 
-/* On install: cache the app shell */
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE)
-      .then(cache => cache.addAll(['./', './index.html']))
+      .then(cache => cache.addAll(APP_SHELL))
       .then(() => self.skipWaiting())
   );
 });
 
-/* On activate: delete old caches */
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
@@ -20,17 +19,16 @@ self.addEventListener('activate', event => {
 });
 
 /* Fetch strategy:
-   - index.html / app root → stale-while-revalidate (instant load, refresh in background)
-   - CDN (fonts, three.js) → cache-first with network fallback
-   - Everything else → network-first, cache fallback */
+   - App shell (same-origin /, index.html, manifest.json) → stale-while-revalidate
+   - External assets (CDN, fonts) → cache-first with network fallback
+   - Same-origin non-shell → network-first with cache fallback */
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  /* Only handle GET */
   if (event.request.method !== 'GET') return;
 
   /* App shell: stale-while-revalidate */
-  if (url.pathname.endsWith('/') || url.pathname.endsWith('index.html') || url.pathname.endsWith('sw.js')) {
+  if (url.origin === self.location.origin && (url.pathname.endsWith('/') || url.pathname.endsWith('index.html') || url.pathname.endsWith('manifest.json'))) {
     event.respondWith(
       caches.open(CACHE).then(cache =>
         cache.match(event.request).then(cached => {
@@ -45,7 +43,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  /* CDN resources (Google Fonts, three.js): cache-first */
+  /* External assets (Google Fonts, CDN): cache-first */
   if (url.hostname !== self.location.hostname) {
     event.respondWith(
       caches.match(event.request).then(cached => {
@@ -59,5 +57,16 @@ self.addEventListener('fetch', event => {
         }).catch(() => new Response('', { status: 503, statusText: 'Offline' }));
       })
     );
+    return;
   }
+
+  /* Same-origin non-shell requests: network-first with cache fallback */
+  event.respondWith(
+    caches.open(CACHE).then(cache =>
+      fetch(event.request).then(res => {
+        if (res && res.status === 200) cache.put(event.request, res.clone());
+        return res;
+      }).catch(() => cache.match(event.request))
+    )
+  );
 });
