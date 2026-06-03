@@ -11955,6 +11955,8 @@ function fixStableOneThingDropdown351() {
       return '<div class="ratingBar"><button class="btn ' + (pinned ? 'pinActive350' : '') + '" data-rate="pin">' + (pinned ? 'Unpin' : 'Pin') + '</button><button class="btn buryBtn352 ' + (buried ? 'buryActive352' : '') + '" data-rate="bury">' + (buried ? 'Suspended' : 'Bury') + '</button><button class="btn againBtn352 ratingBtn again" data-rate="again" data-rating="again">Again</button><button class="btn ratingBtn hard" data-rate="hard" data-rating="hard">Hard</button><button class="btn ratingBtn good" data-rate="good" data-rating="good">Good</button><button class="btn primary ratingBtn easy" data-rate="easy" data-rating="easy">EASY</button><button class="btn primary" data-rate="continue">Continue</button></div>';
     };
     window.cardPool = cardPool = () => sessionPool(mode === 'domain' ? 'expansion' : 'solo');
+    window.cardPool.__energyBuriedFilter352 = true;
+    window.cardPool.__cozyStableRandom351 = true;
     window.nextCard = nextCard = () => {
       if (window.__shadowDungeonActive175164 && Array.isArray(window.__shadowRunQueue) && window.__shadowRunQueue.length) {
         const idx = typeof window.__shadowRunQueueIdx === 'number' ? window.__shadowRunQueueIdx : 1;
@@ -11970,6 +11972,7 @@ function fixStableOneThingDropdown351() {
       index += 1;
       if (typeof makeChoices === 'function') makeChoices();
     };
+    window.nextCard.__cozyStableRandom351 = true;
     (function(){
       const _adv = window.advance || advance;
       window.advance = advance = function(which){
