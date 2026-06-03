@@ -11278,6 +11278,51 @@ function fixStableOneThingDropdown351() {
     return map[mode] || 'new_first';
   }
 
+  function legacyScopeToken(mode) {
+    const map = {
+      new_only: 'new', new_first: 'all', random_all: 'random', random_new: 'random-new',
+      reviewed_first: 'reviewed', review_deck: 'review', random: 'random',
+      'random-new': 'random-new', due: 'due', pinned: 'pinned', hard: 'hard',
+      review: 'review', reviewed: 'reviewed', new: 'new', all: 'all',
+      expansion: 'expansion', suspended: 'suspended'
+    };
+    return map[String(mode || '').trim()] || 'all';
+  }
+
+  function setSelectIfPresent(id, value) {
+    const el = q(id);
+    if (!el) return;
+    if ([...el.options].some(opt => opt.value === value)) el.value = value;
+  }
+
+  function syncGeneralStudyScopePhase3(rawMode, opts = {}) {
+    const browseValue = q('browseScope351')?.value || '';
+    const existing = rawMode || browseValue || document.documentElement.dataset.cozyLaunchScope || phase3State.settings.solo_order || 'all';
+    const scope = legacyScopeToken(existing);
+    document.documentElement.dataset.cozyLaunchScope = scope;
+    window.homeFilters = window.homeFilters || { scope: 'all', system: 'all', tag: 'all' };
+    window.homeFilters.scope = scope;
+    try { if (typeof deckMode !== 'undefined') deckMode = scope === 'random-new' ? 'random' : scope; } catch (_) {}
+    phase3State.settings.solo_order = scope;
+    if (opts.syncExpansion !== false) phase3State.settings.expansion_order = scope;
+    session.poolKey = '';
+    session.pool = [];
+    try { index = 0; } catch (_) {}
+    setSelectIfPresent('browseScope351', scope);
+    setSelectIfPresent('homeScope175155', scope);
+    setSelectIfPresent('reviewScope17526', scope);
+    savePhase3State();
+    if (opts.log) {
+      setTimeout(() => {
+        try {
+          const pool = sessionPool(opts.gameType || 'solo');
+          console.log('[E7B] scope sync:', scope, 'pool:', pool.length);
+        } catch (err) { console.warn('[E7B] scope sync check failed:', err); }
+      }, 0);
+    }
+    return scope;
+  }
+
   function selectedOrder(gameType) {
     const explicit = document.documentElement.dataset.cozyLaunchScope || '';
     const hf = window.homeFilters || {};
@@ -11697,16 +11742,13 @@ function fixStableOneThingDropdown351() {
   function wireUi() {
     const browse = q('browseScope351');
     if (browse) {
-      const selected = normalizeMode(browse.value || phase3State.settings.solo_order);
+      const selected = legacyScopeToken(browse.value || phase3State.settings.solo_order);
       browse.dataset.phase3Options = '1';
       if (browse.innerHTML !== optionHtml(selected)) browse.innerHTML = optionHtml(selected);
       const label = browse.closest('div')?.querySelector('label');
       if (label) label.textContent = 'General Study Mode';
       browse.onchange = () => {
-        phase3State.settings.solo_order = normalizeMode(browse.value);
-        phase3State.settings.expansion_order = normalizeMode(browse.value);
-        savePhase3State();
-        session.poolKey = '';
+        syncGeneralStudyScopePhase3(browse.value, { log: true, source: 'browseScope351' });
         updateKpisPhase3();
       };
     }
