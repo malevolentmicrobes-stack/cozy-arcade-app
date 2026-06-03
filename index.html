@@ -6104,6 +6104,7 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
       sel.value=configs.some(x=>x[0]===old)?old:'new';
       sel.onchange=()=>{try{deckMode=sel.value;}catch(e){} try{updateKpis();}catch(e){}};
     });
+    if(window.cardPool && window.cardPool.__cozyStableRandom351 && window.cardPool.__energyBuriedFilter352) return;
     window.cardPool=cardPool=function(){
       let arr=(cards||[]).filter(c=>clean(answer(c))&&clean(prompt(c)));
       const sys=$('homeSystem175155')?.value||'all';
