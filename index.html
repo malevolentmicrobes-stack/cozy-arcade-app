@@ -11326,6 +11326,14 @@ function fixStableOneThingDropdown351() {
 	      ];
     } else if (selected === 'due') {
       arr = arr.filter(c => isDue(progress(c)));
+      arr = [...arr].sort((a, b) => {
+        const ta = Date.parse(progress(a).next_due_at || '');
+        const tb = Date.parse(progress(b).next_due_at || '');
+        if (isNaN(ta) && isNaN(tb)) return 0;
+        if (isNaN(ta)) return 1;
+        if (isNaN(tb)) return -1;
+        return ta - tb;
+      });
 	    } else if (selected === 'review_deck') {
 	      arr = normalizeDeckIdentities().filter(c => !progressForCard(c).suspended).filter(c => {
 	        const p = progressForCard(c);
@@ -11948,6 +11956,13 @@ function fixStableOneThingDropdown351() {
     };
     window.cardPool = cardPool = () => sessionPool(mode === 'domain' ? 'expansion' : 'solo');
     window.nextCard = nextCard = () => {
+      if (window.__shadowDungeonActive175164 && Array.isArray(window.__shadowRunQueue) && window.__shadowRunQueue.length) {
+        const idx = typeof window.__shadowRunQueueIdx === 'number' ? window.__shadowRunQueueIdx : 1;
+        current = window.__shadowRunQueue[idx % window.__shadowRunQueue.length];
+        window.__shadowRunQueueIdx = idx + 1;
+        if (typeof makeChoices === 'function') makeChoices();
+        return;
+      }
       const gameType = mode === 'domain' ? 'expansion' : 'solo';
       const pool = sessionPool(gameType);
       if (!pool.length) { try { toast('No cards available for this study mode'); } catch (_) {} return; }
