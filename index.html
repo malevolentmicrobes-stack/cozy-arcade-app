@@ -10711,6 +10711,45 @@ function fixStableOneThingDropdown351() {
     return SYS_MAP_PHASE3[key] || text.trim().toUpperCase();
   }
 
+  function tagsForPhase3(card) {
+    const raw = card?.tags;
+    if (Array.isArray(raw)) return raw.map(clean).filter(Boolean);
+    return String(raw || '').split(/[;,|]/).map(clean).filter(Boolean);
+  }
+
+  function systemForPhase3(card) {
+    return normSysPhase3(card?.system || card?.sys || card?.subject || card?.subspecialty || '');
+  }
+
+  function selectedSystemPhase3() {
+    const value = document.documentElement.dataset.cozyLaunchSystem
+      || window.homeFilters?.system
+      || q('browseSystem351')?.value
+      || q('homeSystem175155')?.value
+      || q('reviewSystem352')?.value
+      || 'all';
+    return value === 'all' ? 'all' : normSysPhase3(value);
+  }
+
+  function selectedTagPhase3() {
+    const value = clean(document.documentElement.dataset.cozyLaunchTag
+      || window.homeFilters?.tag
+      || q('browseTag351')?.value
+      || q('homeTag175155')?.value
+      || q('reviewTagOverlay17527')?.value
+      || 'all');
+    return value || 'all';
+  }
+
+  function applyStudyFiltersPhase3(cardsList) {
+    let arr = [...(cardsList || [])];
+    const system = selectedSystemPhase3();
+    const tag = selectedTagPhase3();
+    if (system && system !== 'all') arr = arr.filter(card => systemForPhase3(card) === system);
+    if (tag && tag !== 'all') arr = arr.filter(card => tagsForPhase3(card).includes(tag));
+    return arr;
+  }
+
   function normTestPhase3(value) {
     return clean(value).replace(/^Test:\s*/i, 'TEST ').replace(/^Test\s+/i, 'TEST ');
   }
@@ -11279,7 +11318,8 @@ function fixStableOneThingDropdown351() {
       random_all: 'random_all',
       random_new: 'random_new',
       review_deck: 'review_deck',
-      suspended: 'suspended'
+      suspended: 'suspended',
+      tagged: 'tagged'
     };
     return map[mode] || 'new_first';
   }
@@ -11349,7 +11389,7 @@ function fixStableOneThingDropdown351() {
 
   function getStudyPool(mode, gameType) {
     const selected = normalizeMode(mode || selectedOrder(gameType));
-    let arr = basePlayableCards();
+    let arr = applyStudyFiltersPhase3(basePlayableCards());
     const progress = card => progressForCard(card);
     const dueSort = (a, b) => {
       const pa = progress(a), pb = progress(b);
@@ -11404,18 +11444,21 @@ function fixStableOneThingDropdown351() {
 	        const p = progress(c);
 	        return (p.repair_point || p.last_rating === 'hard' || p.last_rating === 'again' || p.rating === 'hard' || p.rating === 'again') && !hasFutureDue(p);
 	      });
+    } else if (selected === 'tagged') {
+      const tag = selectedTagPhase3();
+      if (!tag || tag === 'all') arr = arr.filter(c => tagsForPhase3(c).length);
     } else if (selected === 'suspended') {
-      arr = normalizeDeckIdentities().filter(c => progressForCard(c).suspended);
+      arr = applyStudyFiltersPhase3(normalizeDeckIdentities()).filter(c => progressForCard(c).suspended);
     }
 
-	    if (!arr.length && ['new_only', 'due', 'pinned', 'hard', 'suspended'].includes(selected)) return [];
+	    if (!arr.length && ['new_only', 'due', 'pinned', 'hard', 'tagged', 'suspended'].includes(selected)) return [];
 
     if (selected === 'random_new' && arr.length) {
       const active = arr.filter(c => !session.buriedToday.has(canonicalCardId(c)));
       return active.length ? active : arr;
     }
     const scheduledModes = ['new_first', 'reviewed_first', 'due', 'review_deck'];
-    const ordered = splitBuriedToBack(arr.length || scheduledModes.includes(selected) ? arr : basePlayableCards());
+    const ordered = splitBuriedToBack(arr.length || scheduledModes.includes(selected) ? arr : applyStudyFiltersPhase3(basePlayableCards()));
     const active = ordered.filter(c => {
       const id = canonicalCardId(c);
       return !session.buriedToday.has(id) && !getProgress(id).buried;
@@ -11424,7 +11467,7 @@ function fixStableOneThingDropdown351() {
     if (ordered.length) return ordered;
     clearSessionBuried();
     if (scheduledModes.includes(selected)) {
-      const refreshed = basePlayableCards();
+      const refreshed = applyStudyFiltersPhase3(basePlayableCards());
       if (selected === 'new_first') {
         return [
           ...refreshed.filter(isNewCard),
@@ -11440,18 +11483,18 @@ function fixStableOneThingDropdown351() {
       }
       if (selected === 'due') return refreshed.filter(c => isDue(progress(c)));
       if (selected === 'review_deck') {
-        return normalizeDeckIdentities().filter(c => !progressForCard(c).suspended).filter(c => {
+        return applyStudyFiltersPhase3(normalizeDeckIdentities()).filter(c => !progressForCard(c).suspended).filter(c => {
           const p = progressForCard(c);
           return isReviewCandidate(c) && (!hasFutureDue(p) || isDue(p));
         });
       }
     }
-    return shuffleCards(basePlayableCards());
+    return shuffleCards(applyStudyFiltersPhase3(basePlayableCards()));
   }
 
   function poolKey(gameType) {
     const scope = window.homeFilters?.scope || (typeof q === 'function' ? q('browseScope351')?.value : '') || '';
-    return [gameType, selectedOrder(gameType), deckFingerprint(), session.buriedToday.size, session.seenThisSession.size, scope].join('|');
+    return [gameType, selectedOrder(gameType), deckFingerprint(), session.buriedToday.size, session.seenThisSession.size, scope, selectedSystemPhase3(), selectedTagPhase3()].join('|');
   }
 
   function sessionPool(gameType) {
@@ -13580,6 +13623,70 @@ window.hideAtlasScreen=function(){
   else{var h=document.getElementById('home');if(h)h.classList.remove('hidden');}
 };
 
+function naLaunchReviewTarget(target){
+  if(!target||!target.value)return;
+  try{if(typeof window.hideAtlasScreen==='function')window.hideAtlasScreen();}catch(_){}
+  window.homeFilters=window.homeFilters||{scope:'all',system:'all',tag:'all'};
+  document.documentElement.dataset.cozyLaunchScope=target.scope;
+  if(target.kind==='tag'){
+    document.documentElement.dataset.cozyLaunchTag=target.value;
+    document.documentElement.dataset.cozyLaunchSystem='all';
+    window.homeFilters.tag=target.value;
+    window.homeFilters.system='all';
+    naSetStudySelect('browseTag351',target.value);
+    naSetStudySelect('homeTag175155',target.value);
+    naSetStudySelect('reviewTagOverlay17527',target.value);
+    naSetStudySelect('browseSystem351','all');
+    naSetStudySelect('homeSystem175155','all');
+    naSetStudySelect('reviewSystem352','all');
+  }else{
+    document.documentElement.dataset.cozyLaunchTag='all';
+    document.documentElement.dataset.cozyLaunchSystem=target.value;
+    window.homeFilters.tag='all';
+    window.homeFilters.system=target.value;
+    naSetStudySelect('browseSystem351',target.value);
+    naSetStudySelect('homeSystem175155',target.value);
+    naSetStudySelect('reviewSystem352',target.value);
+    naSetStudySelect('browseTag351','all');
+    naSetStudySelect('homeTag175155','all');
+    naSetStudySelect('reviewTagOverlay17527','all');
+  }
+  if(typeof window.syncGeneralStudyScopePhase3==='function')window.syncGeneralStudyScopePhase3(target.scope,{syncExpansion:false,log:true,source:'A9'});
+  else if(typeof window.__cozyApplyDeckMode351==='function')window.__cozyApplyDeckMode351(target.scope);
+  try{if(typeof window.startSolo==='function')window.startSolo();else{var start=document.getElementById('startSolo');if(start)start.click();}}catch(err){console.warn('[A9] Review Tag launch failed:',err);}
+}
+
+function naReviewTargetForCard(card,p){
+  var tags=parseTags(card);
+  if(tags.length)return{kind:'tag',value:tags[0],scope:'tagged'};
+  var sys=(card&&(card.sys||card.system))||(p&&p.sys)||'';
+  if(sys&&sys!=='—')return{kind:'system',value:String(sys).trim(),scope:'random'};
+  return null;
+}
+
+function naInjectReviewTagButton(cardId){
+  var cd=naQ('cd-content');
+  if(!cd)return;
+  var old=document.getElementById('na-review-tag-btn');
+  if(old)old.remove();
+  var card=deckMap[cardId]||{};
+  var p=progress[cardId]||{};
+  var target=naReviewTargetForCard(card,p);
+  var btn=document.createElement('button');
+  btn.id='na-review-tag-btn';
+  btn.type='button';
+  btn.className='btn primary';
+  btn.style.cssText='margin-top:10px;width:100%;font-size:11px;white-space:normal';
+  if(target){
+    btn.textContent=(target.kind==='tag'?'▶ Review Tag: ':'▶ Review System: ')+target.value;
+    btn.onclick=function(){naLaunchReviewTarget(target);};
+  }else{
+    btn.disabled=true;
+    btn.textContent='No tag — filter by system in Atlas';
+  }
+  cd.appendChild(btn);
+}
+
 // ── GLOBAL BRIDGES for HTML onclick attrs ─────────────────────────────────
 window.naHandleFileUpload=function(e){handleFileUpload(e);};
 window.naHandleDrop=function(e){handleDrop(e);};
@@ -13601,7 +13708,7 @@ window.naClickTag=function(tag){clickTag(tag);};
 window.naToggleView=function(){naToggleView();};
 window.naToggleSort=function(col){naToggleSort(col);};
 window.naClickSys=function(sys){clickSys(sys);};
-window.naOpenCardDetail=function(id){openCardDetail(id);};
+window.naOpenCardDetail=function(id){openCardDetail(id);naInjectReviewTagButton(id);};
 
 })();
 </script>
