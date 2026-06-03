@@ -1,5 +1,5 @@
 /* Cozy Arcade Service Worker — offline-first for ABIM study anywhere */
-const CACHE = 'cozy-arcade-v30';
+const CACHE = 'cozy-arcade-v31';
 
 /* On install: cache the app shell */
 self.addEventListener('install', event => {

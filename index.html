@@ -11855,6 +11855,9 @@ function fixStableOneThingDropdown351() {
     window.getStudyPool = getStudyPool;
     window.migrateLegacyProgress = migrateLegacyProgress;
     window.canonicalizeCard = canonicalizeCard;
+    window.__cozyApplyDeckMode351 = function(mode) {
+      return syncGeneralStudyScopePhase3(mode, { syncExpansion: false });
+    };
     window.cozyPhase3 = { exportCleanDeck, exportProgressOnly, exportDeckWithProgress, exportFullGameState, importObjectPhase3, cleanDeckPayload, progressPayload, backupPayload, fullGameStatePayload, getStudyPool, clearSessionBuried, wireUi };
     try {
       const _fgsHooks = {};
