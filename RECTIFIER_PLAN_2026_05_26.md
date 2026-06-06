@@ -213,3 +213,5 @@ If bionic appears broken:
 *Reference file:* `/Users/rebekahbetar/Documents/Codex/2026-05-16/cozy-arcade/index.html` (do not overwrite; CSS/logic comparison only)
 *Active gate tracking:* `GOAL.md`
 *Feature goals:* `ULTIMATE_GOALS.md`
+
+2026-06-06: Ported Shadow Dungeon phase3State progress lookup and immediate solo timer/user rating path from PHASE2; service worker cache bumped to v40.
