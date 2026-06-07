@@ -215,3 +215,4 @@ If bionic appears broken:
 *Feature goals:* `ULTIMATE_GOALS.md`
 
 2026-06-06: Ported Shadow Dungeon phase3State progress lookup and immediate solo timer/user rating path from PHASE2; service worker cache bumped to v40.
+2026-06-07: Applied FQ-1/FQ-2/FQ-4 burial-safe study-pool filters and empty Solo guard in PHASE1; browser CDP validation passed FSRS 17/17, smoke 6/6, buried-card exclusion, and empty-pool toast.

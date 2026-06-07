@@ -7308,6 +7308,9 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
       try{show('home');}catch(e){}
       return;
     }
+    const gameType351 = which === 'domain' ? 'expansion' : 'solo';
+    const pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool(selectedOrder(gameType351), gameType351) : []);
+    if (!pool351 || pool351.length === 0) { try{toast('No cards match this filter — change scope or upload a deck');}catch(e){} return; }
     try{$('notify')?.classList.add('hidden');}catch(e){}
     try{$('pause')?.classList.add('hidden');}catch(e){}
     try{$('end')?.classList.add('hidden');}catch(e){}
@@ -11463,7 +11466,7 @@ function fixStableOneThingDropdown351() {
 	        ...arr.filter(isNewCard)
 	      ];
     } else if (selected === 'due') {
-      arr = arr.filter(c => isDue(progress(c)));
+      arr = arr.filter(c => { const p=progressForCard(c); return isDue(p) && !p.suspended && !p.buried && p.rating!=='bury' && p.last_rating!=='bury'; });
       arr = [...arr].sort((a, b) => {
         const ta = Date.parse(progress(a).next_due_at || '');
         const tb = Date.parse(progress(b).next_due_at || '');
@@ -11527,9 +11530,9 @@ function fixStableOneThingDropdown351() {
           ...refreshed.filter(isNewCard)
         ];
       }
-      if (selected === 'due') return refreshed.filter(c => isDue(progress(c)));
+      if (selected === 'due') return refreshed.filter(c => { const p=progressForCard(c); return isDue(p) && !p.suspended && !p.buried && p.rating!=='bury' && p.last_rating!=='bury'; });
       if (selected === 'review_deck') {
-        return applyStudyFiltersPhase3(normalizeDeckIdentities()).filter(c => !progressForCard(c).suspended).filter(c => {
+        return applyStudyFiltersPhase3(normalizeDeckIdentities()).filter(c => { const p=progressForCard(c); return !p.suspended && !p.buried && p.rating!=='bury' && p.last_rating!=='bury'; }).filter(c => {
           const p = progressForCard(c);
           return isReviewCandidate(c) && (isImmediateReviewCandidate(p) || !hasFutureDue(p) || isDue(p));
         });
@@ -12150,13 +12153,15 @@ function fixStableOneThingDropdown351() {
     const priorStartSolo = window.startSolo || startSolo;
 	    window.startSolo = startSolo = function() {
 	      try { if (typeof window.__cozyApplyDeckMode351 === 'function') window.__cozyApplyDeckMode351(); } catch (_) {}
-	      const selected = q('browseScope351')?.value || document.documentElement.dataset.cozyLaunchScope || phase3State.settings.solo_order;
-	      document.documentElement.dataset.cozyLaunchScope = selected;
-	      phase3State.settings.solo_order = normalizeMode(selected);
-	      session.poolKey = '';
-	      savePhase3State();
-	      return priorStartSolo.apply(this, arguments);
-	    };
+      const selected = q('browseScope351')?.value || document.documentElement.dataset.cozyLaunchScope || phase3State.settings.solo_order;
+      document.documentElement.dataset.cozyLaunchScope = selected;
+      phase3State.settings.solo_order = normalizeMode(selected);
+      session.poolKey = '';
+      savePhase3State();
+      const pool = sessionPool('solo');
+      if (!pool || pool.length === 0) { try{toast('No cards match this filter — change scope or upload a deck');}catch(e){} return; }
+      return priorStartSolo.apply(this, arguments);
+    };
     const priorStartDomain = window.startDomain || startDomain;
     window.startDomain = startDomain = function() { phase3State.settings.expansion_order = normalizeMode(q('expansionOrderPhase3')?.value || phase3State.settings.expansion_order); savePhase3State(); return priorStartDomain.apply(this, arguments); };
     if (q('startSolo')) q('startSolo').onclick = startSolo;
