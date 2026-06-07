@@ -196,6 +196,25 @@ If the answer is no: split the work.
 
 ---
 
-*Last updated: 2026-05-29*
+*Last updated: 2026-05-30*
 *Source: git log · REDUNDANT_CODE_AUDIT.md · RECTIFIER_PLAN_2026-05-29.md · commit diffs f540bcf, dfd488b, 8b1237b, 0aad991, b4364b3, b2f1a9f*
+
+---
+
+## ENTRY 11 — ⛔ DO NOT: Fix Knowledge Expansion card/orb position by overriding `positionOrbs` cy and hiding `.domainTitle`
+
+**Attempted:** `ad610c9` (2026-05-30) — Two changes at once: (1) `#domain.game-shell .gameMain371 > .domainTitle { display:none }` to remove the title spacer; (2) new `positionOrbs` override setting `cy = rect.height * 0.22` instead of `rect.height / 2`.
+
+**What broke:** Worsened gameplay mechanics and the card position was still incorrect. Reverted at `53d8f09`, SW bumped to v17 at `a0551bf`.
+
+**Why it broke (diagnosis incomplete):** The root cause of "first card in center" in Knowledge Expansion is NOT confirmed. The `positionOrbs` chain is deep (5+ overrides: lines 411, 451, 558, 605, 1581 in the file, then `patchDomainGeometry` at 12712). The `patchDomainGeometry` wrapper already attempts arena-relative positioning but has multiple fallback paths. Changing `cy` without fully understanding the interaction of all override layers worsened the starting position and disrupted the expansion mechanic.
+
+**What needs investigation FIRST (before any future fix):**
+1. Confirm in DevTools: does `#domain` actually have class `game-shell` when the game is live?
+2. Check `window.positionOrbs.__mobileShell371` and `window.positionOrbs.__domainOrbFix` at runtime — are the patches in effect?
+3. What does `arena.getBoundingClientRect()` return during gameplay? Is the arena 0×0 at call time?
+4. Is the "first card in center" the `.promptBox` or the orbs? Screenshot needed.
+
+**Lesson:** Do not touch `positionOrbs` without first confirming via DevTools which override is actually executing at runtime. There are 6 competing definitions. The game mechanic (orbs expand from start position to edges) is sensitive to `cy` and `maxR` values. Any change needs user confirmation of the exact visual bug before coding.
+
 *This document contains only confirmed failures. No speculation.*
