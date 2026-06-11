@@ -7313,7 +7313,8 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
       return;
     }
     const gameType351 = which === 'domain' ? 'expansion' : 'solo';
-    const pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool(selectedOrder(gameType351), gameType351) : []);
+    const order351 = typeof selectedOrder === 'function' ? selectedOrder(gameType351) : (document.documentElement.dataset.cozyLaunchScope || (gameType351 === 'expansion' ? 'new_first' : 'random_new'));
+    const pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool(order351, gameType351) : []);
     if (!pool351 || pool351.length === 0) { try{toast('No cards match this filter — change scope or upload a deck');}catch(e){} return; }
     try{$('notify')?.classList.add('hidden');}catch(e){}
     try{$('pause')?.classList.add('hidden');}catch(e){}
@@ -14866,6 +14867,60 @@ setTimeout(installRatingPathHooks20260603,3200);
 setTimeout(installRatingPathHooks20260603,5200);
 setTimeout(installRatingPathHooks20260603,8000);
 setTimeout(installRatingPathHooks20260603,13000);
+})();
+</script>
+<script id="cozy-explicit-rating-stabilizer-2026-06-11">
+;(function(){
+'use strict';
+if(window.__cozyExplicitRatingStabilizer20260611) return;
+window.__cozyExplicitRatingStabilizer20260611=true;
+function cardIdFor(card){
+  try{ if(typeof canonicalCardId==='function') return canonicalCardId(card); }catch(_){}
+  return card && (card.qid_unique || card.card_id || card.qid || card.id || card.json_id || card.diagnosis || card.answer);
+}
+function clearDeferredAutoRate(){
+  clearTimeout(window.__cozyAutoRateHandle20260603);
+  window.__cozyAutoRateHandle20260603=null;
+  window.__cozyPendingRating20260603=null;
+}
+function requeueAgainCard(card,rating){
+  if(rating!=='again' || !card) return;
+  try{
+    var sess=window.cozyPhase3Session;
+    if(!sess || !Array.isArray(sess.pool)) return;
+    var ids=[cardIdFor(card),card.id,card.qid,card.qid_unique,card.card_id].filter(Boolean);
+    ids.forEach(function(id){ try{ sess.seenThisSession && sess.seenThisSession.delete(id); }catch(_){} });
+    var idx=(typeof index==='number') ? index : (typeof sess.poolIdx==='number' ? sess.poolIdx : 0);
+    var exhausted=sess.pool.length<=idx;
+    var at=Math.min(sess.pool.length,Math.max(0,idx)+3);
+    sess.pool.splice(at,0,Object.assign({},card));
+    if(exhausted && typeof index==='number') index=0;
+  }catch(_){}
+}
+function wrapRate(){
+  var prior=window.rate || (typeof rate!=='undefined' ? rate : null);
+  if(typeof prior!=='function' || prior.__cozyExplicitRatingStabilizer20260611) return;
+  var wrapped=function(card,rating){
+    if(rating && rating!=='pin' && rating!=='bury') clearDeferredAutoRate();
+    var out=prior.apply(this,arguments);
+    requeueAgainCard(card,rating);
+    return out;
+  };
+  wrapped.__cozyExplicitRatingStabilizer20260611=true;
+  window.rate=rate=wrapped;
+}
+function wrapRateCard(){
+  var prior=window.rateCard;
+  if(typeof prior!=='function' || prior.__cozyExplicitRatingStabilizer20260611) return;
+  window.rateCard=function(cardId,rating){
+    if(rating && rating!=='pin' && rating!=='bury') clearDeferredAutoRate();
+    return prior.apply(this,arguments);
+  };
+  window.rateCard.__cozyExplicitRatingStabilizer20260611=true;
+}
+function install(){wrapRate();wrapRateCard();}
+install();
+[700,1600,3200,5200,8000].forEach(function(ms){setTimeout(install,ms);});
 })();
 </script>
 <script id="cozy-full-card-caret-close-2026-06-10">
