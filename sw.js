@@ -1,5 +1,5 @@
 /* Cozy Arcade Service Worker — offline-first for ABIM study anywhere */
-const CACHE = 'cozy-arcade-v52';
+const CACHE = 'cozy-arcade-v53';
 const APP_SHELL = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', event => {
@@ -19,7 +19,7 @@ self.addEventListener('activate', event => {
 });
 
 /* Fetch strategy:
-   - App shell (same-origin /, index.html, manifest.json) → stale-while-revalidate
+   - App shell (same-origin /, index.html, manifest.json) → network-first so deployments are visible immediately; cache fallback for offline
    - External assets (CDN, fonts) → cache-first with network fallback
    - Same-origin non-shell → network-first with cache fallback */
 self.addEventListener('fetch', event => {
@@ -27,17 +27,14 @@ self.addEventListener('fetch', event => {
 
   if (event.request.method !== 'GET') return;
 
-  /* App shell: stale-while-revalidate */
+  /* App shell: network-first so deployments are visible immediately; cache fallback for offline */
   if (url.origin === self.location.origin && (url.pathname.endsWith('/') || url.pathname.endsWith('index.html') || url.pathname.endsWith('manifest.json'))) {
     event.respondWith(
       caches.open(CACHE).then(cache =>
-        cache.match(event.request).then(cached => {
-          const fresh = fetch(event.request).then(res => {
-            if (res && res.status === 200) cache.put(event.request, res.clone());
-            return res;
-          }).catch(() => cached);
-          return cached || fresh;
-        })
+        fetch(event.request).then(res => {
+          if (res && res.status === 200) cache.put(event.request, res.clone());
+          return res;
+        }).catch(() => cache.match(event.request))
       )
     );
     return;
