@@ -11037,7 +11037,7 @@ function fixStableOneThingDropdown351() {
 	    phase3State.deck_fingerprint = deckFingerprint();
 	    const exportedProgress = exportProgressMap();
 	    try { localStorage.setItem(STATE_KEY, JSON.stringify(Object.assign({}, phase3State, { progress: exportedProgress }))); } catch (_) {}
-	    LEGACY_STATE_KEYS.forEach(key => { try { localStorage.setItem(key, JSON.stringify(exportedProgress)); } catch (_) {} });
+	    /* LEGACY_STATE_KEYS dead write removed 2026-06-15 — soloStudyingState_v1757 no longer written */
 	    try { localStorage.setItem('cozy_arcade_progress_v1', JSON.stringify({ metadata: { type: 'progress', deck_fingerprint: deckFingerprint(), exported_at: nowIso(), schema_version: '3.0' }, progress: exportedProgress })); } catch (_) {}
 	    try { state = phase3State.progress; } catch (_) {}
 	    window.cozyPhase3State = phase3State;
