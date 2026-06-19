@@ -14926,13 +14926,13 @@ function requeueAgainCard(card,rating){
   try{
     var sess=window.cozyPhase3Session;
     if(!sess || !Array.isArray(sess.pool)) return;
-    var ids=[cardIdFor(card),card.id,card.qid,card.qid_unique,card.card_id].filter(Boolean);
-    ids.forEach(function(id){ try{ sess.seenThisSession && sess.seenThisSession.delete(id); }catch(_){} });
-    var idx=(typeof index==='number') ? index : (typeof sess.poolIdx==='number' ? sess.poolIdx : 0);
-    var exhausted=sess.pool.length<=idx;
-    var at=Math.min(sess.pool.length,Math.max(0,idx)+3);
-    sess.pool.splice(at,0,Object.assign({},card));
-    if(exhausted && typeof index==='number') index=0;
+    var id=cardIdFor(card);
+    var p=id && typeof getProgress==='function' ? getProgress(id) : null;
+    if(p && p.next_due_at && Date.parse(p.next_due_at)>Date.now()){
+      sess.poolKey='';
+      return;
+    }
+    if(id){ try{ sess.seenThisSession && sess.seenThisSession.delete(id); }catch(_){} }
   }catch(_){}
 }
 function wrapRate(){
