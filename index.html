@@ -7169,7 +7169,8 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     }
     dx.textContent=answer(card);
     trigger.dataset.v350Key=cardKey(card);
-    trigger.innerHTML=safeBionic(card.educational_objective||card.quick_recall||card.answer||'');
+    const eduRaw7141=card.educational_objective;
+    trigger.innerHTML=safeBionic((eduRaw7141&&eduRaw7141!==card.diagnosis)?eduRaw7141:(card.board_trigger||card.quick_recall||card.answer||eduRaw7141||''));
     let board=root.querySelector('.boardTrigger350');
     if(!board){board=document.createElement('div'); board.className='boardTrigger350'; trigger.insertAdjacentElement('afterend',board);}
     board.innerHTML=safeBionic(card.board_trigger||'');
