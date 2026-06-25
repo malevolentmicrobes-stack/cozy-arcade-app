@@ -1,6 +1,6 @@
 # Mobile Rectifier Plan — cozy-arcade-app
 *Senior audit. Independent. Written before cross-checking user notes. 2026-05-28*
-*Last updated: 2026-05-29 — vFix41 reverted; diagnostic added*
+*Last updated: 2026-06-24 — Cozy app mobile duplicate-home screenshot added to future task list*
 
 ## Patch Status (as of 2026-05-29)
 
@@ -69,6 +69,7 @@
 | M2 Stripe | Low | post-ABIM |
 | iOS1 Capacitor | Medium | after boards — wraps current HTML natively |
 | iOS native `<select>` full fix | Low | vC7 guard in place; full fix = custom dropdown |
+| COZY-HOME-DUPE-MOBILE | Medium | 2026-06-24 user iPhone screenshot (`IMG_8751.PNG`) shows two visible home-style buttons stacked at upper-left during Cozy app Solo gameplay. Do not confuse with PHASE2 `#homeTopBtn` CSS kill-rule, which browser-tested fixed; this appears to be Cozy app mobile HUD/control duplication. Future pass: reproduce in browser/iOS viewport, identify whether controls are `#homeTopBtn`, HUD-injected `[data-home]`, `.hudHome*`, or legacy mobile shell buttons, then remove one owner without breaking gameplay exit path. |
 
 ---
 
