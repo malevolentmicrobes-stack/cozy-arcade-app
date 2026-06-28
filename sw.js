@@ -1,5 +1,5 @@
 /* Cozy Arcade Service Worker — offline-first for ABIM study anywhere */
-const CACHE = 'cozy-arcade-v89';
+const CACHE = 'cozy-arcade-v90';
 const APP_SHELL = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', event => {
