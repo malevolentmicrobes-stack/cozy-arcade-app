@@ -8995,6 +8995,7 @@ Rules:
 .drawerActions351 .primary,.drawerFileLabel351{background:linear-gradient(135deg,#0f2843,#164f68);border-color:rgba(103,232,249,.38);color:#eafbff}
 .exportMenuWrap351{position:relative;display:inline-flex}
 .exportMenu351{position:absolute;right:0;bottom:calc(100% + 8px);min-width:230px;display:none;flex-direction:column;gap:4px;padding:8px;border:1px solid rgba(103,232,249,.28);border-radius:14px;background:#050816;box-shadow:0 18px 46px rgba(0,0,0,.55);z-index:100000}
+#advancedMenu351{right:auto;left:0}
 .exportMenu351.open351{display:flex}
 .exportMenuItem351{width:100%;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.055);color:#edf7ff;padding:9px 10px;text-align:left;font-weight:900;cursor:pointer}
 .exportMenuItem351:hover{border-color:rgba(103,232,249,.42);background:rgba(103,232,249,.10)}
@@ -9284,7 +9285,12 @@ Rules:
           <select id="drawerQuestionTime351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select>
           <label class="drawerToggle351" style="margin-top:14px!important"><input id="drawerBionic351" type="checkbox"> Bionic Reading</label>
           <div class="drawerActions351"><button class="btn primary" id="drawerApply351" type="button">Apply</button><div class="exportMenuWrap351"><button class="btn primary" id="importMenuBtn351" type="button">Import ▾</button><div class="exportMenu351" id="importMenu351"><div class="exportMenuHint351">Import from .json file</div><button class="exportMenuItem351" id="importMenuDeck351">📂 Deck Only</button><button class="exportMenuItem351" id="importMenuProgress351">📂 Progress Only</button><button class="exportMenuItem351" id="importMenuFull351">📂 Full Deck + Progress</button><div class="exportMenuHint351" style="opacity:.35;font-size:9px">.csv support coming soon</div></div></div><div class="exportMenuWrap351"><button class="btn" id="drawerFullSettings351" type="button">Export ▾</button><div class="exportMenu351" id="exportMenu351">
-            <button class="exportMenuItem351" id="exportMenuDeck351">📄 Deck Only</button><button class="exportMenuItem351" id="exportMenuProgress351">📊 Progress Only</button><button class="exportMenuItem351" id="exportMenuFull351">💾 Full Deck + Progress</button></div></div><input type="file" id="importFile351" accept=".json,application/json" style="display:none"></div>
+            <button class="exportMenuItem351" id="exportMenuDeck351">📄 Deck Only</button><button class="exportMenuItem351" id="exportMenuProgress351">📊 Progress Only</button><button class="exportMenuItem351" id="exportMenuFull351">💾 Full Deck + Progress</button></div></div><div class="exportMenuWrap351"><button class="btn" id="advancedMenuBtn351" type="button">Advanced ▾</button><div class="exportMenu351" id="advancedMenu351"><button class="exportMenuItem351" id="drawerClearState351">🗑️ Clear Local State</button></div></div><input type="file" id="importFile351" accept=".json,application/json" style="display:none"></div>
+          <div id="drawerClearConfirm351" class="hidden" style="margin-top:10px">
+            <p style="margin:0 0 10px">Are you sure? This will remove local progress.</p>
+            <button class="btn primary" id="drawerClearAccept351" type="button">Accept</button>
+            <button class="btn" id="drawerClearCancel351" type="button">Cancel</button>
+          </div>
         </section>
         <details class="drawerPanel351" id="howToPlay351">
           <summary>How to Play</summary>
@@ -9307,23 +9313,11 @@ Rules:
             </div>
           </div>
         </details>
-        <details class="drawerPanel351" id="advancedSettings351">
-          <summary>Advanced Settings</summary>
-          <div class="htpBody351">
-            <button class="btn red" id="drawerClearState351" type="button">Clear Local State</button>
-            <div id="drawerClearConfirm351" class="hidden" style="margin-top:10px">
-              <p style="margin:0 0 10px">Are you sure? This will remove local progress.</p>
-              <button class="btn primary" id="drawerClearAccept351" type="button">Accept</button>
-              <button class="btn" id="drawerClearCancel351" type="button">Cancel</button>
-            </div>
-          </div>
-        </details>
       </div>
       <div class="drawerFooter351">Cozy Arcade Board Prep - LIMITLESS - Public Blank - v18</div>`;
     document.body.appendChild(drawer);
     q('closeDrawer351').onclick = closeDrawer351;
     q('drawerApply351').onclick = applyDrawer351;
-    q('drawerClearState351').onclick = function(){ q('drawerClearConfirm351').classList.remove('hidden'); };
     q('drawerClearCancel351').onclick = function(){ q('drawerClearConfirm351').classList.add('hidden'); };
     q('drawerClearAccept351').onclick = function(){
       if(typeof window.clearAllLocalProgress === 'function') window.clearAllLocalProgress();
@@ -9357,14 +9351,27 @@ Rules:
     q('drawerFullSettings351').onclick = function(e){
       e.stopPropagation();
       q('importMenu351')&&q('importMenu351').classList.remove('open351');
+      q('advancedMenu351')&&q('advancedMenu351').classList.remove('open351');
       var m=q('exportMenu351'); if(m) m.classList.toggle('open351');
     };
     q('exportMenuDeck351').onclick = function(){ q('exportMenu351')&&q('exportMenu351').classList.remove('open351'); try{ if(typeof exportCleanDeck==='function') exportCleanDeck(); else if(window.cozyPhase3) window.cozyPhase3.exportCleanDeck(); }catch(_){} };
     q('exportMenuProgress351').onclick = function(){ q('exportMenu351')&&q('exportMenu351').classList.remove('open351'); try{ if(typeof exportProgressOnly==='function') exportProgressOnly(); else if(window.cozyPhase3) window.cozyPhase3.exportProgressOnly(); }catch(_){} };
     q('exportMenuFull351').onclick = function(){ q('exportMenu351')&&q('exportMenu351').classList.remove('open351'); try{ if(typeof exportDeckWithProgress==='function') exportDeckWithProgress(); else if(window.cozyPhase3) window.cozyPhase3.exportDeckWithProgress(); }catch(_){} };
+    q('advancedMenuBtn351').onclick = function(e){
+      e.stopPropagation();
+      q('importMenu351')&&q('importMenu351').classList.remove('open351');
+      q('exportMenu351')&&q('exportMenu351').classList.remove('open351');
+      var m=q('advancedMenu351'); if(m) m.classList.toggle('open351');
+    };
+    q('drawerClearState351').onclick = function(e){
+      e.stopPropagation();
+      q('advancedMenu351')&&q('advancedMenu351').classList.remove('open351');
+      q('drawerClearConfirm351').classList.remove('hidden');
+    };
     document.addEventListener('click', function(){
       q('exportMenu351')&&q('exportMenu351').classList.remove('open351');
       q('importMenu351')&&q('importMenu351').classList.remove('open351');
+      q('advancedMenu351')&&q('advancedMenu351').classList.remove('open351');
     });
     return drawer;
   }
@@ -11100,17 +11107,19 @@ function fixStableOneThingDropdown351() {
     window.cozyPhase3Session = session;
   }
 
-  /* Clear Local State — REVERTED 2026-07-05, same day. Was briefly made to
-     actually clear phase3State.progress (cozy_arcade_progress_v1) since the
-     old clearBtn handlers only touched a dead key (soloStudyingState_v1757,
-     unwritten since 2026-06-15) and never real progress. User explicitly
-     asked to undo this: "KEEP LOCAL STATE BUT MAKE SURE STATE CORRECT" —
-     they want progress preserved, not an easy path to delete it. Left as a
-     safe no-op (does not touch phase3State.progress or cozy_arcade_progress_v1)
-     until there's a clear answer on what "make sure state correct" and "an
-     option in settings" should actually do — see COZY_ARCADE_PROJECT_STATUS
-     and RECTIFIER_PLAN for the open question. */
-  window.clearAllLocalProgress = function(){};
+  /* Clear Local State — real fix, re-confirmed 2026-07-05. Old clearBtn
+     handlers only touched a dead key (soloStudyingState_v1757, unwritten
+     since 2026-06-15), never the canonical progress store. User confirmed
+     the select-then-confirm-then-clear flow IS wanted ("OK TO CLEAR LOCAL
+     STATE IF SELECTED THEN CONFIRMED") — the earlier same-day revert was
+     about pausing before shipping a destructive action, not rejecting it.
+     Gated behind explicit menu selection + Accept/Cancel confirm only. */
+  window.clearAllLocalProgress = function(){
+    try{ phase3State.progress = {}; }catch(_){}
+    try{ savePhase3State(); }catch(_){}
+    try{ localStorage.removeItem('soloStudyingState_v1757'); }catch(_){}
+    try{ if(typeof updateKpis==='function') updateKpis(); }catch(_){}
+  };
 
   function hasMoreSrsData(candidate, existing) {
     if (!existing) return true;

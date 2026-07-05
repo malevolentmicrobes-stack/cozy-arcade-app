@@ -1,6 +1,13 @@
 # Cozy Arcade PHASE1 (cozy-app) — Project Status 2026-07-04
 
-**LIVE, CONFIRMED (curl, not assumed):** `cozy-arcade-v110` — matches local, matches pushed. (v111 below, this entry, not yet pushed.)
+**LIVE, CONFIRMED (curl, not assumed):** `cozy-arcade-v111` — matches local, matches pushed. (v112 below, this entry, not yet pushed.)
+
+## Clear Local State re-confirmed real + moved into Advanced ▾ dropdown (v111→v112)
+User clarified the earlier revert was caution before shipping a destructive action, not a rejection: "OK TO CLEAR LOCAL STATE IF SELECTED THEN CONFIRMED." Restored `window.clearAllLocalProgress()` to actually clear `phase3State.progress`/`cozy_arcade_progress_v1` through the canonical save path, gated behind explicit menu selection + Accept/Cancel confirm.
+
+Also redesigned placement per "avoid too much redundancy" feedback: removed the separate `<details id="advancedSettings351">` collapsible (redundant next to "How to Play"), folded Clear Local State into a new 4th "Advanced ▾" dropdown button in the same action row as Apply/Import ▾/Export ▾, reusing the exact existing `exportMenuWrap351`/`exportMenu351` pattern. Found and fixed one real layout bug while testing: the shared `.exportMenu351{right:0}` positioning clips off-screen left when this 4th button wraps to its own line at narrow widths — added a scoped `#advancedMenu351{right:auto;left:0}` override, screenshot-confirmed fixed, Import/Export untouched.
+
+Live-validated: menu opens/closes correctly, closes on item click, confirm panel shows, Cancel leaves progress untouched (3 cards), Accept clears it (0), FSRS 17/17, smoke 6/6, zero errors. Shadow Dungeon timing/card-review-timing controls intentionally untouched — premortem only, per explicit "no quick changes" instruction.
 
 ## Clear Local State fix REVERTED same day (v110→v111) — user wants progress kept, not an easy delete path
 User: "UNDO THIS: KEEP LOCAL STATE BUT MAKE SURE STATE CORRECT... I WANTED TO KEEP THE LOCAL STATE BUT HAVE AN OPTION IN THE SETTINGS." `window.clearAllLocalProgress()` is now a no-op (does not touch `phase3State.progress` or `cozy_arcade_progress_v1`); all three entry points (old `#review` button, old Shadow Dungeon hub button, new Advanced Settings drawer button) call it and all three now safely do nothing to real progress. UI scaffolding (Advanced Settings collapsible, Accept/Cancel confirm panel, the confirm() prompts on the two old buttons) left in place since it's harmless either way. Live-validated: played/rated 3 cards, tried all three clear entry points, progress count stayed at 3 through every one, FSRS 17/17, smoke 6/6, zero errors.
