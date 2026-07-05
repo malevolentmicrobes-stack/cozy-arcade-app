@@ -3,6 +3,32 @@
 
 ---
 
+## CONSOLIDATED USER GOALS — written 2026-07-05 at explicit user request, before any context compaction, so nothing gets lost or re-derived from scratch
+
+**Standing meta-instructions for this whole thread of work (apply to everything below):**
+- Read `RECTIFIER_PLAN_2026_05_26.md` and this file's recent dated sections *in depth* before touching any code — do not rely on memory alone.
+- PHASE1 (`cozy-arcade-app`) only. PHASE2 stays untouched unless explicitly asked again.
+- "Less code, less quick patching, delete if able" — when something looks broken/redundant, prefer tracing to the real root cause and deleting the dead path over wrapping it in a patch.
+- "No quick changes" / "big picture" — for anything touching Shadow Dungeon or SM2/card-order specifically, a premortem (trace + document) comes before any code, every time, given documented past instability in this exact area.
+- Keep chat responses terse; keep the actual investigation/validation work thorough.
+- Always run the two-gate deploy check (SHA match via `git ls-remote` + live `curl` of `sw.js`) before claiming anything is pushed or live.
+
+**1. Clear Local State — DONE, current state as of `be7240c`/v113.** Advanced ▾ dropdown (folded into the same action row as Apply/Import ▾/Export ▾, not a separate section — redundancy explicitly flagged and fixed) now has two scoped, confirm-gated options: "Clear Progress Only" (`window.clearAllLocalProgress()`) and "Clear Deck + Progress" (`window.clearAllLocalDeckAndProgress()`). Both real, both require explicit menu selection + Accept — nothing clears silently or by accident. This went through several iterations same-day (broken 3 weeks → fixed for real → reverted to a no-op out of caution → re-confirmed wanted → split into two scopes) — this entry is the final, current state; don't re-litigate the earlier steps.
+
+**2. Local state/progress correctness — traced and confirmed, not a bug.** Deck (cards) and progress (FSRS ratings) persist through two fully independent localStorage paths: deck via `storeDeck()`/`readStoredDeck()` on `cozy_arcade_limitless_cards_v1`; progress via `savePhase3State()`/`loadPhase3State()` on `cozy_arcade_progress_v1`. User separately confirmed via their own testing on alternate devices that local state survives a hard reset correctly. No further action needed here unless a new correctness problem is reported.
+
+**3. Shadow Dungeon modal text — DONE.** Description string simplified to user's exact requested wording. Cosmetic only, no logic touched.
+
+**4. Shadow Dungeon "extend card review timing before auto-advance" — PREMORTEM DONE, NOT CODED, explicitly flagged delicate.** Traced: `shadowDropSeconds351()` is a one-line passthrough to Solo's shared `questionSeconds351()` — the Shadow Dungeon setup modal's own "Game timing" dropdown does nothing when changed (a third dead-dropdown finding this session, after `shadowSchedule351` and the duplicate fallback modal, both already removed). No comment or history found explaining this as an intentional past workaround. User's own caution: past Shadow Dungeon work has caused "multiple patches/glitches and subsequent card state glitches" — any fix here needs a Shadow-Dungeon-specific full regression pass (answer→reveal→advance cycle), not a reactive one-liner, and should be reviewed against the currently-live "prior study mode dropdown" pattern (the Home screen's `Study Mode: Limitless Scholar ▾`, which the user called out as an aesthetic they liked) before redesigning anything here. **Not started.**
+
+**5. "System Surge"/"Weak System Detected" → neuralPulse371 integration — PREMORTEM DONE, NOT CODED, user's own words: "very delicate," "do not assume."** Traced: the exact banner from the user's screenshot ("WEAK SYSTEM DETECTED — ENDO energy unstable...") comes from a bare (non-`window.`) `showPulseToast(...)` call inside `checkKnowledgePulse()`, which resolves to the `.pulseToast351` bottom-toast closure — not `vEnergyPulse`. Separately, `vEnergyPulse` (~line 14493) already has unused `'SYSTEM SURGE'`/`'WEAK SYSTEM DETECTED'` message tables sitting dormant — partial, likely-unintentional groundwork for exactly the consolidation the user wants (one clean path, in the `✻` neural-pulse format) already exists in a second system nobody's using for this. Any real integration touches at least three systems (`.pulseToast351`, `vEnergyPulse`/`.energyChip_v`, `neuralPulse371`) and needs a deliberate "which one is canonical" decision from the user first. **Not started, not scoped for a specific session yet.**
+
+**6. SM2/card-pool filter duplication — flagged only, from the earlier Shadow Dungeon premortem, still open.** `scope==='due'`/`scope==='review'` filter logic independently reimplemented 5-6 times (~lines 1395, 3261, 4337, 4481, 6163, 6166), each slightly different. Any future SM2/card-order work must trace which implementation is actually live for main-page Solo vs. Shadow Dungeon vs. Domain before touching anything.
+
+**Aesthetic/UX north star, restated because it governs every item above:** elegant, simple gameplay; avoid redundant UI (reuse existing dropdown/menu patterns instead of inventing new ones, as done folding Advanced ▾ into the existing action row); the app needs to work for other users, not just as a personal study tool.
+
+---
+
 ## UPDATE 2026-07-05 — glitch-cleanup session, sw v100→v108, see COZY_ARCADE_PROJECT_STATUS_2026-07-04.md for full detail per-fix
 
 **Current active goal, superseding the stale P8/M2/iOS1 queue below for now:** user-reported visual glitches (HUD duplication, double-icon rendering, gate-banner timing bug, neural-pulse flicker, Shadow Dungeon dropdown/modal duplication) took priority this session. M2 Stripe remains explicitly paused per user's 2026-06-18 decision (see memory); iOS1/P8 not touched, not regressed.
