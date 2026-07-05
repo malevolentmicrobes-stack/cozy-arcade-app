@@ -1,6 +1,9 @@
 # Cozy Arcade PHASE1 (cozy-app) — Project Status 2026-07-04
 
-**LIVE, CONFIRMED (curl, not assumed):** `cozy-arcade-v111` — matches local, matches pushed. (v112 below, this entry, not yet pushed.)
+**LIVE, CONFIRMED (curl, not assumed):** `cozy-arcade-v112` — matches local, matches pushed (SHA `ffc30db`). (v113 below, this entry, not yet pushed.)
+
+## Advanced ▾ split into two clear scopes: Progress Only vs Deck + Progress (v112→v113)
+Traced and confirmed for the user: deck (cards) and progress (FSRS ratings) persist through two fully independent localStorage paths — deck via `storeDeck()`/`readStoredDeck()` on `cozy_arcade_limitless_cards_v1`, progress via `savePhase3State()`/`loadPhase3State()` on `cozy_arcade_progress_v1`. User asked for the Advanced ▾ dropdown to offer both scopes explicitly, matching the existing Export ▾ pattern (Deck Only / Progress Only / Full Deck+Progress). Added `window.clearAllLocalDeckAndProgress()` (calls the existing progress clear, plus removes the deck key and its metadata key) alongside the existing `window.clearAllLocalProgress()`. Confirm panel text now updates per selected scope via a `dataset.mode` flag. Live-validated: Clear Progress Only drops progress to 0 while the deck key survives; Clear Deck + Progress then also removes the deck key; FSRS 17/17, smoke 6/6, zero errors, screenshot-confirmed both menu items render fully visible.
 
 ## Clear Local State re-confirmed real + moved into Advanced ▾ dropdown (v111→v112)
 User clarified the earlier revert was caution before shipping a destructive action, not a rejection: "OK TO CLEAR LOCAL STATE IF SELECTED THEN CONFIRMED." Restored `window.clearAllLocalProgress()` to actually clear `phase3State.progress`/`cozy_arcade_progress_v1` through the canonical save path, gated behind explicit menu selection + Accept/Cancel confirm.

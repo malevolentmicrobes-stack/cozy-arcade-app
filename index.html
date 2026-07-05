@@ -9285,9 +9285,9 @@ Rules:
           <select id="drawerQuestionTime351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select>
           <label class="drawerToggle351" style="margin-top:14px!important"><input id="drawerBionic351" type="checkbox"> Bionic Reading</label>
           <div class="drawerActions351"><button class="btn primary" id="drawerApply351" type="button">Apply</button><div class="exportMenuWrap351"><button class="btn primary" id="importMenuBtn351" type="button">Import ▾</button><div class="exportMenu351" id="importMenu351"><div class="exportMenuHint351">Import from .json file</div><button class="exportMenuItem351" id="importMenuDeck351">📂 Deck Only</button><button class="exportMenuItem351" id="importMenuProgress351">📂 Progress Only</button><button class="exportMenuItem351" id="importMenuFull351">📂 Full Deck + Progress</button><div class="exportMenuHint351" style="opacity:.35;font-size:9px">.csv support coming soon</div></div></div><div class="exportMenuWrap351"><button class="btn" id="drawerFullSettings351" type="button">Export ▾</button><div class="exportMenu351" id="exportMenu351">
-            <button class="exportMenuItem351" id="exportMenuDeck351">📄 Deck Only</button><button class="exportMenuItem351" id="exportMenuProgress351">📊 Progress Only</button><button class="exportMenuItem351" id="exportMenuFull351">💾 Full Deck + Progress</button></div></div><div class="exportMenuWrap351"><button class="btn" id="advancedMenuBtn351" type="button">Advanced ▾</button><div class="exportMenu351" id="advancedMenu351"><button class="exportMenuItem351" id="drawerClearState351">🗑️ Clear Local State</button></div></div><input type="file" id="importFile351" accept=".json,application/json" style="display:none"></div>
+            <button class="exportMenuItem351" id="exportMenuDeck351">📄 Deck Only</button><button class="exportMenuItem351" id="exportMenuProgress351">📊 Progress Only</button><button class="exportMenuItem351" id="exportMenuFull351">💾 Full Deck + Progress</button></div></div><div class="exportMenuWrap351"><button class="btn" id="advancedMenuBtn351" type="button">Advanced ▾</button><div class="exportMenu351" id="advancedMenu351"><button class="exportMenuItem351" id="drawerClearProgress351">🗑️ Clear Progress Only</button><button class="exportMenuItem351" id="drawerClearDeckProgress351">🗑️ Clear Deck + Progress</button></div></div><input type="file" id="importFile351" accept=".json,application/json" style="display:none"></div>
           <div id="drawerClearConfirm351" class="hidden" style="margin-top:10px">
-            <p style="margin:0 0 10px">Are you sure? This will remove local progress.</p>
+            <p id="drawerClearConfirmText351" style="margin:0 0 10px">Are you sure? This will remove local progress.</p>
             <button class="btn primary" id="drawerClearAccept351" type="button">Accept</button>
             <button class="btn" id="drawerClearCancel351" type="button">Cancel</button>
           </div>
@@ -9320,9 +9320,14 @@ Rules:
     q('drawerApply351').onclick = applyDrawer351;
     q('drawerClearCancel351').onclick = function(){ q('drawerClearConfirm351').classList.add('hidden'); };
     q('drawerClearAccept351').onclick = function(){
-      if(typeof window.clearAllLocalProgress === 'function') window.clearAllLocalProgress();
+      var mode = q('drawerClearConfirm351').dataset.mode;
+      if(mode === 'deckProgress'){
+        if(typeof window.clearAllLocalDeckAndProgress === 'function') window.clearAllLocalDeckAndProgress();
+      } else {
+        if(typeof window.clearAllLocalProgress === 'function') window.clearAllLocalProgress();
+      }
       q('drawerClearConfirm351').classList.add('hidden');
-      try{ if(typeof toast === 'function') toast('Local progress cleared'); }catch(_){}
+      try{ if(typeof toast === 'function') toast(mode === 'deckProgress' ? 'Local deck + progress cleared' : 'Local progress cleared'); }catch(_){}
       updateDrawer351();
     };
     q('importFile351').onchange = function(){
@@ -9363,9 +9368,18 @@ Rules:
       q('exportMenu351')&&q('exportMenu351').classList.remove('open351');
       var m=q('advancedMenu351'); if(m) m.classList.toggle('open351');
     };
-    q('drawerClearState351').onclick = function(e){
+    q('drawerClearProgress351').onclick = function(e){
       e.stopPropagation();
       q('advancedMenu351')&&q('advancedMenu351').classList.remove('open351');
+      q('drawerClearConfirm351').dataset.mode = 'progress';
+      q('drawerClearConfirmText351').textContent = 'Are you sure? This will remove local progress.';
+      q('drawerClearConfirm351').classList.remove('hidden');
+    };
+    q('drawerClearDeckProgress351').onclick = function(e){
+      e.stopPropagation();
+      q('advancedMenu351')&&q('advancedMenu351').classList.remove('open351');
+      q('drawerClearConfirm351').dataset.mode = 'deckProgress';
+      q('drawerClearConfirmText351').textContent = 'Are you sure? This will remove the local deck AND local progress.';
       q('drawerClearConfirm351').classList.remove('hidden');
     };
     document.addEventListener('click', function(){
@@ -11119,6 +11133,18 @@ function fixStableOneThingDropdown351() {
     try{ savePhase3State(); }catch(_){}
     try{ localStorage.removeItem('soloStudyingState_v1757'); }catch(_){}
     try{ if(typeof updateKpis==='function') updateKpis(); }catch(_){}
+  };
+
+  /* Clear Deck + Progress — second Advanced menu option, 2026-07-05. Same
+     progress clear as above, plus the deck's own persistence key
+     (cozy_arcade_limitless_cards_v1, written by storeDeck()/read back by
+     readStoredDeck() at boot) and its metadata key. Two distinct localStorage
+     paths — deck and progress never shared a code path — so a real
+     "clear everything local" option has to touch both explicitly. */
+  window.clearAllLocalDeckAndProgress = function(){
+    window.clearAllLocalProgress();
+    try{ localStorage.removeItem('cozy_arcade_limitless_cards_v1'); }catch(_){}
+    try{ localStorage.removeItem('cozy_arcade_limitless_meta_v1'); }catch(_){}
   };
 
   function hasMoreSrsData(candidate, existing) {
