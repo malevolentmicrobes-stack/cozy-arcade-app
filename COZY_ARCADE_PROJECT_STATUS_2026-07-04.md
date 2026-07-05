@@ -1,5 +1,7 @@
 # Cozy Arcade PHASE1 (cozy-app) — Project Status 2026-07-04
 
+**LIVE, CONFIRMED (curl, not assumed):** `cozy-arcade-v103` — matches local and matches what was pushed. Both HUD fixes below are live for real users right now.
+
 **Scope note:** user explicitly said no more changes to PHASE2 from this point — this doc and all fixes below are PHASE1-only. PHASE2's OPEN_DIFFERENTIALS.md/AGENTS.md are NOT updated with today's PHASE1-specific HUD work; if PHASE2 restrictions lift later, check whether PHASE2 needs the same fixes (it currently carries the same underlying bugs — see below).
 
 ## HUD fixes shipped today (sw v101 → v103)
