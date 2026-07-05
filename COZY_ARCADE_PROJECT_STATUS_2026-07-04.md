@@ -1,6 +1,11 @@
 # Cozy Arcade PHASE1 (cozy-app) — Project Status 2026-07-04
 
-**LIVE, CONFIRMED (curl, not assumed):** `cozy-arcade-v109` — matches local, matches pushed (SHA `4d0932d`, confirmed via GitHub API `main` HEAD directly, not just `ls-remote`). (v110 below, this entry, not yet pushed.)
+**LIVE, CONFIRMED (curl, not assumed):** `cozy-arcade-v110` — matches local, matches pushed. (v111 below, this entry, not yet pushed.)
+
+## Clear Local State fix REVERTED same day (v110→v111) — user wants progress kept, not an easy delete path
+User: "UNDO THIS: KEEP LOCAL STATE BUT MAKE SURE STATE CORRECT... I WANTED TO KEEP THE LOCAL STATE BUT HAVE AN OPTION IN THE SETTINGS." `window.clearAllLocalProgress()` is now a no-op (does not touch `phase3State.progress` or `cozy_arcade_progress_v1`); all three entry points (old `#review` button, old Shadow Dungeon hub button, new Advanced Settings drawer button) call it and all three now safely do nothing to real progress. UI scaffolding (Advanced Settings collapsible, Accept/Cancel confirm panel, the confirm() prompts on the two old buttons) left in place since it's harmless either way. Live-validated: played/rated 3 cards, tried all three clear entry points, progress count stayed at 3 through every one, FSRS 17/17, smoke 6/6, zero errors.
+
+**Open question, asked back to user rather than guessed at a second time:** what should "make sure state correct" and "have an option in the settings" actually mean if not a destructive clear? Candidates not yet chosen between: (a) a read-only diagnostic panel showing current progress counts/health for verification, (b) an export-first-then-clear safety net, (c) something else. Not implemented until answered.
 
 ## Clear Local State fixed for real (v109→v110) — confirmed broken for 3 weeks, nobody caught it
 User asked for a simple "Advanced Settings > Clear Local State" with a confirm prompt. Before adding it, checked whether the *existing* "Clear Local State" buttons (there were two — `#review` screen and Shadow Dungeon hub) actually worked. **They didn't.** Both called `state={};saveState();` — `saveState()` only writes `soloStudyingState_v1757`, a key a code comment already flags as dead-written-since-2026-06-15. Real progress lives in `cozy_arcade_progress_v1` via `phase3State.progress`, never touched by either button. This is exactly why "clear cookies/browser history" was the only thing that ever actually worked — the app's own button did nothing to real data, and no one caught it because the screen still visibly refreshed.

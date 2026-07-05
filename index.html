@@ -11100,20 +11100,17 @@ function fixStableOneThingDropdown351() {
     window.cozyPhase3Session = session;
   }
 
-  /* Clear Local State, real fix 2026-07-05 — the old clearBtn handlers only
-     reset `state` and wrote to `soloStudyingState_v1757`, a key that stopped
-     being written to entirely on 2026-06-15 (see the dead-write comment
-     above). The canonical FSRS progress lives in `cozy_arcade_progress_v1`
-     via phase3State.progress, which the old button never touched — clicking
-     it did nothing to real progress, which is why "clear cookies/browser
-     history" became the only workaround that actually worked. This clears
-     the real store and persists it through the one canonical save path. */
-  window.clearAllLocalProgress = function(){
-    try{ phase3State.progress = {}; }catch(_){}
-    try{ savePhase3State(); }catch(_){}
-    try{ localStorage.removeItem('soloStudyingState_v1757'); }catch(_){}
-    try{ if(typeof updateKpis==='function') updateKpis(); }catch(_){}
-  };
+  /* Clear Local State — REVERTED 2026-07-05, same day. Was briefly made to
+     actually clear phase3State.progress (cozy_arcade_progress_v1) since the
+     old clearBtn handlers only touched a dead key (soloStudyingState_v1757,
+     unwritten since 2026-06-15) and never real progress. User explicitly
+     asked to undo this: "KEEP LOCAL STATE BUT MAKE SURE STATE CORRECT" —
+     they want progress preserved, not an easy path to delete it. Left as a
+     safe no-op (does not touch phase3State.progress or cozy_arcade_progress_v1)
+     until there's a clear answer on what "make sure state correct" and "an
+     option in settings" should actually do — see COZY_ARCADE_PROJECT_STATUS
+     and RECTIFIER_PLAN for the open question. */
+  window.clearAllLocalProgress = function(){};
 
   function hasMoreSrsData(candidate, existing) {
     if (!existing) return true;
