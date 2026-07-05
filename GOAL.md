@@ -3,6 +3,18 @@
 
 ---
 
+## UPDATE 2026-07-05 — glitch-cleanup session, sw v100→v108, see COZY_ARCADE_PROJECT_STATUS_2026-07-04.md for full detail per-fix
+
+**Current active goal, superseding the stale P8/M2/iOS1 queue below for now:** user-reported visual glitches (HUD duplication, double-icon rendering, gate-banner timing bug, neural-pulse flicker, Shadow Dungeon dropdown/modal duplication) took priority this session. M2 Stripe remains explicitly paused per user's 2026-06-18 decision (see memory); iOS1/P8 not touched, not regressed.
+
+**Closed this session:** ADVANCE-LOCK-SELF-CANCEL, REVEAL-TRIGGER-CHURN root cause, duplicate/offscreen HUD home buttons, double-rendered Pause/Exit icons, gate-completion-banner removal, neural-pulse rewritten 4 times (v1 removed → v2 repositioned → v3 breathing-star crossfade → v4 continuous CSS rotation matching `vEnergyPulse`'s proven mechanism, plus a self-inflicted `document.body` MutationObserver feedback loop found and fixed), Shadow Dungeon dead `shadowSchedule351` dropdown removed, `openShadowSetupFallback371()` confirmed-unreachable duplicate removed.
+
+**Corrected mid-session, worth flagging:** initially assessed `.pulseToast351` (bottom-of-screen toast) as dead code superseded by `vEnergyPulse`. Empirical test proved this wrong — it's genuinely live for wrong-answer/persona/milestone messages via bare (non-`window.`) `showPulseToast()` calls that resolve to a different closure than `window.showPulseToast`. **Two real, parallel, live feedback systems exist simultaneously** (bottom toast for some triggers, top-right chip for others) — this is real "too many duplicates" but is NOT a safe deletion; needs its own consolidation-design pass, not touched this session.
+
+**Flagged, explicitly NOT scoped or touched — genuinely delicate:** the `scope==='due'`/`scope==='review'` card-pool filter logic is independently reimplemented 5-6 times across the file (~lines 1395, 3261, 4337, 4481, 6163, 6166) with slightly different exact conditions each time. Any SM2/card-order work must trace which implementation is actually live for main-page Solo vs. Shadow Dungeon vs. Domain before touching anything — do not guess which one "wins."
+
+---
+
 ## Active Goal
 
 **Goal:** P8 deployment hardening: CSP/security headers through `vercel.json`; next milestones are M2 Stripe gate and iOS1 Capacitor scaffold.

@@ -6410,7 +6410,7 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     ov=document.createElement('div');
     ov.id='shadowSetup351';
     ov.className='shadowSetup351 hidden';
-    ov.innerHTML='<div class="shadowBox351"><h2>Shadow Dungeon</h2><p>Review pinned, missed, hard, or scheduled cards with the same timing as Solo Studying.</p><div class="shadowGrid351"><div><label>Option review</label><select id="shadowScope351"><option value="due" selected>Spaced Repetition</option><option value="review">Review pinned and missed cards</option><option value="pinned">Pinned only</option><option value="random-new">Random new cards</option></select></div><div><label>Type</label><select id="shadowType351"><option value="solo">Solo Studying: Runner</option><option value="domain">Knowledge Expansion: orb select</option></select></div><div><label>Game timing</label><select id="shadowDropSeconds351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select></div><div><label>Review scheduled</label><select id="shadowSchedule351"><option value="due">Spaced Repetition</option><option value="review">Pinned / missed / hard</option></select></div></div><div class="controls"><button id="shadowStart351" class="btn primary">Start Shadow Dungeon</button><button id="shadowCancel351" class="btn red">Cancel</button></div></div>';
+    ov.innerHTML='<div class="shadowBox351"><h2>Shadow Dungeon</h2><p>Review pinned, missed, hard, or scheduled cards with the same timing as Solo Studying.</p><div class="shadowGrid351"><div><label>Option review</label><select id="shadowScope351"><option value="due" selected>Spaced Repetition</option><option value="review">Review pinned and missed cards</option><option value="pinned">Pinned only</option><option value="random-new">Random new cards</option></select></div><div><label>Type</label><select id="shadowType351"><option value="solo">Solo Studying: Runner</option><option value="domain">Knowledge Expansion: orb select</option></select></div><div><label>Game timing</label><select id="shadowDropSeconds351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select></div></div><div class="controls"><button id="shadowStart351" class="btn primary">Start Shadow Dungeon</button><button id="shadowCancel351" class="btn red">Cancel</button></div></div>';
     document.body.appendChild(ov);
     $('shadowCancel351').onclick=()=>ov.classList.add('hidden');
     const dropSel=$('shadowDropSeconds351');
@@ -13077,39 +13077,16 @@ body.cozyGameShellActive371 #gearBtn {
     window.positionOrbs.__mobileShell371 = true;
   }
 
-  function openShadowSetupFallback371() {
-    let ov = q('shadowSetup351');
-    if (!ov) {
-      ov = document.createElement('div');
-      ov.id = 'shadowSetup351';
-      ov.className = 'shadowSetup351 hidden';
-      ov.innerHTML = '<div class="shadowBox351"><h2>Shadow Dungeon</h2><p>Review pinned, missed, hard, or scheduled cards with the same timing as Solo Studying.</p><div class="shadowGrid351"><div><label>Option review</label><select id="shadowScope351"><option value="due" selected>Spaced Repetition</option><option value="review">Review pinned and missed cards</option><option value="pinned">Pinned only</option><option value="random-new">Random new cards</option></select></div><div><label>Type</label><select id="shadowType351"><option value="solo">Solo Studying: Runner</option><option value="domain">Knowledge Expansion: orb select</option></select></div><div><label>Game timing</label><select id="shadowDropSeconds351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select></div><div><label>Review scheduled</label><select id="shadowSchedule351"><option value="due">Spaced Repetition</option><option value="review">Pinned / missed / hard</option></select></div></div><div class="controls"><button id="shadowStart351" class="btn primary">Start Shadow Dungeon</button><button id="shadowCancel351" class="btn red">Cancel</button></div></div>';
-      document.body.appendChild(ov);
-    }
-    const cancel = q('shadowCancel351');
-    if (cancel && !cancel.dataset.mobileShell371) {
-      cancel.dataset.mobileShell371 = '1';
-      cancel.addEventListener('click', () => ov.classList.add('hidden'));
-    }
-    const start = q('shadowStart351');
-    if (start && !start.dataset.mobileShell371 && !start.onclick) {
-      start.dataset.mobileShell371 = '1';
-      start.addEventListener('click', () => {
-        const scope = q('shadowScope351')?.value || 'review';
-        const shadowModeMap={'review':'review_deck','pinned':'pinned','scheduled':'due','due':'due','new':'random_new','random-new':'random_new'};
-        const studyMode=shadowModeMap[scope]||'review_deck';
-        const browse = q('browseScope351');
-        if (browse) {
-          browse.value = studyMode;
-          browse.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        ov.classList.add('hidden');
-        const type = q('shadowType351')?.value || 'solo';
-        q(type === 'domain' ? 'startDomain' : 'startSolo')?.click();
-      });
-    }
-    ov.classList.remove('hidden');
-  }
+  /* openShadowSetupFallback371() removed 2026-07-05 — confirmed unreachable:
+     its only call site was `if (typeof window.openShadowSetup351 === 'function')
+     ... else openShadowSetupFallback371()`. window.openShadowSetup351 is
+     assigned unconditionally, synchronously, much earlier in the file
+     (ensureShadowSetup351/openShadowSetup351 above) — by the time any click
+     handler can fire, the page has fully loaded and that assignment has
+     already run, so the else branch could never execute. Was a byte-identical
+     duplicate of the same modal markup with a simpler (less complete) Start
+     handler; consolidating to the one real implementation, not merging two
+     behaviors. */
 
   function run() {
     normalizeHud('solo');
@@ -13132,7 +13109,6 @@ body.cozyGameShellActive371 #gearBtn {
     event.preventDefault();
     event.stopPropagation();
     if (typeof window.openShadowSetup351 === 'function') window.openShadowSetup351();
-    else openShadowSetupFallback371();
   }, true);
   setTimeout(run, 100);
   setTimeout(run, 700);
@@ -14723,8 +14699,17 @@ setTimeout(boot160,900);
   overflow: hidden;
   white-space: nowrap;
 }
-#neuralPulse371 .npStar, #neuralPulse371 .npText {
+#neuralPulse371 .npText {
   transition: opacity .28s ease;
+}
+#neuralPulse371 .npStar {
+  display: inline-block;
+  animation: neuralPulseStarSpin371 1.4s linear infinite;
+}
+@keyframes neuralPulseStarSpin371 {
+  0%   { transform: rotate(0deg)   scale(1);    }
+  50%  { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1);    }
 }
 </style>
 
@@ -14733,8 +14718,7 @@ setTimeout(boot160,900);
   var E_TOTAL = 'cozy_energy_total_352';
   var E_SESS  = 'cozy_energy_session_352';
   var IDLES = ['Vibing…','Cooking…','Grinding…','Leveling…','Clinician-ing…'];
-  var STARS = ['·','✢','✶','✻','✽','✻','✶','✢'];
-  var _ii=0, _si=0, _msgTimeout=null, _starTimer=null, _sessStart=null;
+  var _ii=0, _msgTimeout=null, _sessStart=null;
 
   function eng()  { return Number(localStorage.getItem(E_TOTAL)||0)||0; }
   function seng() { return Number(sessionStorage.getItem(E_SESS)||0)||0; }
@@ -14766,24 +14750,15 @@ setTimeout(boot160,900);
     if(_msgTimeout) return;
     crossfadeText(idleMsg());
   }
-  function startStarBreathing(){
-    if(_starTimer) return;
-    _starTimer = setInterval(function(){
-      var el = document.getElementById('neuralPulse371');
-      var star = el && el.querySelector('.npStar');
-      if(!star) return;
-      star.style.opacity = '0';
-      setTimeout(function(){ star.textContent = STARS[_si % STARS.length]; _si++; star.style.opacity = '1'; }, 140);
-    }, 420);
-  }
-  function stopStarBreathing(){
-    if(_starTimer){ clearInterval(_starTimer); _starTimer = null; }
-  }
   function inject(game){
     if(document.getElementById('neuralPulse371')){ return; }
     var el = document.createElement('div');
     el.id = 'neuralPulse371';
-    el.innerHTML = '<span class="npStar">'+STARS[0]+'</span> <span class="npText">'+idleMsg()+'</span>';
+    /* Star: same mechanism as vEnergyPulse's proven .energyChipStar_v — one
+       static character, continuous smooth CSS transform:rotate animation.
+       No JS-driven glyph swapping or crossfade on the star at all; that
+       approach (v3) still read as "flashing" per direct user feedback. */
+    el.innerHTML = '<span class="npStar">✳</span> <span class="npText">'+idleMsg()+'</span>';
     /* Append inside #solo/#domain, NOT document.body directly — appending to
        body's direct children re-triggers an existing MutationObserver on
        document.body (childList, non-subtree) that debounce-calls run() at
@@ -14793,13 +14768,11 @@ setTimeout(boot160,900);
        #solo/#domain has no transform, so position:fixed still measures
        from the true viewport, same visual result, no loop. */
     game.appendChild(el);
-    startStarBreathing();
   }
   function eject(){
     var el = document.getElementById('neuralPulse371');
     if(el) el.remove();
     _sessStart = null;
-    stopStarBreathing();
     if(_msgTimeout){ clearTimeout(_msgTimeout); _msgTimeout = null; }
   }
   function watchGame(id){
