@@ -14700,130 +14700,14 @@ setTimeout(boot160,900);
 </script>
 
 
-<style id="vNeuralPulseCSS">
-#neuralPulse371 {
-  position: absolute;
-  top: 52px;
-  left: 0;
-  right: 0;
-  height: 16px;
-  z-index: 51;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: Orbitron, monospace;
-  font-size: 9px;
-  letter-spacing: .09em;
-  font-weight: 700;
-  color: rgba(103,232,249,.36);
-  pointer-events: none;
-  overflow: hidden;
-  white-space: nowrap;
-  transition: color .3s;
-}
-#neuralPulse371.flash {
-  color: rgba(245,201,122,.72);
-}
-</style>
-
-<script id="vNeuralPulseJS">
-(function(){
-  var E_TOTAL = 'cozy_energy_total_352';
-  var E_SESS  = 'cozy_energy_session_352';
-  var SPIN  = ['✳','✻','✽','✶'];
-  var IDLES = ['Vibing…','Cooking…','Grinding…','Leveling…','Clinician-ing…'];
-  var _si=0, _ii=0, _flash=null, _sessStart=null;
-
-  function eng()  { return Number(localStorage.getItem(E_TOTAL)||0)||0; }
-  function seng() { return Number(sessionStorage.getItem(E_SESS)||0)||0; }
-  function fmtMin(ms){ var m=Math.round(ms/60000); return m<1?'<1m':m+'m'; }
-  function dueN(){
-    try{ return parseInt(document.getElementById('dueCount').textContent,10)||0; }catch(_){ return 0; }
-  }
-  function idleMsg(){
-    var t = _sessStart ? fmtMin(Date.now()-_sessStart) : '--';
-    var se = seng();
-    return SPIN[_si%4]+' '+IDLES[_ii%5]+' (Session: '+t+' · '+dueN()+' due · Energy '+eng()+(se?' +'+se+' CE':'')+')';
-  }
-  function flashMsg(txt){
-    var el = document.getElementById('neuralPulse371');
-    if(!el) return;
-    if(_flash) clearTimeout(_flash);
-    el.classList.add('flash');
-    el.textContent = txt;
-    _flash = setTimeout(function(){
-      el.classList.remove('flash');
-      el.textContent = idleMsg();
-      _flash = null;
-    }, 2200);
-  }
-  function setIdle(){
-    var el = document.getElementById('neuralPulse371');
-    if(!el || _flash) return;
-    el.textContent = idleMsg();
-  }
-  function inject(game){
-    if(document.getElementById('neuralPulse371')){ setIdle(); return; }
-    var el = document.createElement('div');
-    el.id = 'neuralPulse371';
-    el.textContent = idleMsg();
-    game.appendChild(el);
-  }
-  function eject(){
-    var el = document.getElementById('neuralPulse371');
-    if(el) el.remove();
-    _sessStart = null;
-    if(_flash){ clearTimeout(_flash); _flash = null; }
-  }
-  function watchGame(id){
-    var g = document.getElementById(id);
-    if(!g) return;
-    new MutationObserver(function(){
-      if(!g.classList.contains('hidden')){
-        if(!_sessStart) _sessStart = Date.now();
-        setTimeout(function(){ inject(g); }, 80);
-      } else { eject(); }
-    }).observe(g, {attributes:true, attributeFilter:['class']});
-  }
-  watchGame('solo'); watchGame('domain');
-
-  /* Rate hook — third wrapper: reads only, fully try/caught, no state mutations */
-  var FLASH_MSGS = ['Cooking…','Synapsing…','Clinician-ing…','Nailed it…'];
-  function hookRate(){
-    var orig = window.rate;
-    if(!orig || orig._npWrapped) return;
-    window.rate = function(card, rating){
-      var res = orig.apply(this, arguments);
-      if(rating && rating !== 'pin' && rating !== 'bury' && rating !== 'continue'){
-        try{
-          var id = card && (card.qid||card.card_id||card.id||card.qid_unique||card.original_qid);
-          var p = id && window.getProgress && window.getProgress(id);
-          var s = p && p.stability ? parseFloat(p.stability).toFixed(1) : null;
-          var n = p && p.interval_days ? Math.round(p.interval_days)+'d' : null;
-          var se = seng();
-          var parts = [SPIN[_si%4]+' '+FLASH_MSGS[Math.floor(Math.random()*4)]];
-          if(s) parts.push('S '+s);
-          if(n) parts.push('next '+n);
-          if(se) parts.push((rating==='again'?'↓':'↑')+se+' CE total');
-          flashMsg(parts.join(' · '));
-          _si++;
-        }catch(_){}
-      }
-      return res;
-    };
-    window.rate._npWrapped = true;
-  }
-
-  /* Idle rotation every 12s */
-  setInterval(function(){ _ii++; _si++; setIdle(); }, 12000);
-
-  if(window.rate) hookRate();
-  var _t=0, _p=setInterval(function(){
-    if(window.rate){ hookRate(); clearInterval(_p); }
-    if(++_t>200) clearInterval(_p);
-  }, 100);
-})();
-</script>
+<!-- vNeuralPulseCSS + vNeuralPulseJS removed 2026-07-05 — root cause of a distracting
+     persistent flicker: absolute-positioned text strip under the HUD (top:52px,
+     z-index:51), directly appended into #solo/#domain, mutating text + a
+     4-character rotating star every 12s plus an extra color-flash on every rate.
+     vEnergyPulse (window.showPulseToast, see vEnergyPulse-css/vEnergyPulse below)
+     already covers this signal correctly: a transient top-right chip, single
+     smooth CSS-animated rotating star, auto-dismisses. Confirmed fully isolated
+     (no other code referenced #neuralPulse371/hookRate/_npWrapped) before removal. -->
 <script id="cozy-rating-path-rectifier-2026-06-03">
 ;(function(){
 'use strict';
