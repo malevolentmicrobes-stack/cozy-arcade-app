@@ -428,7 +428,7 @@ function exportSession(){let blob=new Blob([JSON.stringify({exportedAt:new Date(
 function importDeck(file){let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);cards=d.cards||d;if(!Array['isArray'](cards))throw Error('No cards array');cards.forEach(c=>{c.diagnosis=c.diagnosis||c.answer||'Unknown';c.presentation=c.presentation||c.clinical_vignette_summary||c.prompt||'';c.quick_recall=c.quick_recall||c.educational_objective||c.presentation;c.system=c.system||c.sys||''});toast('Deck loaded: '+cards.length);updateKpis()}catch(e){toast('Import failed')}};r.readAsText(file)}
 window.addEventListener('mousemove',e=>{cursor={x:e.clientX,y:e.clientY};let g=$('cursorGlow');if(g){g.style.left=cursor.x+'px';g.style.top=cursor.y+'px'}});window.addEventListener('touchmove',e=>{let t=e.touches[0];if(t){cursor={x:t.clientX,y:t.clientY};let g=$('cursorGlow');if(g){g.style.left=cursor.x+'px';g.style.top=cursor.y+'px'}}},{passive:true});
 window.addEventListener('keydown',e=>{if(document.activeElement&&(/^(TEXTAREA|INPUT|SELECT)$/i.test(document.activeElement.tagName)||document.activeElement.isContentEditable))return;if(e.key==='Escape'){if(mode==='home')return;pauseGame();return} if(mode==='solo'&&!paused){if(['ArrowLeft','a','A'].includes(e.key)){selected=Math.max(0,selected-1);updateSoloVisuals()} if(['ArrowRight','d','D'].includes(e.key)){selected=Math.min(3,selected+1);updateSoloVisuals()} if(['Enter',' '].includes(e.key)){const rev=document.getElementById('soloReveal');if(rev&&!rev.classList.contains('hidden')){try{advance('solo');}catch(e){}}else{var _sinceAdv=performance.now()-(window.__cozyLastAdvanceAt351||0);if(_sinceAdv>=50)selectSolo(selected);}} let n=parseInt(e.key); if(n>=1&&n<=4)selectSolo(n-1); if(['a','b','c','d','A','B','C','D'].includes(e.key)&&!['a','A','d','D'].includes(e.key))selectSolo('abcd'.indexOf(e.key.toLowerCase()))} if(mode==='domain'&&!paused){let n=parseInt(e.key); if(n>=1&&n<=4)selectDomain(n-1); if(['a','b','c','d','A','B','C','D'].includes(e.key))selectDomain('abcd'.indexOf(e.key.toLowerCase()))}});
-function wire(){const on=(id,fn)=>{const el=$(id);if(el)el.onclick=fn};document.querySelectorAll('[data-home]').forEach(b=>b.onclick=home);on('startSolo',startSolo);on('startDomain',startDomain);on('settingsBtn',()=>show('settings'));on('soloPause',pauseGame);on('domainPause',pauseGame);on('pauseResume',resumeGame);on('pauseHome',home);on('endHome',()=>{$('end').classList.add('hidden');home()});on('endRestart',()=>{$('end').classList.add('hidden');mode==='domain'?startDomain():startSolo()});on('modalClose',()=>$('modal').classList.add('hidden'));on('soloFull',fullCard);on('domainFull',fullCard);on('leftBtn',()=>{selected=Math.max(0,selected-1);updateSoloVisuals()});on('rightBtn',()=>{selected=Math.min(3,selected+1);updateSoloVisuals()});on('selectBtn',()=>selectSolo(selected));on('clearBtn',()=>{state={};saveState();updateKpis();showReview()});on('applyBtn',()=>{deckMode=$('deckMode').value;promptField=$('promptField').value;autoSelect=$('autoSelect').checked;bionicOn=$('bionicToggle').checked;toast('Applied')});const deck=$('deckFile');if(deck)deck.onchange=e=>{let f=e.target.files[0];if(f)importDeck(f)}}
+function wire(){const on=(id,fn)=>{const el=$(id);if(el)el.onclick=fn};document.querySelectorAll('[data-home]').forEach(b=>b.onclick=home);on('startSolo',startSolo);on('startDomain',startDomain);on('settingsBtn',()=>show('settings'));on('soloPause',pauseGame);on('domainPause',pauseGame);on('pauseResume',resumeGame);on('pauseHome',home);on('endHome',()=>{$('end').classList.add('hidden');home()});on('endRestart',()=>{$('end').classList.add('hidden');mode==='domain'?startDomain():startSolo()});on('modalClose',()=>$('modal').classList.add('hidden'));on('soloFull',fullCard);on('domainFull',fullCard);on('leftBtn',()=>{selected=Math.max(0,selected-1);updateSoloVisuals()});on('rightBtn',()=>{selected=Math.min(3,selected+1);updateSoloVisuals()});on('selectBtn',()=>selectSolo(selected));on('clearBtn',()=>{if(confirm('Are you sure? This will remove local progress.')){if(window.clearAllLocalProgress)window.clearAllLocalProgress();else{state={};saveState();}updateKpis();showReview();}});on('applyBtn',()=>{deckMode=$('deckMode').value;promptField=$('promptField').value;autoSelect=$('autoSelect').checked;bionicOn=$('bionicToggle').checked;toast('Applied')});const deck=$('deckFile');if(deck)deck.onchange=e=>{let f=e.target.files[0];if(f)importDeck(f)}}
 
 
 /* v17.5.8 behavior patch: better Domain orb proportions + click-outside-to-continue. */
@@ -997,7 +997,7 @@ document.addEventListener('DOMContentLoaded',()=>{initSpacedToggle();wire();upda
     show('review'); const box=document.querySelector('#review .box'); if(!box)return;
     box.innerHTML=`<h1>Spaced Repetition</h1><div class="shadowTabs"><button id="shadowTabDungeon" class="shadowTab active">Shadow Dungeon</button><button id="shadowTabFlagged" class="shadowTab">Flagged</button><button id="shadowTabTagged" class="shadowTab">Tagged / Filtered</button></div><div class="shadowDungeonHub"><div class="shadowDungeonTitle">Shadow Dungeon</div><div class="shadowDungeonSub">Review pinned, No Idea, tagged, or system-filtered cards without changing the source deck.</div><div id="shadowStats" class="shadowStats"></div><div class="shadowFilters"><select id="shadowPool"><option value="flagged">Flagged: pinned + No Idea</option><option value="pinned">Pinned only</option><option value="missed">No Idea / missed</option><option value="reviewed">Reviewed</option><option value="new">New / unseen</option><option value="all">All cards</option></select><select id="shadowSystem"><option value="">All systems</option>${systems().map(s=>`<option value="${escHTML(s)}">${escHTML(s)}</option>`).join('')}</select><select id="shadowTag"><option value="">All tags</option>${allTags().slice(0,400).map(t=>`<option value="${escHTML(t)}">${escHTML(t)}</option>`).join('')}</select></div><div class="shadowFilters" style="grid-template-columns:1fr"><input id="shadowSearch" placeholder="Search diagnosis / tag / board trigger" /></div><div class="shadowStart"><button id="shadowStartFirst" class="btn primary">Start selected Shadow Dungeon review</button><button id="shadowExportSubset" class="btn">Export selected subset</button><button id="clearBtn" class="btn red">Clear Local State</button><button class="btn" data-home>Home</button></div></div><div id="reviewList"></div>`;
     document.querySelectorAll('#review [data-home]').forEach(b=>b.onclick=home);
-    q('clearBtn').onclick=()=>{state={};saveState();updateKpis();renderShadowDungeonList();};
+    q('clearBtn').onclick=()=>{if(confirm('Are you sure? This will remove local progress.')){if(window.clearAllLocalProgress)window.clearAllLocalProgress();else{state={};saveState();}updateKpis();renderShadowDungeonList();}};
     ['shadowPool','shadowSystem','shadowTag','shadowSearch'].forEach(id=>q(id).addEventListener('input',renderShadowDungeonList));
     q('shadowStartFirst').onclick=()=>startCard(filterShadowCards()[0]);
     q('shadowExportSubset').onclick=()=>downloadJSON({metadata:{app:'Solo Studying',version:'v17.5.15.2',type:'shadow_dungeon_subset',exportedAt:new Date().toISOString()},cards:filterShadowCards()},'solo_studying_shadow_dungeon_subset_v17_5_15_2.json');
@@ -6410,7 +6410,7 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     ov=document.createElement('div');
     ov.id='shadowSetup351';
     ov.className='shadowSetup351 hidden';
-    ov.innerHTML='<div class="shadowBox351"><h2>Shadow Dungeon</h2><p>Review pinned, missed, hard, or scheduled cards with the same timing as Solo Studying.</p><div class="shadowGrid351"><div><label>Option review</label><select id="shadowScope351"><option value="due" selected>Spaced Repetition</option><option value="review">Review pinned and missed cards</option><option value="pinned">Pinned only</option><option value="random-new">Random new cards</option></select></div><div><label>Type</label><select id="shadowType351"><option value="solo">Solo Studying: Runner</option><option value="domain">Knowledge Expansion: orb select</option></select></div><div><label>Game timing</label><select id="shadowDropSeconds351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select></div></div><div class="controls"><button id="shadowStart351" class="btn primary">Start Shadow Dungeon</button><button id="shadowCancel351" class="btn red">Cancel</button></div></div>';
+    ov.innerHTML='<div class="shadowBox351"><h2>Shadow Dungeon</h2><p>Review scheduled, pinned, missed & random cards with auto-selection for time-crunch optimized review.</p><div class="shadowGrid351"><div><label>Option review</label><select id="shadowScope351"><option value="due" selected>Spaced Repetition</option><option value="review">Review pinned and missed cards</option><option value="pinned">Pinned only</option><option value="random-new">Random new cards</option></select></div><div><label>Type</label><select id="shadowType351"><option value="solo">Solo Studying: Runner</option><option value="domain">Knowledge Expansion: orb select</option></select></div><div><label>Game timing</label><select id="shadowDropSeconds351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select></div></div><div class="controls"><button id="shadowStart351" class="btn primary">Start Shadow Dungeon</button><button id="shadowCancel351" class="btn red">Cancel</button></div></div>';
     document.body.appendChild(ov);
     $('shadowCancel351').onclick=()=>ov.classList.add('hidden');
     const dropSel=$('shadowDropSeconds351');
@@ -9307,11 +9307,30 @@ Rules:
             </div>
           </div>
         </details>
+        <details class="drawerPanel351" id="advancedSettings351">
+          <summary>Advanced Settings</summary>
+          <div class="htpBody351">
+            <button class="btn red" id="drawerClearState351" type="button">Clear Local State</button>
+            <div id="drawerClearConfirm351" class="hidden" style="margin-top:10px">
+              <p style="margin:0 0 10px">Are you sure? This will remove local progress.</p>
+              <button class="btn primary" id="drawerClearAccept351" type="button">Accept</button>
+              <button class="btn" id="drawerClearCancel351" type="button">Cancel</button>
+            </div>
+          </div>
+        </details>
       </div>
       <div class="drawerFooter351">Cozy Arcade Board Prep - LIMITLESS - Public Blank - v18</div>`;
     document.body.appendChild(drawer);
     q('closeDrawer351').onclick = closeDrawer351;
     q('drawerApply351').onclick = applyDrawer351;
+    q('drawerClearState351').onclick = function(){ q('drawerClearConfirm351').classList.remove('hidden'); };
+    q('drawerClearCancel351').onclick = function(){ q('drawerClearConfirm351').classList.add('hidden'); };
+    q('drawerClearAccept351').onclick = function(){
+      if(typeof window.clearAllLocalProgress === 'function') window.clearAllLocalProgress();
+      q('drawerClearConfirm351').classList.add('hidden');
+      try{ if(typeof toast === 'function') toast('Local progress cleared'); }catch(_){}
+      updateDrawer351();
+    };
     q('importFile351').onchange = function(){
       var file = this.files && this.files[0];
       if(!file) return;
@@ -11080,6 +11099,21 @@ function fixStableOneThingDropdown351() {
     window.phase3State = phase3State;
     window.cozyPhase3Session = session;
   }
+
+  /* Clear Local State, real fix 2026-07-05 — the old clearBtn handlers only
+     reset `state` and wrote to `soloStudyingState_v1757`, a key that stopped
+     being written to entirely on 2026-06-15 (see the dead-write comment
+     above). The canonical FSRS progress lives in `cozy_arcade_progress_v1`
+     via phase3State.progress, which the old button never touched — clicking
+     it did nothing to real progress, which is why "clear cookies/browser
+     history" became the only workaround that actually worked. This clears
+     the real store and persists it through the one canonical save path. */
+  window.clearAllLocalProgress = function(){
+    try{ phase3State.progress = {}; }catch(_){}
+    try{ savePhase3State(); }catch(_){}
+    try{ localStorage.removeItem('soloStudyingState_v1757'); }catch(_){}
+    try{ if(typeof updateKpis==='function') updateKpis(); }catch(_){}
+  };
 
   function hasMoreSrsData(candidate, existing) {
     if (!existing) return true;
