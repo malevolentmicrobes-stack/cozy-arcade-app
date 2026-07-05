@@ -14695,14 +14695,125 @@ setTimeout(boot160,900);
 </script>
 
 
-<!-- vNeuralPulseCSS + vNeuralPulseJS removed 2026-07-05 — root cause of a distracting
-     persistent flicker: absolute-positioned text strip under the HUD (top:52px,
-     z-index:51), directly appended into #solo/#domain, mutating text + a
-     4-character rotating star every 12s plus an extra color-flash on every rate.
-     vEnergyPulse (window.showPulseToast, see vEnergyPulse-css/vEnergyPulse below)
-     already covers this signal correctly: a transient top-right chip, single
-     smooth CSS-animated rotating star, auto-dismisses. Confirmed fully isolated
-     (no other code referenced #neuralPulse371/hookRate/_npWrapped) before removal. -->
+<!-- vNeuralPulseCSS/JS v1 removed 2026-07-05 (flashing text under HUD, overlapped promptBox).
+     Reimplemented same day, v2: same informational content (session time, due count,
+     energy, per-rating stability/interval feedback), but no color-flash class, no
+     rotating-star character-swap, and repositioned to the true top of the screen
+     (top:0) so it never overlaps the HUD (top:10px) or promptBox (top:54px). -->
+<style id="vNeuralPulseCSS">
+#neuralPulse371 {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: Orbitron, monospace;
+  font-size: 9px;
+  letter-spacing: .09em;
+  font-weight: 700;
+  color: rgba(103,232,249,.55);
+  pointer-events: none;
+  overflow: hidden;
+  white-space: nowrap;
+}
+</style>
+
+<script id="vNeuralPulseJS">
+(function(){
+  var E_TOTAL = 'cozy_energy_total_352';
+  var E_SESS  = 'cozy_energy_session_352';
+  var IDLES = ['Vibing…','Cooking…','Grinding…','Leveling…','Clinician-ing…'];
+  var _ii=0, _msgTimeout=null, _sessStart=null;
+
+  function eng()  { return Number(localStorage.getItem(E_TOTAL)||0)||0; }
+  function seng() { return Number(sessionStorage.getItem(E_SESS)||0)||0; }
+  function fmtMin(ms){ var m=Math.round(ms/60000); return m<1?'<1m':m+'m'; }
+  function dueN(){
+    try{ return parseInt(document.getElementById('dueCount').textContent,10)||0; }catch(_){ return 0; }
+  }
+  function idleMsg(){
+    var t = _sessStart ? fmtMin(Date.now()-_sessStart) : '--';
+    var se = seng();
+    return '✳ '+IDLES[_ii%5]+' (Session: '+t+' · '+dueN()+' due · Energy '+eng()+(se?' +'+se+' CE':'')+')';
+  }
+  function showMsg(txt){
+    var el = document.getElementById('neuralPulse371');
+    if(!el) return;
+    if(_msgTimeout) clearTimeout(_msgTimeout);
+    el.textContent = txt;
+    _msgTimeout = setTimeout(function(){
+      el.textContent = idleMsg();
+      _msgTimeout = null;
+    }, 2200);
+  }
+  function setIdle(){
+    var el = document.getElementById('neuralPulse371');
+    if(!el || _msgTimeout) return;
+    el.textContent = idleMsg();
+  }
+  function inject(game){
+    if(document.getElementById('neuralPulse371')){ setIdle(); return; }
+    var pb = game.querySelector('.promptBox');
+    if(!pb) return;
+    var el = document.createElement('div');
+    el.id = 'neuralPulse371';
+    el.textContent = idleMsg();
+    pb.insertBefore(el, pb.firstChild);
+  }
+  function eject(){
+    var el = document.getElementById('neuralPulse371');
+    if(el) el.remove();
+    _sessStart = null;
+    if(_msgTimeout){ clearTimeout(_msgTimeout); _msgTimeout = null; }
+  }
+  function watchGame(id){
+    var g = document.getElementById(id);
+    if(!g) return;
+    new MutationObserver(function(){
+      if(!g.classList.contains('hidden')){
+        if(!_sessStart) _sessStart = Date.now();
+        setTimeout(function(){ inject(g); }, 80);
+      } else { eject(); }
+    }).observe(g, {attributes:true, attributeFilter:['class']});
+  }
+  watchGame('solo'); watchGame('domain');
+
+  /* Rate hook — reads only, fully try/caught, no state mutations, no color flash */
+  var RATE_MSGS = ['Cooking…','Synapsing…','Clinician-ing…','Nailed it…'];
+  function hookRate(){
+    var orig = window.rate;
+    if(!orig || orig._npWrapped) return;
+    window.rate = function(card, rating){
+      var res = orig.apply(this, arguments);
+      if(rating && rating !== 'pin' && rating !== 'bury' && rating !== 'continue'){
+        try{
+          var id = card && (card.qid||card.card_id||card.id||card.qid_unique||card.original_qid);
+          var p = id && window.getProgress && window.getProgress(id);
+          var s = p && p.stability ? parseFloat(p.stability).toFixed(1) : null;
+          var n = p && p.interval_days ? Math.round(p.interval_days)+'d' : null;
+          var se = seng();
+          var parts = ['✳ '+RATE_MSGS[Math.floor(Math.random()*4)]];
+          if(s) parts.push('S '+s);
+          if(n) parts.push('next '+n);
+          if(se) parts.push((rating==='again'?'↓':'↑')+se+' CE total');
+          showMsg(parts.join(' · '));
+        }catch(_){}
+      }
+      return res;
+    };
+    window.rate._npWrapped = true;
+  }
+
+  /* Idle refresh every 12s — plain text update only, no color/flash transition */
+  setInterval(function(){ _ii++; setIdle(); }, 12000);
+
+  if(window.rate) hookRate();
+  var _t=0, _p=setInterval(function(){
+    if(window.rate){ hookRate(); clearInterval(_p); }
+    if(++_t>200) clearInterval(_p);
+  }, 100);
+})();
+</script>
 <script id="cozy-rating-path-rectifier-2026-06-03">
 ;(function(){
 'use strict';
