@@ -14778,8 +14778,20 @@ setTimeout(boot160,900);
   function watchGame(id){
     var g = document.getElementById(id);
     if(!g) return;
+    /* Track hidden state ourselves and only act on a genuine transition —
+       an unrelated periodic run()/renderHudControls() cycle re-adds the
+       'game-shell' class to this same element on its own schedule, which
+       fires a class-attribute mutation record even though 'hidden' never
+       changed. Reacting to every such mutation (found live 2026-07-05, a
+       real ~50-100ms disappear/reappear right at the answer/reveal moment,
+       not just the document.body loop v4 already fixed) caused a second,
+       independent flash. Only eject()/inject() when hidden actually flips. */
+    var _wasHidden = g.classList.contains('hidden');
     new MutationObserver(function(){
-      if(!g.classList.contains('hidden')){
+      var isHidden = g.classList.contains('hidden');
+      if(isHidden === _wasHidden) return;
+      _wasHidden = isHidden;
+      if(!isHidden){
         if(!_sessStart) _sessStart = Date.now();
         setTimeout(function(){ inject(g); }, 80);
       } else { eject(); }
