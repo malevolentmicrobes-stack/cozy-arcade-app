@@ -6404,9 +6404,9 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     });
   }
 
-  function ensureShadowSetup351(){
-    let ov=$('shadowSetup351');
-    if(ov) return ov;
+	  function ensureShadowSetup351(){
+	    let ov=$('shadowSetup351');
+	    if(ov) return ov;
     ov=document.createElement('div');
     ov.id='shadowSetup351';
     ov.className='shadowSetup351 hidden';
@@ -6422,10 +6422,39 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
         const label=$('shadowDropLabel351'); if(label) label.textContent=n+' seconds';
       };
     }
-    $('shadowStart351').onclick=()=>{
-      const scope=$('shadowScope351')?.value||'review';
-      const shadowModeMap={'review':'review_deck','pinned':'pinned','scheduled':'due','due':'due','new':'random_new','random-new':'random_new'};
-      const studyMode=shadowModeMap[scope]||'review_deck';
+	    function buildShadowQueue(studyMode){
+	      const seen=new Set(), queue=[];
+	      const add=list=>{
+	        (list||[]).forEach(card=>{
+	          const id=typeof canonicalCardId==='function'?canonicalCardId(card):(card&&(card.id||card.qid));
+	          if(!id||seen.has(id)) return;
+	          seen.add(id);
+	          queue.push(card);
+	        });
+	      };
+	      try{
+	        if(studyMode==='due'){
+	          add(getStudyPool('due','solo'));
+	          add(getStudyPool('review_deck','solo'));
+	          add(getStudyPool('random_new','solo'));
+	        }else if(studyMode==='review_deck'){
+	          add(getStudyPool('review_deck','solo'));
+	          add(getStudyPool('due','solo'));
+	          add(getStudyPool('random_new','solo'));
+	        }else{
+	          add(getStudyPool(studyMode,'solo'));
+	        }
+	      }catch(_){}
+	      window.__shadowRunQueue=queue;
+	      window.__shadowRunQueueIdx=0;
+	      window.__shadowDungeonActive175164=true;
+	      return queue;
+	    }
+	    window.buildShadowQueue351=buildShadowQueue;
+	    $('shadowStart351').onclick=()=>{
+	      const scope=$('shadowScope351')?.value||'review';
+	      const shadowModeMap={'review':'review_deck','pinned':'pinned','scheduled':'due','due':'due','new':'random_new','random-new':'random_new'};
+	      const studyMode=shadowModeMap[scope]||'review_deck';
       shadowType351=$('shadowType351')?.value||'solo';
       const drop=$('shadowDropSeconds351');
       if(drop){
@@ -6435,11 +6464,12 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
       const homeScope=$('homeScope175155');
       if(homeScope){homeScope.value=studyMode; homeScope.dispatchEvent(new Event('change',{bubbles:true}));}
       const bs=$('browseScope351'); if(bs){bs.value=studyMode; bs.dispatchEvent(new Event('change',{bubbles:true}));}
-      if(typeof syncGeneralStudyScopePhase3==='function') syncGeneralStudyScopePhase3(studyMode);
-      shadowActive351=true;
-      ov.classList.add('hidden');
-      if(shadowType351==='domain') directStartGame351('domain'); else directStartGame351('solo');
-    };
+	      if(typeof syncGeneralStudyScopePhase3==='function') syncGeneralStudyScopePhase3(studyMode);
+	      buildShadowQueue(studyMode);
+	      shadowActive351=true;
+	      ov.classList.add('hidden');
+	      if(shadowType351==='domain') directStartGame351('domain'); else directStartGame351('solo');
+	    };
     return ov;
   }
   function openShadowSetup351(){
@@ -7335,10 +7365,11 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     }
     const gameType351 = which === 'domain' ? 'expansion' : 'solo';
     const order351 = typeof selectedOrder === 'function' ? selectedOrder(gameType351) : (document.documentElement.dataset.cozyLaunchScope || (gameType351 === 'expansion' ? 'new_first' : 'random_new'));
-    let pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool(order351, gameType351) : []);
-    if (!pool351 || pool351.length === 0) {
-      try{
-        document.documentElement.dataset.cozyLaunchScope='random_new';
+	    let pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool(order351, gameType351) : []);
+	    let shadowQueue351 = window.__shadowDungeonActive175164 && Array.isArray(window.__shadowRunQueue) ? window.__shadowRunQueue : [];
+	    if ((!pool351 || pool351.length === 0) && !shadowQueue351.length) {
+	      try{
+	        document.documentElement.dataset.cozyLaunchScope='random_new';
         delete document.documentElement.dataset.cozyLaunchSystem;
         delete document.documentElement.dataset.cozyLaunchTag;
         window.homeFilters=window.homeFilters||{};
@@ -7348,9 +7379,10 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
         if(typeof syncGeneralStudyScopePhase3==='function') syncGeneralStudyScopePhase3('random_new',{syncExpansion:true});
         if(typeof clearSessionBuried==='function') clearSessionBuried();
       }catch(e){}
-      pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool('random_new', gameType351) : []);
-    }
-    if (!pool351 || pool351.length === 0) { try{toast('No cards match this filter — change scope or upload a deck');}catch(e){} return; }
+	      pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool('random_new', gameType351) : []);
+	      shadowQueue351 = window.__shadowDungeonActive175164 && Array.isArray(window.__shadowRunQueue) ? window.__shadowRunQueue : [];
+	    }
+	    if ((!pool351 || pool351.length === 0) && !shadowQueue351.length) { try{toast('No cards match this filter — change scope or upload a deck');}catch(e){} return; }
     try{$('notify')?.classList.add('hidden');}catch(e){}
     try{$('pause')?.classList.add('hidden');}catch(e){}
     try{$('end')?.classList.add('hidden');}catch(e){}
@@ -11339,8 +11371,8 @@ function fixStableOneThingDropdown351() {
   function fsrsRecallStability(D,S,Rv,r){
     const ri=fsrsRating(r);
     const hard_p=ri===2?FSRS_W[15]:1, easy_b=ri===4?FSRS_W[16]:1;
-    const val=S*Math.exp(FSRS_W[8])*(11-D)*Math.pow(S,-FSRS_W[9])
-             *(Math.exp(FSRS_W[10]*(1-Rv))-1)*hard_p*easy_b;
+    const val=S*(1+Math.exp(FSRS_W[8])*(11-D)*Math.pow(S,-FSRS_W[9])
+             *(Math.exp(FSRS_W[10]*(1-Rv))-1)*hard_p*easy_b);
     return Math.max(S,val);
   }
   function fsrsForgetStability(D,S,Rv){
@@ -11374,8 +11406,8 @@ function fixStableOneThingDropdown351() {
     const Rv=fsrsRetrievability(3,3.1262);
     check('R on schedule',Rv,0.9038,0.005);
     const S2=fsrsRecallStability(5.3146,3.1262,Rv,'good');
-    check('S good->good',S2,6.9371,0.05);
-    check('int good->good',fsrsNextInterval(S2),7);
+    check('S good->good',S2,10.0633,0.05);
+    check('int good->good',fsrsNextInterval(S2),10);
     const Rv2=fsrsRetrievability(1,3.1262);
     const Sf=fsrsForgetStability(5.315,3.1262,Rv2);
     check('S early again',Sf,1.4685,0.05);

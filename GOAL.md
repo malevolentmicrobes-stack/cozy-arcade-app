@@ -29,6 +29,12 @@
 
 ---
 
+## UPDATE 2026-07-07 — real FSRS formula bug found and fixed: `fsrsRecallStability` was missing its "+1", `runFSRSValidation()` had been silently calibrated to the bug
+
+User asked whether Good/Easy ratings match real Anki/FSRS, and whether "pin" is correctly just a tag (it is — confirmed `rateCard()`'s `pin` branch returns before any FSRS math runs). Auditing the actual formula against the published FSRS spec found `fsrsRecallStability` (Hard/Good/Easy stability growth) was computing `S' = max(S, S×growth)` instead of the correct `S' = S×(1+growth)` — missing the "+1". Confirmed via precise (Python-verified, not hand-rounded) computation that the bug's output (S'≈6.937 for a specific test case) exactly matches `runFSRSValidation()`'s own hardcoded expected constant — the test had been validating the bug, not the real algorithm, for the project's whole history. Affects all three games identically (one shared `rateCard()` path, no per-mode divergence). Fixed the formula, recalibrated the two dependent test constants using the same precise computation. Full trace, exact numbers, and the "existing progress data" premortem in `RECTIFIER_PLAN_2026_05_26.md`'s 2026-07-07 continued section. **Browser-validated after the fix:** `runFSRSValidation()` 17/17, `runCozySmokeTests()` 6/6, reviewed-card Good now schedules 10d with stability ≈10.063, Easy schedules 22d, Hard/Again remain valid, and Pin toggles without mutating schedule fields.
+
+---
+
 ## UPDATE 2026-07-05 — glitch-cleanup session, sw v100→v108, see COZY_ARCADE_PROJECT_STATUS_2026-07-04.md for full detail per-fix
 
 **Current active goal, superseding the stale P8/M2/iOS1 queue below for now:** user-reported visual glitches (HUD duplication, double-icon rendering, gate-banner timing bug, neural-pulse flicker, Shadow Dungeon dropdown/modal duplication) took priority this session. M2 Stripe remains explicitly paused per user's 2026-06-18 decision (see memory); iOS1/P8 not touched, not regressed.
