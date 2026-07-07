@@ -995,7 +995,7 @@ document.addEventListener('DOMContentLoaded',()=>{initSpacedToggle();wire();upda
   const baseShowReview=window.showReview;
   window.showReview=function(){
     show('review'); const box=document.querySelector('#review .box'); if(!box)return;
-    box.innerHTML=`<h1>Spaced Repetition</h1><div class="shadowTabs"><button id="shadowTabDungeon" class="shadowTab active">Shadow Dungeon</button><button id="shadowTabFlagged" class="shadowTab">Flagged</button><button id="shadowTabTagged" class="shadowTab">Tagged / Filtered</button></div><div class="shadowDungeonHub"><div class="shadowDungeonTitle">Shadow Dungeon</div><div class="shadowDungeonSub">Review pinned, No Idea, tagged, or system-filtered cards without changing the source deck.</div><div id="shadowStats" class="shadowStats"></div><div class="shadowFilters"><select id="shadowPool"><option value="flagged">Flagged: pinned + No Idea</option><option value="pinned">Pinned only</option><option value="missed">No Idea / missed</option><option value="reviewed">Reviewed</option><option value="new">New / unseen</option><option value="all">All cards</option></select><select id="shadowSystem"><option value="">All systems</option>${systems().map(s=>`<option value="${escHTML(s)}">${escHTML(s)}</option>`).join('')}</select><select id="shadowTag"><option value="">All tags</option>${allTags().slice(0,400).map(t=>`<option value="${escHTML(t)}">${escHTML(t)}</option>`).join('')}</select></div><div class="shadowFilters" style="grid-template-columns:1fr"><input id="shadowSearch" placeholder="Search diagnosis / tag / board trigger" /></div><div class="shadowStart"><button id="shadowStartFirst" class="btn primary">Start selected Shadow Dungeon review</button><button id="shadowExportSubset" class="btn">Export selected subset</button><button id="clearBtn" class="btn red">Clear Local State</button><button class="btn" data-home>Home</button></div></div><div id="reviewList"></div>`;
+    box.innerHTML=`<h1>Spaced Repetition</h1><div class="shadowTabs"><button id="shadowTabDungeon" class="shadowTab active">Shadow Dungeon</button><button id="shadowTabFlagged" class="shadowTab">Flagged</button><button id="shadowTabTagged" class="shadowTab">Tagged / Filtered</button></div><div class="shadowDungeonHub"><div class="shadowDungeonTitle">Shadow Dungeon</div><div class="shadowDungeonSub">Review pinned, No Idea, tagged, or system-filtered cards without changing the source deck.</div><div id="shadowStats" class="shadowStats"></div><div class="shadowFilters"><select id="shadowPool"><option value="all" selected>All cards</option><option value="flagged">Flagged: pinned + No Idea</option><option value="pinned">Pinned only</option><option value="missed">No Idea / missed</option><option value="reviewed">Reviewed</option><option value="new">New / unseen</option></select><select id="shadowSystem"><option value="">All systems</option>${systems().map(s=>`<option value="${escHTML(s)}">${escHTML(s)}</option>`).join('')}</select><select id="shadowTag"><option value="">All tags</option>${allTags().slice(0,400).map(t=>`<option value="${escHTML(t)}">${escHTML(t)}</option>`).join('')}</select></div><div class="shadowFilters" style="grid-template-columns:1fr"><input id="shadowSearch" placeholder="Search diagnosis / tag / board trigger" /></div><div class="shadowStart"><button id="shadowStartFirst" class="btn primary">Start selected Shadow Dungeon review</button><button id="shadowExportSubset" class="btn">Export selected subset</button><button id="clearBtn" class="btn red">Clear Local State</button><button class="btn" data-home>Home</button></div></div><div id="reviewList"></div>`;
     document.querySelectorAll('#review [data-home]').forEach(b=>b.onclick=home);
     q('clearBtn').onclick=()=>{if(confirm('Are you sure? This will remove local progress.')){if(window.clearAllLocalProgress)window.clearAllLocalProgress();else{state={};saveState();}updateKpis();renderShadowDungeonList();}};
     ['shadowPool','shadowSystem','shadowTag','shadowSearch'].forEach(id=>q(id).addEventListener('input',renderShadowDungeonList));
@@ -6410,7 +6410,7 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     ov=document.createElement('div');
     ov.id='shadowSetup351';
     ov.className='shadowSetup351 hidden';
-    ov.innerHTML='<div class="shadowBox351"><h2>Shadow Dungeon</h2><p>Review scheduled, pinned, missed & random cards with auto-selection for time-crunch optimized review.</p><div class="shadowGrid351"><div><label>Option review</label><select id="shadowScope351"><option value="due" selected>Spaced Repetition</option><option value="review">Review pinned and missed cards</option><option value="pinned">Pinned only</option><option value="random-new">Random new cards</option></select></div><div><label>Type</label><select id="shadowType351"><option value="solo">Solo Studying: Runner</option><option value="domain">Knowledge Expansion: orb select</option></select></div><div><label>Game timing</label><select id="shadowDropSeconds351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select></div></div><div class="controls"><button id="shadowStart351" class="btn primary">Start Shadow Dungeon</button><button id="shadowCancel351" class="btn red">Cancel</button></div></div>';
+    ov.innerHTML='<div class="shadowBox351"><h2>Shadow Dungeon</h2><p>Review scheduled, pinned, missed & random cards with auto-selection for time-crunch optimized review.</p><div class="shadowGrid351"><div><label>Option review</label><select id="shadowScope351"><option value="random-new" selected>Random new cards</option><option value="due">Spaced Repetition</option><option value="review">Review pinned and missed cards</option><option value="pinned">Pinned only</option></select></div><div><label>Type</label><select id="shadowType351"><option value="solo">Solo Studying: Runner</option><option value="domain">Knowledge Expansion: orb select</option></select></div><div><label>Game timing</label><select id="shadowDropSeconds351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select></div></div><div class="controls"><button id="shadowStart351" class="btn primary">Start Shadow Dungeon</button><button id="shadowCancel351" class="btn red">Cancel</button></div></div>';
     document.body.appendChild(ov);
     $('shadowCancel351').onclick=()=>ov.classList.add('hidden');
     const dropSel=$('shadowDropSeconds351');
@@ -6447,7 +6447,7 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     const n=shadowDropSeconds351();
     const sel=$('shadowDropSeconds351'); if(sel) sel.value=String(n);
     const label=$('shadowDropLabel351'); if(label) label.textContent=n+' seconds';
-    const sc=$('shadowScope351'); if(sc) sc.value='due';
+    const sc=$('shadowScope351'); if(sc) sc.value='random-new';
     ov.classList.remove('hidden');
   }
   window.openShadowSetup351=openShadowSetup351;
@@ -6735,6 +6735,12 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     let n=7;
     try{n=Number(localStorage.getItem('cozyQuestionSeconds351')||7)||7;}catch(e){}
     return Math.max(3,Math.min(15,n));
+  }
+
+  function shadowAnswerHoldSeconds351(){
+    let n=5;
+    try{n=Number(localStorage.getItem('cozyShadowAnswerHoldSeconds351')||5)||5;}catch(e){}
+    return Math.max(2,Math.min(15,n));
   }
 
   function applyQuestionSeconds351(){
@@ -7180,7 +7186,7 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
       clearTimeout(shadowAnswerTimer351);
       let clock=root.querySelector('.shadowAnswerClock351');
       if(!clock){clock=document.createElement('div'); clock.className='shadowAnswerClock351'; ratings.insertAdjacentElement('afterend',clock);}
-      let left=2;
+      let left=shadowAnswerHoldSeconds351();
       clock.textContent='Shadow auto-advance in '+left+'s';
       const tick=()=>{
         if(!visible(root) || !shadowActive351) return;
@@ -7329,7 +7335,21 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     }
     const gameType351 = which === 'domain' ? 'expansion' : 'solo';
     const order351 = typeof selectedOrder === 'function' ? selectedOrder(gameType351) : (document.documentElement.dataset.cozyLaunchScope || (gameType351 === 'expansion' ? 'new_first' : 'random_new'));
-    const pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool(order351, gameType351) : []);
+    let pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool(order351, gameType351) : []);
+    if (!pool351 || pool351.length === 0) {
+      try{
+        document.documentElement.dataset.cozyLaunchScope='random_new';
+        delete document.documentElement.dataset.cozyLaunchSystem;
+        delete document.documentElement.dataset.cozyLaunchTag;
+        window.homeFilters=window.homeFilters||{};
+        window.homeFilters.scope='random-new';
+        window.homeFilters.system='all';
+        window.homeFilters.tag='all';
+        if(typeof syncGeneralStudyScopePhase3==='function') syncGeneralStudyScopePhase3('random_new',{syncExpansion:true});
+        if(typeof clearSessionBuried==='function') clearSessionBuried();
+      }catch(e){}
+      pool351 = typeof sessionPool === 'function' ? sessionPool(gameType351) : (typeof getStudyPool === 'function' ? getStudyPool('random_new', gameType351) : []);
+    }
     if (!pool351 || pool351.length === 0) { try{toast('No cards match this filter — change scope or upload a deck');}catch(e){} return; }
     try{$('notify')?.classList.add('hidden');}catch(e){}
     try{$('pause')?.classList.add('hidden');}catch(e){}
@@ -9145,6 +9165,7 @@ Rules:
         importDeckObject351(parsed, file.name);
       }catch(err){
         try{ if(window.importLimitlessFile && window.importLimitlessFile !== importFile351) return window.importLimitlessFile(file); }catch(_){}
+        try{ console.error('importFile351 failed:', err); }catch(_){}
         try{ if(typeof toast === 'function') toast('Import failed: ' + (err?.message || 'check file')); }catch(_){}
       }
     };
@@ -9251,6 +9272,10 @@ Rules:
       const legacyTimer = q('soloTimerInput');
       if(legacyTimer) legacyTimer.value = timing.value;
     }
+    const shadowHold = q('drawerShadowAnswerHold351');
+    if(shadowHold){
+      try{ localStorage.setItem('cozyShadowAnswerHoldSeconds351', shadowHold.value); }catch(_){}
+    }
     try{ if(typeof toast === 'function') toast('Settings applied'); }catch(_){}
     updateDrawer351();
   }
@@ -9285,12 +9310,7 @@ Rules:
           <select id="drawerQuestionTime351"><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select>
           <label class="drawerToggle351" style="margin-top:14px!important"><input id="drawerBionic351" type="checkbox"> Bionic Reading</label>
           <div class="drawerActions351"><button class="btn primary" id="drawerApply351" type="button">Apply</button><div class="exportMenuWrap351"><button class="btn primary" id="importMenuBtn351" type="button">Import ▾</button><div class="exportMenu351" id="importMenu351"><div class="exportMenuHint351">Import from .json file</div><button class="exportMenuItem351" id="importMenuDeck351">📂 Deck Only</button><button class="exportMenuItem351" id="importMenuProgress351">📂 Progress Only</button><button class="exportMenuItem351" id="importMenuFull351">📂 Full Deck + Progress</button><div class="exportMenuHint351" style="opacity:.35;font-size:9px">.csv support coming soon</div></div></div><div class="exportMenuWrap351"><button class="btn" id="drawerFullSettings351" type="button">Export ▾</button><div class="exportMenu351" id="exportMenu351">
-            <button class="exportMenuItem351" id="exportMenuDeck351">📄 Deck Only</button><button class="exportMenuItem351" id="exportMenuProgress351">📊 Progress Only</button><button class="exportMenuItem351" id="exportMenuFull351">💾 Full Deck + Progress</button></div></div><div class="exportMenuWrap351"><button class="btn" id="advancedMenuBtn351" type="button">Advanced ▾</button><div class="exportMenu351" id="advancedMenu351"><button class="exportMenuItem351" id="drawerClearProgress351">🗑️ Clear Progress Only</button><button class="exportMenuItem351" id="drawerClearDeckProgress351">🗑️ Clear Deck + Progress</button></div></div><input type="file" id="importFile351" accept=".json,application/json" style="display:none"></div>
-          <div id="drawerClearConfirm351" class="hidden" style="margin-top:10px">
-            <p id="drawerClearConfirmText351" style="margin:0 0 10px">Are you sure? This will remove local progress.</p>
-            <button class="btn primary" id="drawerClearAccept351" type="button">Accept</button>
-            <button class="btn" id="drawerClearCancel351" type="button">Cancel</button>
-          </div>
+            <button class="exportMenuItem351" id="exportMenuDeck351">📄 Deck Only</button><button class="exportMenuItem351" id="exportMenuProgress351">📊 Progress Only</button><button class="exportMenuItem351" id="exportMenuFull351">💾 Full Deck + Progress</button></div></div><input type="file" id="importFile351" accept=".json,application/json" style="display:none"></div>
         </section>
         <details class="drawerPanel351" id="howToPlay351">
           <summary>How to Play</summary>
@@ -9310,6 +9330,29 @@ Rules:
             <div class="htpSection351">
               <span class="htpLabel351">Mobile</span>
               <div class="htpRow351">Shake phone = Undo last answer</div>
+            </div>
+          </div>
+        </details>
+        <details class="drawerPanel351" id="advancedSettings351">
+          <summary>Advanced Settings</summary>
+          <div class="htpBody351">
+            <div class="htpSection351">
+              <span class="htpLabel351">Shadow Dungeon</span>
+              <label>Answer view before auto-advance</label>
+              <select id="drawerShadowAnswerHold351"><option value="2">2 seconds</option><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option><option value="6">6 seconds</option><option value="7">7 seconds</option><option value="8">8 seconds</option><option value="9">9 seconds</option><option value="10">10 seconds</option><option value="11">11 seconds</option><option value="12">12 seconds</option><option value="13">13 seconds</option><option value="14">14 seconds</option><option value="15">15 seconds</option></select>
+              <div class="htpRow351">Shadow Dungeon only. How long the answer/reveal stays up before auto-advancing to the next card. Default (5s) unchanged unless you pick a different value.</div>
+            </div>
+            <div class="htpSection351">
+              <span class="htpLabel351">Clear Local State</span>
+              <div class="drawerActions351" style="margin-top:6px">
+                <button class="btn red" id="drawerClearProgress351" type="button">🗑️ Clear Progress Only</button>
+                <button class="btn red" id="drawerClearDeckProgress351" type="button">🗑️ Clear Deck + Progress</button>
+              </div>
+              <div id="drawerClearConfirm351" class="hidden" style="margin-top:10px">
+                <p id="drawerClearConfirmText351" style="margin:0 0 10px">Are you sure? This will remove local progress.</p>
+                <button class="btn primary" id="drawerClearAccept351" type="button">Accept</button>
+                <button class="btn" id="drawerClearCancel351" type="button">Cancel</button>
+              </div>
             </div>
           </div>
         </details>
@@ -9333,16 +9376,13 @@ Rules:
     q('importFile351').onchange = function(){
       var file = this.files && this.files[0];
       if(!file) return;
-      var reader = new FileReader();
-      reader.onload = function(e){
-        try{
-          var parsed = JSON.parse(e.target.result || '{}');
-          if(typeof importObjectPhase3==='function') importObjectPhase3(parsed, file.name);
-          else if(window.cozyPhase3) window.cozyPhase3.importObjectPhase3(parsed, file.name);
-        }catch(_){}
-        try{ q('importFile351').value = ''; }catch(_){}
-      };
-      reader.readAsText(file);
+      try{
+        importFile351(file);
+      }catch(err){
+        try{ console.error('Drawer import failed:', err); }catch(_){}
+        try{ if(typeof toast === 'function') toast('Import failed: ' + (err?.message || 'check file')); }catch(_){}
+      }
+      try{ q('importFile351').value = ''; }catch(_){}
       q('importMenu351')&&q('importMenu351').classList.remove('open351');
     };
     q('importMenuBtn351').onclick = function(e){
@@ -9362,12 +9402,6 @@ Rules:
     q('exportMenuDeck351').onclick = function(){ q('exportMenu351')&&q('exportMenu351').classList.remove('open351'); try{ if(typeof exportCleanDeck==='function') exportCleanDeck(); else if(window.cozyPhase3) window.cozyPhase3.exportCleanDeck(); }catch(_){} };
     q('exportMenuProgress351').onclick = function(){ q('exportMenu351')&&q('exportMenu351').classList.remove('open351'); try{ if(typeof exportProgressOnly==='function') exportProgressOnly(); else if(window.cozyPhase3) window.cozyPhase3.exportProgressOnly(); }catch(_){} };
     q('exportMenuFull351').onclick = function(){ q('exportMenu351')&&q('exportMenu351').classList.remove('open351'); try{ if(typeof exportDeckWithProgress==='function') exportDeckWithProgress(); else if(window.cozyPhase3) window.cozyPhase3.exportDeckWithProgress(); }catch(_){} };
-    q('advancedMenuBtn351').onclick = function(e){
-      e.stopPropagation();
-      q('importMenu351')&&q('importMenu351').classList.remove('open351');
-      q('exportMenu351')&&q('exportMenu351').classList.remove('open351');
-      var m=q('advancedMenu351'); if(m) m.classList.toggle('open351');
-    };
     q('drawerClearProgress351').onclick = function(e){
       e.stopPropagation();
       q('advancedMenu351')&&q('advancedMenu351').classList.remove('open351');
@@ -9406,6 +9440,11 @@ Rules:
     if(q('drawerBionic351') && !q('cozySettingsDrawer351')?.classList.contains('open')){
       const saved = localStorage.getItem('bionicOn_v1751523');
       q('drawerBionic351').checked = saved === null ? false : saved === '1';
+    }
+    if(q('drawerShadowAnswerHold351') && !q('cozySettingsDrawer351')?.classList.contains('open')){
+      const saved = localStorage.getItem('cozyShadowAnswerHoldSeconds351') || '5';
+      const sel = q('drawerShadowAnswerHold351');
+      sel.value = sel.querySelector('option[value="' + saved + '"]') ? saved : '5';
     }
   }
 
@@ -11145,6 +11184,7 @@ function fixStableOneThingDropdown351() {
     window.clearAllLocalProgress();
     try{ localStorage.removeItem('cozy_arcade_limitless_cards_v1'); }catch(_){}
     try{ localStorage.removeItem('cozy_arcade_limitless_meta_v1'); }catch(_){}
+    try{ if('indexedDB' in window) indexedDB.deleteDatabase('cozy_arcade_deck_idb_v1'); }catch(_){}
   };
 
   function hasMoreSrsData(candidate, existing) {
@@ -12278,7 +12318,23 @@ function fixStableOneThingDropdown351() {
       phase3State.settings.solo_order = normalizeMode(selected);
       session.poolKey = '';
       savePhase3State();
-      const pool = sessionPool('solo');
+      let pool = sessionPool('solo');
+      if (!pool || pool.length === 0) {
+        try{
+          delete document.documentElement.dataset.cozyLaunchSystem;
+          delete document.documentElement.dataset.cozyLaunchTag;
+          document.documentElement.dataset.cozyLaunchScope='random_new';
+          window.homeFilters=window.homeFilters||{};
+          window.homeFilters.scope='random-new';
+          window.homeFilters.system='all';
+          window.homeFilters.tag='all';
+          phase3State.settings.solo_order='random_new';
+          session.poolKey='';
+          session.pool=[];
+          savePhase3State();
+          pool=sessionPool('solo');
+        }catch(e){}
+      }
       if (!pool || pool.length === 0) { try{toast('No cards match this filter — change scope or upload a deck');}catch(e){} return; }
       return priorStartSolo.apply(this, arguments);
     };
@@ -15100,6 +15156,182 @@ document.addEventListener('keydown',function(ev){
   ev.stopImmediatePropagation();
   modal.classList.add('hidden');
 },true);
+})();
+</script>
+<script id="cozy-authoritative-import-gate-20260706">
+;(function(){
+'use strict';
+if(window.__cozyAuthoritativeImportGate20260706) return;
+window.__cozyAuthoritativeImportGate20260706=true;
+
+var DB_NAME='cozy_arcade_deck_idb_v1';
+var STORE_NAME='decks';
+var ACTIVE_KEY='active';
+var IMPORT_IDS={limitlessHomeDeckFile:1,importFile351:1,deckFile:1,deckUpload351:1,menuImportReplace175159:1,menuImportMerge175159:1};
+
+function clean(v){return String(v==null?'':v).replace(/\s+/g,' ').trim();}
+function toastImport(msg){
+  try{ if(typeof toast==='function') toast(msg); }catch(_){}
+  try{ console.log('[Cozy import]',msg); }catch(_){}
+}
+function parseJsonLoose(text){
+  try{return JSON.parse(text);}
+  catch(_){
+    var cleaned=String(text||'')
+      .replace(/:\s*NaN(\s*[,}])/g,': null$1')
+      .replace(/:\s*Infinity(\s*[,}])/g,': null$1')
+      .replace(/:\s*-Infinity(\s*[,}])/g,': null$1');
+    return JSON.parse(cleaned);
+  }
+}
+function cardsFromPayload(obj){
+  if(Array.isArray(obj)) return obj;
+  if(obj&&Array.isArray(obj.cards)) return obj.cards;
+  if(obj&&Array.isArray(obj.data)) return obj.data;
+  return [];
+}
+function openDeckDb(){
+  return new Promise(function(resolve,reject){
+    if(!('indexedDB' in window)){reject(new Error('IndexedDB unavailable'));return;}
+    var req=indexedDB.open(DB_NAME,1);
+    req.onupgradeneeded=function(){req.result.createObjectStore(STORE_NAME);};
+    req.onsuccess=function(){resolve(req.result);};
+    req.onerror=function(){reject(req.error||new Error('IndexedDB open failed'));};
+  });
+}
+function idbPutDeck(payload){
+  return openDeckDb().then(function(db){
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction(STORE_NAME,'readwrite');
+      tx.objectStore(STORE_NAME).put(payload,ACTIVE_KEY);
+      tx.oncomplete=function(){db.close();resolve(true);};
+      tx.onerror=function(){db.close();reject(tx.error||new Error('IndexedDB write failed'));};
+    });
+  });
+}
+function idbGetDeck(){
+  return openDeckDb().then(function(db){
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction(STORE_NAME,'readonly');
+      var req=tx.objectStore(STORE_NAME).get(ACTIVE_KEY);
+      req.onsuccess=function(){resolve(req.result||null);};
+      req.onerror=function(){reject(req.error||new Error('IndexedDB read failed'));};
+      tx.oncomplete=function(){db.close();};
+    });
+  });
+}
+function currentCardCount(){
+  try{ if(window.appCards&&Array.isArray(window.appCards())) return window.appCards().length; }catch(_){}
+  try{ if(Array.isArray(cards)) return cards.length; }catch(_){}
+  try{ if(Array.isArray(window.cards)) return window.cards.length; }catch(_){}
+  try{ if(window.DATA&&Array.isArray(window.DATA.cards)) return window.DATA.cards.length; }catch(_){}
+  return 0;
+}
+function forceUiRefresh(){
+  try{ if(typeof updateKpis==='function') updateKpis(); }catch(_){}
+  try{ if(typeof updateDrawer351==='function') updateDrawer351(); }catch(_){}
+  try{ if(typeof renderDataStatus==='function') renderDataStatus(); }catch(_){}
+}
+function resetStudyFiltersForImportedDeck(){
+  try{
+    delete document.documentElement.dataset.cozyLaunchSystem;
+    delete document.documentElement.dataset.cozyLaunchTag;
+    document.documentElement.dataset.cozyLaunchScope='random_new';
+  }catch(_){}
+  try{
+    window.homeFilters=window.homeFilters||{};
+    window.homeFilters.scope='random-new';
+    window.homeFilters.system='all';
+    window.homeFilters.tag='all';
+  }catch(_){}
+  ['browseSystem351','homeSystem175155','reviewSystem352','browseTag351','homeTag175155','reviewTagOverlay17527'].forEach(function(id){
+    try{var el=document.getElementById(id); if(el&&[...el.options].some(function(o){return o.value==='all';})) el.value='all';}catch(_){}
+  });
+  ['browseScope351','homeScope175155','reviewScope17526'].forEach(function(id){
+    try{var el=document.getElementById(id); if(el&&[...el.options].some(function(o){return o.value==='random-new';})) el.value='random-new'; else if(el&&[...el.options].some(function(o){return o.value==='random_new';})) el.value='random_new';}catch(_){}
+  });
+  try{ if(window.phase3State&&window.phase3State.settings){window.phase3State.settings.solo_order='random_new'; window.phase3State.settings.expansion_order='random_new';} }catch(_){}
+  try{ if(typeof syncGeneralStudyScopePhase3==='function') syncGeneralStudyScopePhase3('random_new',{syncExpansion:true}); }catch(_){}
+  try{ if(typeof clearSessionBuried==='function') clearSessionBuried(); }catch(_){}
+  try{ index=0; }catch(_){}
+}
+function importObjectAuthoritative(obj,label,opts){
+  opts=opts||{};
+  var incoming=cardsFromPayload(obj);
+  var hasProgressOnly=!!(obj&&(obj.progress||obj.state));
+  if(!incoming.length&&!hasProgressOnly) throw new Error('No cards found');
+  var usedPhase3=false;
+  if(window.cozyPhase3&&typeof window.cozyPhase3.importObjectPhase3==='function'){
+    window.cozyPhase3.importObjectPhase3(obj,label);
+    usedPhase3=true;
+  }else if(typeof window.importLimitlessDeck==='function'){
+    window.importLimitlessDeck(obj,label);
+  }else if(incoming.length){
+    try{cards=incoming;}catch(_){window.cards=incoming;}
+    window.cards=incoming;
+    try{ if(window.DATA) window.DATA.cards=incoming; }catch(_){}
+    try{ if(typeof DATA!=='undefined') DATA.cards=incoming; }catch(_){}
+  }
+  if(!opts.restored&&incoming.length) resetStudyFiltersForImportedDeck();
+  forceUiRefresh();
+  if(!opts.restored&&incoming.length){
+    idbPutDeck({metadata:Object.assign({},obj&&obj.metadata||obj&&obj.meta||{},{deck_label:label||'Uploaded deck',stored_at:new Date().toISOString()}),cards:incoming})
+      .catch(function(err){try{console.warn('[Cozy import] IndexedDB persist failed',err);}catch(_){}});
+  }
+  if(!usedPhase3){
+    toastImport((opts.restored?'Restored ':'Imported ')+currentCardCount()+' cards');
+  }
+  return currentCardCount();
+}
+function importFileAuthoritative(file){
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var text=String(reader.result||'');
+      var obj=parseJsonLoose(text);
+      importObjectAuthoritative(obj,file.name);
+    }catch(err){
+      try{console.error('[Cozy import] failed',err);}catch(_){}
+      toastImport('Import failed: '+(err&&err.message?err.message:'check file'));
+    }
+  };
+  reader.onerror=function(){
+    var err=reader.error||new Error('File read failed');
+    try{console.error('[Cozy import] read failed',err);}catch(_){}
+    toastImport('Import failed: '+(err.message||'file read failed'));
+  };
+  reader.readAsText(file);
+}
+function isImportInput(el){
+  return !!(el&&el.tagName==='INPUT'&&el.type==='file'&&IMPORT_IDS[el.id]);
+}
+document.addEventListener('change',function(ev){
+  var el=ev.target;
+  if(!isImportInput(el)) return;
+  var file=el.files&&el.files[0];
+  if(!file) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+  importFileAuthoritative(file);
+  try{el.value='';}catch(_){}
+},true);
+
+function restoreDeckIfBlank(){
+  setTimeout(function(){
+    if(currentCardCount()>0) return;
+    idbGetDeck().then(function(payload){
+      if(!payload||!Array.isArray(payload.cards)||!payload.cards.length) return;
+      if(currentCardCount()>0) return;
+      importObjectAuthoritative(payload,payload.metadata&&payload.metadata.deck_label||'Restored deck',{restored:true});
+    }).catch(function(err){try{console.warn('[Cozy import] restore skipped',err);}catch(_){}});
+  },1800);
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',restoreDeckIfBlank);
+else restoreDeckIfBlank();
+window.cozyImportDeckFileAuthoritative351=importFileAuthoritative;
+window.cozyImportDeckObjectAuthoritative351=importObjectAuthoritative;
 })();
 </script>
 <script>if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));</script>
