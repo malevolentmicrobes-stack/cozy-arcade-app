@@ -11455,7 +11455,24 @@ function fixStableOneThingDropdown351() {
       updated_at: now.toISOString()
     });
     if (rating === 'again') console.log('[SRS] again fired for', cardId, next);
-    if(rating==='again'){session.seenThisSession.delete(cardId);try{if(Array.isArray(session.pool)){const _i=session.pool.findIndex(c=>canonicalCardId(c)===cardId);if(_i>0){const[_c]=session.pool.splice(_i,1);session.pool.unshift(_c);}else if(_i===-1&&window.cards){const _c=window.cards.find(c=>canonicalCardId(c)===cardId);if(_c)session.pool.unshift(_c);}}}catch(_){}}
+    if (rating === 'again') {
+      session.seenThisSession.delete(cardId);
+      session.buriedToday.delete(cardId);
+      session.poolKey = '';
+      try { index = 0; } catch (_) {}
+      try {
+        if (Array.isArray(session.pool)) {
+          const _i = session.pool.findIndex(c => canonicalCardId(c) === cardId);
+          if (_i >= 0) {
+            const [_c] = session.pool.splice(_i, 1);
+            session.pool.unshift(_c);
+          } else if (window.cards) {
+            const _c = window.cards.find(c => canonicalCardId(c) === cardId);
+            if (_c) session.pool.unshift(_c);
+          }
+        }
+      } catch (_) {}
+    }
   }
 
   function shuffleCards(arr) {
@@ -11598,26 +11615,40 @@ function fixStableOneThingDropdown351() {
       if (ad !== bd) return ad - bd;
       return String(pa.last_seen_at || '').localeCompare(String(pb.last_seen_at || ''));
     };
+    const isRelearningNow = card => {
+      const p = progress(card);
+      return !!(p && !p.suspended && !p.buried && (isDue(p) || p.stage === 'relearning' || p.repair_point || p.rating === 'again' || p.last_rating === 'again'));
+    };
+    const dueRelearningFirst = list => {
+      const seen = new Set();
+      return (list || []).filter(isRelearningNow).sort(dueSort).filter(card => {
+        const id = canonicalCardId(card);
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+    };
+    const isDueOrRelearning = card => {
+      const p = progressForCard(card);
+      return (isDue(p) || p.stage === 'relearning' || p.repair_point || p.rating === 'again' || p.last_rating === 'again') && !p.suspended && !p.buried && p.rating !== 'bury' && p.last_rating !== 'bury';
+    };
 
 	    if (selected === 'new_only') {
-	      arr = arr.filter(isNewCard);
+	      arr = [...dueRelearningFirst(arr), ...arr.filter(isNewCard)];
 	    } else if (selected === 'new_first') {
-	      arr = [
-	        ...arr.filter(isNewCard),
-	        ...arr.filter(c => isDue(progress(c)) && isReviewedCard(c)),
-	        ...arr.filter(c => !isDue(progress(c)) && progress(c).stage === 'relearning')
-	      ];
+	      arr = [...dueRelearningFirst(arr), ...arr.filter(isNewCard)];
 	    } else if (selected === 'random_all') {
 	      arr = shuffleCards(arr);
 	    } else if (selected === 'random_new') {
-	      arr = shuffleCards(arr.filter(isNewCard));
-	    } else if (selected === 'reviewed_first') {
+	      arr = [...dueRelearningFirst(arr), ...shuffleCards(arr.filter(isNewCard))];
+    } else if (selected === 'reviewed_first') {
 	      arr = [
 	        ...arr.filter(c => isReviewedCard(c) && isDue(progress(c))).sort(dueSort),
+	        ...arr.filter(c => !isDue(progress(c)) && isRelearningNow(c)),
 	        ...arr.filter(isNewCard)
 	      ];
     } else if (selected === 'due') {
-      arr = arr.filter(c => { const p=progressForCard(c); return isDue(p) && !p.suspended && !p.buried && p.rating!=='bury' && p.last_rating!=='bury'; });
+      arr = arr.filter(isDueOrRelearning);
       arr = [...arr].sort((a, b) => {
         const ta = Date.parse(progress(a).next_due_at || '');
         const tb = Date.parse(progress(b).next_due_at || '');
@@ -11651,7 +11682,7 @@ function fixStableOneThingDropdown351() {
       arr = applyStudyFiltersPhase3(normalizeDeckIdentities()).filter(c => progressForCard(c).suspended);
     }
 
-	    if (!arr.length && ['new_only', 'due', 'pinned', 'hard', 'tagged', 'suspended'].includes(selected)) return [];
+	    if (!arr.length && ['new_only', 'pinned', 'hard', 'tagged', 'suspended'].includes(selected)) return [];
 
     if (selected === 'random_new' && arr.length) {
       const active = arr.filter(c => !isSessionBlockedCard(c));
@@ -11668,19 +11699,16 @@ function fixStableOneThingDropdown351() {
     if (scheduledModes.includes(selected)) {
       const refreshed = applyStudyFiltersPhase3(basePlayableCards());
       if (selected === 'new_first') {
-        return [
-          ...refreshed.filter(isNewCard),
-          ...refreshed.filter(c => isDue(progress(c)) && isReviewedCard(c)),
-          ...refreshed.filter(c => !isDue(progress(c)) && progress(c).stage === 'relearning')
-        ];
+        return [...dueRelearningFirst(refreshed), ...refreshed.filter(isNewCard)];
       }
       if (selected === 'reviewed_first') {
         return [
           ...refreshed.filter(c => isReviewedCard(c) && isDue(progress(c))).sort(dueSort),
+          ...refreshed.filter(c => !isDue(progress(c)) && isRelearningNow(c)),
           ...refreshed.filter(isNewCard)
         ];
       }
-      if (selected === 'due') return refreshed.filter(c => { const p=progressForCard(c); return isDue(p) && !p.suspended && !p.buried && p.rating!=='bury' && p.last_rating!=='bury'; });
+      if (selected === 'due') return refreshed.filter(isDueOrRelearning);
       if (selected === 'review_deck') {
         return applyStudyFiltersPhase3(normalizeDeckIdentities()).filter(c => { const p=progressForCard(c); return !p.suspended && !p.buried && p.rating!=='bury' && p.last_rating!=='bury'; }).filter(c => {
           const p = progressForCard(c);
