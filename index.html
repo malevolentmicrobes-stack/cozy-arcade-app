@@ -400,7 +400,7 @@ function notify(body,cb){$('notifyBody').textContent=body;$('notify').classList.
 function startSolo(){notify('Gate opening.',()=>{show('solo'); resetRun(); renderSolo(); loopSolo();})}
 function startDomain(){notify('Domain opening.',()=>{show('domain'); resetRun(); renderDomain(); loopDomain();})}
 function resetRun(){score=0;streak=0;hp=100;gate=1;domainRound=1;paused=false;index=0;nextCard();}
-function renderSolo(){const _savedShell=document.body.classList.contains('cozyGameShellActive371');document.body.className='';if(_savedShell)document.body.classList.add('cozyGameShellActive371');$('soloScore').textContent=score;$('soloStreak').textContent=streak;$('soloGate').textContent=gate;$('hpFill').style.width=hp+'%';$('soloSystem').textContent=current.system||current.sys||'';$('soloQuestion').innerHTML=(window.bionic||bionic)(getPrompt(current));$('soloReveal').classList.add('hidden'); let row=$('choiceRow'); row.innerHTML=''; choices.forEach((ch,i)=>{let d=document.createElement('button');d.className='choice '+(i===selected?'selected':'');d.innerHTML=`<span class="letter">${'ABCD'[i]}</span>${escHTML(ch)}`;d.onclick=()=>selectSolo(i);row.appendChild(d)});moveHunter();timerMax=parseInt(localStorage.getItem('cozyQuestionSeconds351')||$('soloTimerInput')?.value||7)||7;timer=timerMax;}
+function renderSolo(){const _soloVisible=$('solo')&&!$('solo').classList.contains('hidden');const _domainVisible=$('domain')&&!$('domain').classList.contains('hidden');const _savedShell=document.body.classList.contains('cozyGameShellActive371')||_soloVisible||_domainVisible;document.body.className='';if(_savedShell)document.body.classList.add('cozyGameShellActive371');$('soloScore').textContent=score;$('soloStreak').textContent=streak;$('soloGate').textContent=gate;$('hpFill').style.width=hp+'%';$('soloSystem').textContent=current.system||current.sys||'';$('soloQuestion').innerHTML=(window.bionic||bionic)(getPrompt(current));$('soloReveal').classList.add('hidden'); let row=$('choiceRow'); row.innerHTML=''; choices.forEach((ch,i)=>{let d=document.createElement('button');d.className='choice '+(i===selected?'selected':'');d.innerHTML=`<span class="letter">${'ABCD'[i]}</span>${escHTML(ch)}`;d.onclick=()=>selectSolo(i);row.appendChild(d)});moveHunter();timerMax=parseInt(localStorage.getItem('cozyQuestionSeconds351')||$('soloTimerInput')?.value||7)||7;timer=timerMax;}
 function updateSoloVisuals(){[...document.querySelectorAll('#choiceRow .choice')].forEach((d,i)=>d.classList.toggle('selected',i===selected));moveHunter();$('soloTimerFill').style.width=Math.max(0,timer/timerMax*100)+'%';}
 function moveHunter(){let pct=[12.5,37.5,62.5,87.5][selected]||50;let r=$('runner');r.style.left=pct+'%';r.classList.remove('lane0','lane1','lane2','lane3');r.classList.add('lane'+selected);$('groundGlow').style.left=pct+'%'}
 function loopSolo(){clearInterval(ticker);ticker=setInterval(()=>{if(mode!=='solo'||paused)return;timer-=.08;updateSoloVisuals();if(timer<=0&&autoSelect)selectSolo(selected)},80)}
@@ -7640,7 +7640,13 @@ button#homeTopBtn,.homeTopBtn{display:none!important;visibility:hidden!important
     const text = 'Energy Lv ' + info.level + ' · +' + sess + ' CE';
     // Update existing .energyHud352 pills only — never inject new ones into game HUD
     document.querySelectorAll('.energyHud352').forEach(el => {
-      if(!el.closest('.hud,.gameHud')) el.textContent = text;
+      if(el.closest('.hud,.gameHud')){
+        el.dataset.energyLevel = String(info.level);
+        el.setAttribute('aria-label', text);
+        el.setAttribute('title', text);
+      } else {
+        el.textContent = text;
+      }
     });
   }
   function patchVisibleLanguage(){
@@ -13121,8 +13127,15 @@ body.cozyGameShellActive371 .gameHud {
       pill.className = 'hudPill energyHud352';
       pill.textContent = 'Energy Lv 1 · +0 CE';
     }
+    const total = Number(localStorage.getItem('cozy_energy_total_352') || 0) || 0;
+    const sess = Number(sessionStorage.getItem('cozy_energy_session_352') || 0) || 0;
+    const level = Math.max(1, Math.floor(total / 250) + 1);
+    const label = 'Energy Lv ' + level + ' · +' + Math.max(0, Math.round(sess)) + ' CE';
     pill.dataset.hudV1 = '1';
     pill.dataset.hudRole = 'energy';
+    pill.dataset.energyLevel = String(level);
+    pill.setAttribute('aria-label', label);
+    pill.setAttribute('title', label);
     pill.classList.add('hudPill', 'energyHud352');
     return pill;
   }
@@ -14725,53 +14738,62 @@ setTimeout(boot160,900);
 </style>
 
 <style id="vHUD-compression-fix">
-/* The older vHUD-single-row patch collapses the stat group on small phones once
-   the action buttons are later enlarged. Restore the canonical mobile HUD
-   structure during gameplay: stats get their own row, actions get their row. */
+/* Final mobile HUD geometry: keep one compact row after labels collapse.
+   Own the geometry here instead of reviving the older vHUD-single-row layer:
+   stats are Energy/Score/Streak, actions are Gate + four controls. */
 @media (max-width: 900px) {
   body.cozyGameShellActive371 .gameHud {
-    display: grid !important;
-    grid-template-rows: 36px 36px !important;
-    align-content: start !important;
-    justify-items: center !important;
-    gap: 4px !important;
-    padding: 6px 8px !important;
-    min-height: var(--hud-h) !important;
-  }
-
-  body.cozyGameShellActive371 .hudStats371,
-  body.cozyGameShellActive371 .hudActions371 {
-    width: min(100%, 680px) !important;
-    min-width: 0 !important;
-    justify-self: stretch !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-  }
-
-  body.cozyGameShellActive371 .hudStats371 {
-    flex: 0 0 auto !important;
-    display: grid !important;
-    grid-template-columns: minmax(118px, 1.35fr) minmax(70px, .75fr) minmax(78px, .85fr) !important;
-  }
-
-  body.cozyGameShellActive371 .hudActions371 {
-    flex: 0 0 auto !important;
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    padding: 4px 7px !important;
+    overflow: hidden !important;
+  }
+
+  body.cozyGameShellActive371 .hudStats371 {
+    display: grid !important;
+    grid-template-columns: repeat(3, 44px) !important;
+    width: 142px !important;
+    min-width: 142px !important;
+    max-width: 142px !important;
+    align-items: center !important;
+    justify-content: start !important;
+    gap: 5px !important;
+    flex: 0 0 auto !important;
+  }
+
+  body.cozyGameShellActive371 .hudActions371 {
+    display: grid !important;
+    grid-template-columns: 44px repeat(4, 32px) !important;
+    width: 192px !important;
+    min-width: 192px !important;
+    max-width: 192px !important;
+    align-items: center !important;
+    justify-content: start !important;
+    gap: 5px !important;
+    flex: 0 0 auto !important;
     max-width: none !important;
+    padding-right: 0 !important;
   }
 
   /* Collapse verbose label text (matches vHUD-simplify's proven pattern) instead
      of the old blanket font-size:11px, which was re-exposing "Energy Level" /
      "Score" / "Streak" text by outranking vHUD-simplify's font-size:0 on the
-     same pills (higher specificity from body.cozyGameShellActive371).
-     .energyHud352 is excluded — it's also a .hudPill but has no separate
-     label/value span (flat text "Energy Lv 1 · +0 CE"), so collapsing it would
-     leave nothing to restore; give it its own readable size instead. */
+     same pills (higher specificity from body.cozyGameShellActive371). */
   body.cozyGameShellActive371 .hudStats371 .hudPill:not(.energyHud352),
   body.cozyGameShellActive371 .hudActions371 .hudPill:not(.hudIconButton371):not(.energyHud352) {
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 4px 7px !important;
     font-size: 0 !important;
   }
 
@@ -14782,40 +14804,62 @@ setTimeout(boot160,900);
   }
 
   body.cozyGameShellActive371 .hudStats371 .energyHud352 {
-    font-size: 11px !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 4px 7px !important;
+    font-size: 0 !important;
+  }
+
+  body.cozyGameShellActive371 .hudStats371 .energyHud352::before {
+    content: '❤️' attr(data-energy-level);
+    font-size: 13px !important;
+    line-height: 1 !important;
   }
 
   body.cozyGameShellActive371 .hudActions371 .hudIconButton371 {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    padding: 0 !important;
   }
 }
 
 @media (max-width: 480px) {
   body.cozyGameShellActive371 .gameHud {
-    grid-template-rows: 34px 34px !important;
-    padding: 5px 7px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    gap: 7px !important;
+    padding: 4px 6px !important;
   }
 
-  body.cozyGameShellActive371 .gameHud .hudPill,
-  body.cozyGameShellActive371 .gameHud .energyHud352 {
-    height: 31px !important;
-    min-height: 31px !important;
-    padding: 5px 7px !important;
+  body.cozyGameShellActive371 .hudStats371 {
+    grid-template-columns: repeat(3, 43px) !important;
+    width: 139px !important;
+    min-width: 139px !important;
+    max-width: 139px !important;
   }
 
-  /* .energyHud352 has no separate label/value split — keep it readable text.
-     Excluded from the collapse selector below (not just a follow-up override,
-     which the earlier version of this fix used and which the collapse rule,
-     coming later, silently beat). */
+  body.cozyGameShellActive371 .hudActions371 {
+    grid-template-columns: 43px repeat(4, 31px) !important;
+    width: 187px !important;
+    min-width: 187px !important;
+    max-width: 187px !important;
+  }
+
   body.cozyGameShellActive371 .hudStats371 .hudPill:not(.energyHud352),
   body.cozyGameShellActive371 .hudActions371 .hudPill:not(.hudIconButton371):not(.energyHud352) {
+    width: 43px !important;
+    min-width: 43px !important;
+    max-width: 43px !important;
     font-size: 0 !important;
   }
 
   body.cozyGameShellActive371 .hudStats371 .energyHud352 {
-    font-size: 10px !important;
+    font-size: 0 !important;
   }
 
   body.cozyGameShellActive371 .hudStats371 .hudPill > span,
@@ -14825,9 +14869,9 @@ setTimeout(boot160,900);
   }
 
   body.cozyGameShellActive371 .hudActions371 .hudIconButton371 {
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
+    width: 31px !important;
+    height: 31px !important;
+    min-width: 31px !important;
   }
 }
 </style>
