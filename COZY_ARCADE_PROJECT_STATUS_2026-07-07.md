@@ -1,5 +1,9 @@
 # Cozy Arcade Project Status — 2026-07-07 (PHASE1 `cozy-arcade-app` only)
 
+## Addendum — 2026-08-11 mobile HUD compression fix
+
+PHASE1-only mobile HUD cleanup: after the intentional `#neuralPulse371` top-strip spacing fix, browser inspection showed the older `vHUD-single-row` patch was still compressing stat pills on small phones once later HUD polish enlarged the action buttons. Added `vHUD-compression-fix` as a late gameplay-scoped CSS override that restores the canonical two-row mobile HUD layout: readable stat row, single no-wrap action row, no document horizontal overflow. Bumped service worker cache to `cozy-arcade-v120`. Browser-validated at 393x852 DPR 3 across Solo/Domain closed, reveal-open, and closed-after-reveal states: neural pulse remains 0-17px, HUD starts at 17px, HUD width/scrollWidth both 393px, `#gearBtn`/`#homeTopBtn` hidden, `runFSRSValidation()` 17/17, `runCozySmokeTests()` 6/6.
+
 ## What this session was about
 Two-day-old user report: rating a card "Again" doesn't bring it back for review — not within 10 minutes, not ever, in the same session. Traced across multiple rounds (Claude + two independent Codex passes) to a real, now browser-verified fix. Full blow-by-blow trace is in `RECTIFIER_PLAN_2026_05_26.md`'s 2026-07-06/07-07 sections; this doc is the consolidated reference for what the algorithm actually does now, verified end to end.
 
