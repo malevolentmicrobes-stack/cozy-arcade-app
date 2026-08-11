@@ -12478,6 +12478,7 @@ function fixStableOneThingDropdown351() {
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --neural-pulse-h: 17px;
   --hud-h: 88px;
   --bottom-h: 88px;
   --game-gap: 10px;
@@ -12524,6 +12525,13 @@ function fixStableOneThingDropdown351() {
    since cozyGameShellActive371 is only added during gameplay. */
 body.cozyGameShellActive371 #gearBtn {
   display: none !important;
+}
+
+/* NEURAL-PULSE-RESERVE: #neuralPulse371 is intentionally fixed to the true
+   viewport top per the vNeuralPulse history below. Reserve its measured
+   browser height so the canonical HUD starts below it instead of underneath. */
+body.cozyGameShellActive371 .gameHud {
+  margin-top: var(--neural-pulse-h) !important;
 }
 
 @media (max-width: 900px) {
